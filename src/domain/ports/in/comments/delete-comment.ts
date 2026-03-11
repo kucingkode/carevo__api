@@ -2,6 +2,7 @@ import z from "zod";
 
 // request
 export const deleteCommentRequestDto = z.object({
+  requestUserId: z.string(),
   commentId: z.uuidv7(),
 });
 

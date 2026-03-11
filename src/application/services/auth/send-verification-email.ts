@@ -1,4 +1,7 @@
-import type { SendVerificationEmailUseCase } from "@/domain/ports/in/auth/send-verification-email";
+import type {
+  SendVerificationEmailRequestDto,
+  SendVerificationEmailUseCase,
+} from "@/domain/ports/in/auth/send-verification-email";
 import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import type { EmailSender } from "@/domain/ports/out/email-sender";
 import type { Hasher } from "@/domain/ports/out/hasher";
@@ -16,7 +19,6 @@ export class SendVerificationEmailService<
   TxCtx extends TxContext<any>,
 > implements SendVerificationEmailUseCase {
   private readonly log: Logger;
-
   private readonly db: Database<TxCtx>;
   private readonly usersRepository: UsersRepository<TxCtx>;
   private readonly hasher: Hasher;
@@ -31,5 +33,7 @@ export class SendVerificationEmailService<
     this.hasher = params.hasher;
   }
 
-  async sendVerificationEmail(email: string): Promise<void> {}
+  async sendVerificationEmail(
+    dto: SendVerificationEmailRequestDto,
+  ): Promise<void> {}
 }
