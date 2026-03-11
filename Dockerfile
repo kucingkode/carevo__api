@@ -9,18 +9,9 @@ RUN apk add --no-cache libc6-compat
 # Set working directory
 WORKDIR /app
 
-# Install turbo
-RUN npm i -g turbo@^2
-
-# =========================
-# Prepare
-# =========================
-FROM base AS prepare
-
-# Copy files
-COPY ./ ./
-
-RUN npx turbo prune --scope=@carevo/api --docker
+# Install pnpm
+RUN npm install --global corepack@latest
+RUN corepack enable pnpm
 
 # =========================
 # Builder
@@ -28,17 +19,14 @@ RUN npx turbo prune --scope=@carevo/api --docker
 FROM base AS builder
 
 # Copy configuration files
-COPY --from=prepare /app/out/json ./
+COPY ./package.json ./
+COPY ./package-lock.yaml ./
 
 # Install dependencies
 ENV CI=true
-RUN npm ci --ignore-scripts
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --from=prepare /app/out/full ./
-
-# Build deployment artifacts
-RUN turbo build --filter=./packages/* || true 
-RUN turbo build --filter=@carevo/api
+COPY . .
 
 # =========================
 # Runtime
@@ -50,8 +38,6 @@ WORKDIR /app
 
 # # Copy deployment artifacts
 COPY --from=builder /app/ ./
-
-WORKDIR /app/apps/api
 
 ENV NODE_ENV=production
 ENV PORT=3000
