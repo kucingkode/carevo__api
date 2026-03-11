@@ -44,7 +44,7 @@ export async function createFastifyRestServer(params: FastifyRestServerParams) {
     }
 
     if (err instanceof DomainError) {
-      return reply.status(409).send({
+      return reply.status(err.httpStatusCode).send({
         error: err.code,
         message: err.message,
       });

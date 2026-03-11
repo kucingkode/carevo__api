@@ -1,9 +1,11 @@
 import { REGISTER_USECASE } from "@/constants";
-import type { RegisterUserDto } from "@/domain/dtos/register-user-dto";
 import { EmailTakenError } from "@/domain/errors/domain/email-taken-error";
 import { UsernameTakenError } from "@/domain/errors/domain/username-taken-error";
 import { User } from "@/domain/models/user";
-import type { RegisterUserUseCase } from "@/domain/ports/in/auth/register-user";
+import type {
+  RegisterUserRequestDto,
+  RegisterUserUseCase,
+} from "@/domain/ports/in/auth/register-user";
 import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import type { EmailSender } from "@/domain/ports/out/email-sender";
 import type { Hasher } from "@/domain/ports/out/hasher";
@@ -36,7 +38,7 @@ export class RegisterUserService<
     this.hasher = params.hasher;
   }
 
-  async registerUser(dto: RegisterUserDto): Promise<void> {
+  async registerUser(dto: RegisterUserRequestDto): Promise<void> {
     const logCtx: any = {
       op: "register",
       usecase: REGISTER_USECASE,
@@ -75,8 +77,6 @@ export class RegisterUserService<
       // insert user
       await this.usersRepository.insertUser(ctx, user);
     });
-
-    // send email
 
     this.log.info(logCtx, "User registered");
   }

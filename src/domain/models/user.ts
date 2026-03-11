@@ -1,13 +1,8 @@
-import z from "zod";
 import { DomainError } from "../errors/domain/domain-error";
-import { v4 as uuidV4 } from "uuid";
+import { v7 as uuidV7 } from "uuid";
 
-const USERNAME_PATTERN = /^[a-zA-Z0-9_-]{3,30}$/;
-
-export type UserId = string;
-
-export type UserParams = {
-  id: UserId;
+export type UserData = {
+  id: string;
   username: string;
   email: string;
   isEmailVerified: boolean;
@@ -24,19 +19,8 @@ export type CreateUserParams = {
   googleId?: string;
 };
 
-export type RehydrateUserParams = {
-  id: UserId;
-  username: string;
-  email: string;
-  isEmailVerified: boolean;
-  passwordHash?: string;
-  googleId?: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export class User {
-  private readonly _id: UserId;
+  private readonly _id: string;
   private _username: string;
   private _email: string;
   private _isEmailVerified: boolean;
@@ -45,26 +29,18 @@ export class User {
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
-  constructor(params: UserParams) {
-    if (z.email().safeParse(params.email).error) {
-      throw new DomainError(`Invalid email: ${params.email}`);
-    }
-
-    if (!USERNAME_PATTERN.test(params.username)) {
-      throw new DomainError(`Invalid username: ${params.username}`);
-    }
-
-    this._id = params.id;
-    this._username = params.username;
-    this._email = params.email;
-    this._isEmailVerified = params.isEmailVerified;
-    this._passwordHash = params.passwordHash;
-    this._createdAt = params.createdAt;
-    this._updatedAt = params.updatedAt;
+  constructor(data: UserData) {
+    this._id = data.id;
+    this._username = data.username;
+    this._email = data.email;
+    this._isEmailVerified = data.isEmailVerified;
+    this._passwordHash = data.passwordHash;
+    this._createdAt = data.createdAt;
+    this._updatedAt = data.updatedAt;
   }
 
   // ===============================
-  // Factory methods
+  // Factory
   // ===============================
   static create(params: CreateUserParams): User {
     if (!params.passwordHash && !params.googleId) {
@@ -74,7 +50,7 @@ export class User {
     }
 
     return new User({
-      id: uuidV4(),
+      id: uuidV7(),
       username: params.username,
       email: params.email,
       isEmailVerified: false,
@@ -85,56 +61,8 @@ export class User {
     });
   }
 
-  static rehydrate(params: RehydrateUserParams): User {
-    return new User({
-      id: params.id,
-      username: params.username,
-      email: params.email,
-      isEmailVerified: params.isEmailVerified,
-      passwordHash: params.passwordHash,
-      googleId: params.googleId,
-      createdAt: params.createdAt,
-      updatedAt: params.updatedAt,
-    });
-  }
-
   // ===============================
-  // Getters
-  // ===============================
-  get id(): UserId {
-    return this._id;
-  }
-
-  get username(): string {
-    return this._username;
-  }
-
-  get email(): string {
-    return this._email;
-  }
-
-  get isEmailVerified(): boolean {
-    return this._isEmailVerified;
-  }
-
-  get passwordHash(): string | undefined {
-    return this._passwordHash;
-  }
-
-  get googleId(): string | undefined {
-    return this._googleId;
-  }
-
-  get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
-  // ===============================
-  // Domain methods
+  // Domain
   // ===============================
   verifyEmail(): void {
     if (this._isEmailVerified) {
@@ -152,9 +80,20 @@ export class User {
   }
 
   // ===============================
+  // Getter
+  // ===============================
+  get email() {
+    return this._email;
+  }
+
+  get username() {
+    return this._username;
+  }
+
+  // ===============================
   // Persistence
   // ===============================
-  toPersistence(): RehydrateUserParams {
+  toPersistence(): UserData {
     return {
       id: this._id,
       username: this._username,
