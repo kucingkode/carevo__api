@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const loginUserPasswordRequestDtoSchema = z.object({
-  email: z.email(),
+  email: z.email().max(255),
   password: z.string().min(8),
 });
 

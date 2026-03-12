@@ -3,7 +3,7 @@ import z from "zod";
 // request
 export const downloadCvRequestDtoSchema = z.object({
   requestUserId: z.uuidv7(),
-  userId: z.string(),
+  userId: z.uuidv7(),
   type: z.enum(["draft", "saved"]),
   preview: z.boolean(),
 });

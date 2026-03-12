@@ -2,7 +2,7 @@ import z from "zod";
 
 export const changeUserPasswordRequestDtoSchema = z.object({
   requestUserId: z.uuidv7(),
-  oldPassword: z.string(),
+  oldPassword: z.string().min(8),
   newPassword: z.string().min(8),
 });
 

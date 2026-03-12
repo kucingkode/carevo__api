@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const verifyEmailRequestDtoSchema = z.object({
-  email: z.email(),
+  email: z.email().max(255),
   token: z.string(),
 });
 

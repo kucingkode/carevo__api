@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const saveCvRequestDtoSchema = z.object({
-  requestUserId: z.string(),
+  requestUserId: z.uuidv7(),
 });
 
 export type SaveCvRequestDto = z.infer<typeof saveCvRequestDtoSchema>;

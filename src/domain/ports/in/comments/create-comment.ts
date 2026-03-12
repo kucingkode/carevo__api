@@ -6,7 +6,7 @@ export const createCommentRequestDto = z.object({
   userId: z.uuidv7(),
   postId: z.uuidv7(),
   parrentId: z.uuidv7().optional(),
-  content: z.string(),
+  content: z.string().max(2000),
 });
 
 export type CreateCommentRequestDto = z.infer<typeof createCommentRequestDto>;

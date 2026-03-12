@@ -1,13 +1,21 @@
 import { v7 as uuidV7 } from "uuid";
+import z from "zod";
+import { DomainError } from "../errors/domain/domain-error";
 
-export type CommentData = {
-  id: string;
-  userId: string;
-  postId: string;
-  parentId?: string;
-  content: string;
-  createdAt: Date;
-};
+// ===============================
+// Schema & Types
+// ===============================
+
+export const commentDataSchema = z.object({
+  id: z.uuidv7(),
+  userId: z.uuidv7(),
+  postId: z.uuidv7(),
+  parentId: z.uuidv7().optional(),
+  content: z.string().max(2000),
+  createdAt: z.date(),
+});
+
+export type CommentData = z.infer<typeof commentDataSchema>;
 
 export type CreateCommentParams = {
   userId: string;
@@ -15,6 +23,20 @@ export type CreateCommentParams = {
   parentId?: string;
   content: string;
 };
+
+// ===============================
+// Errors
+// ===============================
+
+export class CommentValidationError extends DomainError {
+  constructor() {
+    super("Invalid comment", "VALIDATION_ERROR");
+  }
+}
+
+// ===============================
+// Entity
+// ===============================
 
 export class Comment {
   private readonly _id: string;
@@ -24,7 +46,7 @@ export class Comment {
   private readonly _content: string;
   private readonly _createdAt: Date;
 
-  constructor(data: CommentData) {
+  private constructor(data: CommentData) {
     this._id = data.id;
     this._userId = data.userId;
     this._postId = data.postId;
@@ -37,11 +59,21 @@ export class Comment {
   // Factory
   // ===============================
   static create(params: CreateCommentParams) {
-    return new Comment({
+    const result = commentDataSchema.safeParse({
       ...params,
       id: uuidV7(),
       createdAt: new Date(),
     });
+
+    if (!result.success) {
+      throw new CommentValidationError();
+    }
+
+    return new Comment(result.data);
+  }
+
+  static rehydrate(data: CommentData) {
+    return new Comment(data);
   }
 
   // ===============================

@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const sendPasswordResetEmailRequestDtoSchema = z.object({
-  email: z.email(),
+  email: z.email().max(255),
 });
 
 export type SendPasswordResetEmailRequestDto = z.infer<

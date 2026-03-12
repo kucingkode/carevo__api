@@ -1,9 +1,10 @@
-import { proftoContentSchema } from "@/domain/models/profto";
+import { proftoDataSchema } from "@/domain/models/profto";
 import z from "zod";
 
 // request
 export const updateProftoRequestDtoSchema = z.object({
-  partialContent: proftoContentSchema.partial(),
+  requestUserId: z.uuidv7(),
+  profto: proftoDataSchema,
 });
 
 export type UpdateProftoRequestDto = z.infer<

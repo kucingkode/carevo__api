@@ -3,8 +3,13 @@ import z from "zod";
 // request
 export const aiGenerateCvRequestDtoSchema = z.object({
   requestUserId: z.string(),
-  input: z.object(),
-  section: z.enum([]),
+  input: z.string().max(2000),
+  section: z.enum([
+    "PROFILE",
+    "WORK_EXPERIENCE_DESCRIPTION",
+    "ORGANIZATION_DESCRIPTION",
+    "COURSE_DESCRIPTION",
+  ]),
 });
 
 export type AiGenerateCvRequestDto = z.infer<

@@ -4,7 +4,7 @@ import z from "zod";
 export const createPostRequestDtoSchema = z.object({
   requestUserId: z.uuidv7(),
   communityId: z.uuidv7(),
-  content: z.string(),
+  content: z.string().max(2000),
 });
 
 export type CreatePostRequestDto = z.infer<typeof createPostRequestDtoSchema>;

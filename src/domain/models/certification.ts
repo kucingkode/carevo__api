@@ -1,7 +1,7 @@
 export type CertificationData = {
   readonly id: string;
   readonly professionRole: string;
-  readonly imageFileId: string;
+  readonly thumbnailFileId: string;
   readonly name: string;
   readonly redirectUrl: string;
   readonly publisher: string;

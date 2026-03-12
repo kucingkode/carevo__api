@@ -3,7 +3,7 @@ import z from "zod";
 
 // request
 export const updateCvRequestDtoSchema = z.object({
-  requestUserId: z.string(),
+  requestUserId: z.uuidv7(),
   partialContent: cvContentSchema.partial(),
 });
 

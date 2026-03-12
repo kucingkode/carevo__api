@@ -1,66 +1,74 @@
 import z from "zod";
 
+// ===============================
+// Schema & Types
+// ===============================
+
 export const cvContentPersonalInformationSchema = z.object({
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  profile: z.string().optional(),
-  websiteUrl: z.url().optional(),
-  address: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.email().optional(),
+  firstName: z.string().max(255).optional(),
+  lastName: z.string().max(255).optional(),
+  profile: z.string().max(255).optional(),
+  websiteUrl: z.url().max(255).optional(),
+  address: z.string().max(255).optional(),
+  phone: z
+    .string()
+    .max(255)
+    .regex(/^\+[1-9]\d{1,14}$/)
+    .optional(),
+  email: z.email().max(255).optional(),
 });
 
 export const cvContentSkillSchema = z.object({
-  name: z.string(),
+  name: z.string().max(255),
   score: z.int().min(1).max(5),
 });
 
 export const cvContentEducationSchema = z.object({
-  educationLevel: z.string(),
-  institution: z.string(),
-  city: z.string().optional(),
-  studyProgram: z.string().optional(),
-  startYear: z.int().optional(),
-  endYear: z.int().optional(),
+  educationLevel: z.string().max(255),
+  institution: z.string().max(255),
+  city: z.string().max(255).optional(),
+  studyProgram: z.string().max(255).optional(),
+  startYear: z.int().min(1900).optional(),
+  endYear: z.int().min(1900).optional(),
   score: z.number().optional(),
   maxScale: z.number().optional(),
 });
 
 export const cvContentWorkExperienceSchema = z.object({
-  position: z.string(),
-  companyName: z.string(),
-  description: z.string().optional(),
-  employmentStatus: z.string(),
-  city: z.string().optional(),
-  startYear: z.int().optional(),
-  endYear: z.int().optional(),
+  position: z.string().max(255),
+  companyName: z.string().max(255),
+  description: z.string().max(2000).optional(),
+  employmentStatus: z.string().max(255),
+  city: z.string().max(255).optional(),
+  startYear: z.int().min(1900).optional(),
+  endYear: z.int().min(1900).optional(),
 });
 
 export const cvContentCourseSchema = z.object({
-  name: z.string(),
-  organizer: z.string(),
-  link: z.url().optional(),
-  description: z.string().optional(),
-  startYear: z.number().optional(),
-  endYear: z.number().optional(),
-  location: z.string().optional(),
+  name: z.string().max(255),
+  organizer: z.string().max(255),
+  link: z.url().max(255).optional(),
+  description: z.string().max(2000).optional(),
+  startYear: z.number().min(1900).optional(),
+  endYear: z.number().min(1900).optional(),
+  location: z.string().max(255).optional(),
 });
 
 export const cvContentOrganizationSchema = z.object({
-  position: z.string(),
-  organizationName: z.string(),
-  description: z.string().optional(),
-  city: z.string().optional(),
-  startYear: z.number().optional(),
-  endYear: z.number().optional(),
+  position: z.string().max(255),
+  organizationName: z.string().max(255),
+  description: z.string().max(2000).optional(),
+  city: z.string().max(255).optional(),
+  startYear: z.number().min(1900).optional(),
+  endYear: z.number().min(1900).optional(),
 });
 
 export const cvContentCertificateSchema = z.object({
-  name: z.string(),
-  publisher: z.string(),
+  name: z.string().max(255),
+  publisher: z.string().max(255),
   publishDate: z.coerce.date().optional(),
   verificationUrl: z.coerce.date().optional(),
-  certificateNumber: z.number().optional(),
+  certificateNumber: z.string().optional(),
 });
 
 export const cvContentSchema = z.object({
@@ -79,6 +87,10 @@ export type CvData = {
   userId: string;
   content: CvContent;
 };
+
+// ===============================
+// Entity
+// ===============================
 
 export class Cv {
   private readonly _userId: string;

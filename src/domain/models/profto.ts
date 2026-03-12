@@ -1,77 +1,65 @@
 import z from "zod";
 
-export const proftoContentCertificateSchema = z.object({
-  imageFileId: z.string(),
-  name: z.string(),
+// ===============================
+// Schema & Types
+// ===============================
+
+export const proftoCertificateSchema = z.object({
+  imageFileId: z.uuidv7(),
+  name: z.string().max(255),
   publishDate: z.date(),
-  publisher: z.string(),
+  publisher: z.string().max(255),
 });
 
-export const proftoContentExperienceSchema = z.object({
-  name: z.string(),
-  startYear: z.int(),
-  endYear: z.int(),
-  description: z.string(),
+export type ProftoCertificate = z.infer<typeof proftoCertificateSchema>;
+
+export const proftoExperienceSchema = z.object({
+  name: z.string().max(255),
+  startYear: z.int().min(1900),
+  endYear: z.int().min(1900),
+  description: z.string().max(2000),
 });
 
-export const proftoContentProjectSchema = z.object({
-  name: z.string(),
-  professionRole: z.string(),
-  imageFileId: z.string(),
+export type ProftoExperience = z.infer<typeof proftoExperienceSchema>;
+
+export const proftoProjectSchema = z.object({
+  name: z.string().max(255),
+  professionRole: z.string().max(255),
+  imageFileId: z.uuidv7(),
   date: z.coerce.date(),
-  description: z.string(),
+  description: z.string().max(2000),
 });
 
-export const proftoContentLinkSchema = z.object({
-  name: z.string(),
-  link: z.string(),
+export type ProftoProject = z.infer<typeof proftoProjectSchema>;
+
+export const proftoLinkSchema = z.object({
+  name: z.string().max(255),
+  link: z.string().max(255),
 });
 
-export const proftoContentSchema = z.object({
-  avatarFileId: z.uuidv7().optional(),
-  name: z.string().optional(),
-  professionRole: z.string().optional(),
-  lastEducation: z.string().optional(),
-  email: z.email().optional(),
-  phone: z.string().optional(),
-  summary: z.string().optional(),
-  cvFileId: z.uuidv7().optional(),
-  certificates: z.array(proftoContentCertificateSchema).optional(),
-  experiences: z.array(proftoContentExperienceSchema).optional(),
-  projects: z.array(proftoContentProjectSchema).optional(),
-  links: z.array(proftoContentLinkSchema).optional(),
+export type ProftoLink = z.infer<typeof proftoLinkSchema>;
+
+export const proftoDataSchema = z.object({
+  userId: z.uuidv7(),
+  avatarFileId: z.uuidv7().nullable(),
+  name: z.string().max(255).nullable(),
+  professionRole: z.string().max(255).nullable(),
+  lastEducation: z.string().max(255).nullable(),
+  email: z.email().max(255).nullable(),
+  summary: z.string().max(2000).nullable(),
+  cvFileId: z.uuidv7().nullable(),
+  certificates: z.array(proftoCertificateSchema),
+  experiences: z.array(proftoExperienceSchema),
+  projects: z.array(proftoProjectSchema),
+  links: z.array(proftoLinkSchema),
 });
 
-export type ProftoContent = z.infer<typeof proftoContentSchema>;
-
-export type ProftoData = {
-  userId: string;
-  content: ProftoContent;
-};
+export type ProftoData = z.infer<typeof proftoDataSchema>;
 
 export type ProftoSummary = {
   userId: string;
   username: string;
   name: string;
   avatarFileId: string;
+  professionRole: string;
 };
-
-export class Profto {
-  private readonly _userId: string;
-  private readonly _content: ProftoContent;
-
-  constructor(data: ProftoData) {
-    this._userId = data.userId;
-    this._content = data.content;
-  }
-
-  // ===============================
-  // Persistence
-  // ===============================
-  toPersistence(): ProftoData {
-    return {
-      userId: this._userId,
-      content: this._content,
-    };
-  }
-}

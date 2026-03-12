@@ -2,9 +2,6 @@ import { DomainError } from "./domain-error";
 
 export class UnauthorizedError extends DomainError {
   constructor() {
-    super("Unauthorized", {
-      code: "UNAUTHORIZED",
-      httpStatusCode: 401,
-    });
+    super("Unauthorized", "UNAUTHORIZED");
   }
 }
