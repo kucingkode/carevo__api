@@ -2,7 +2,9 @@ import z from "zod";
 
 // request
 export const refreshTokenRequestDtoSchema = z.object({
-  refreshToken: z.string(),
+  refreshToken: z.string().length(43),
+  ipAddress: z.ipv4(),
+  userAgent: z.string().max(512),
 });
 
 export type RefreshTokenRequestDto = z.infer<

@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const aiGenerateCvRequestDtoSchema = z.object({
-  requestUserId: z.string(),
+  requestUserId: z.uuidv7(),
   input: z.string().max(2000),
   section: z.enum([
     "PROFILE",

@@ -10,10 +10,7 @@ const appConfigSchema = z.object({
   HASH_SALT: z.string().optional(),
   HASH_LENGTH: z.coerce.number().int().default(32),
   HASH_TIME_COST: z.coerce.number().int().default(3),
-  HASH_MEMORY_COST: z.coerce
-    .number()
-    .int()
-    .default(1 << 16),
+  HASH_MEMORY_COST: z.coerce.number().int().default(65536),
   HASH_PARALLELISM: z.coerce.number().int().default(4),
 
   DB_HOST: z.string(),

@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const logoutUserPasswordRequestDtoSchema = z.object({
-  refreshToken: z.string(),
+  refreshToken: z.string().length(43),
 });
 
 export type LogoutUserPasswordRequestDto = z.infer<

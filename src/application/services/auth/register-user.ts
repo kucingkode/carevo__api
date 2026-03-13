@@ -1,4 +1,3 @@
-import { REGISTER_USECASE } from "@/constants";
 import { EmailTakenError } from "@/domain/errors/domain/email-taken-error";
 import { UsernameTakenError } from "@/domain/errors/domain/username-taken-error";
 import { User } from "@/domain/models/user";
@@ -11,6 +10,7 @@ import type { EmailSender } from "@/domain/ports/out/email-sender";
 import type { Hasher } from "@/domain/ports/out/hasher";
 import type { UsersRepository } from "@/domain/ports/out/database/users-repository";
 import { getLogger, type Logger } from "@/observability/logging";
+import { REGISTER_USER_USE_CASE } from "@/constants";
 
 export type RegisterUserServiceParams<TxCtx extends TxContext<any>> = {
   db: Database<TxCtx>;
@@ -31,6 +31,7 @@ export class RegisterUserService<
   constructor(params: RegisterUserServiceParams<TxCtx>) {
     this.log = getLogger().child({
       component: RegisterUserService.name,
+      usecase: REGISTER_USER_USE_CASE,
     });
 
     this.db = params.db;
@@ -39,10 +40,7 @@ export class RegisterUserService<
   }
 
   async registerUser(dto: RegisterUserRequestDto): Promise<void> {
-    const logCtx: any = {
-      op: "register",
-      usecase: REGISTER_USECASE,
-    };
+    const logCtx: any = {};
 
     // get row user data
     const passwordHash = await this.hasher.hash(dto.password);

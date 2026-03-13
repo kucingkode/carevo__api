@@ -1,23 +1,97 @@
 export const SERVICE_NAME = "api";
 export const SERVICE_VERSION = "0.1.0";
 
+// ===============================
+// Port Directions
+// ===============================
+
 export const INBOUND_DIRECTION = "inbound";
 export const OUTBOUND_DIRECTION = "outbound";
 
+// ===============================
+// Inbound Ports
+// ===============================
+
 export const REST_SERVER_PORT = "rest-server";
 
+// ===============================
+// Outbound ports
+// ===============================
+
+// database
 export const DATABASE_PORT = "database";
+export const BOOTCAMPS_REPOSITORY_PORT = "bootcamps-repository";
+export const CERTIFICATIONS_REPOSITORY_PORT = "certifications-repository";
+export const COMMENTS_REPOSITORY_PORT = "comments-repository";
+export const COMMUNITIES_REPOSITORY_PORT = "communities-repository";
+export const CVS_REPOSITORY_PORT = "cvs-repository";
+export const FILES_REPOSITORY_PORT = "files-repository";
+export const POSTS_REPOSITORY_PORT = "posts-repository";
 export const USERS_REPOSITORY_PORT = "users-repository";
 
+export const CACHE_PORT = "cache";
 export const EMAIL_SENDER_PORT = "email-sender";
+export const EMBEDDING_PROVIDER_PORT = "embedding-provider";
 export const FILE_STORAGE_PORT = "file-storage";
 export const HASHER_PORT = "hasher";
 export const JWT_SIGNER_PORT = "jwt-signer";
 export const LLM_API_PORT = "llm-api";
-export const OAUTH_PROVIDER_PORT = "oauth-provider";
 export const PDF_GENERATOR_PORT = "pdf-generator";
-export const STATE_STORE_PORT = "state-store";
 export const TOKEN_PROVIDER_PORT = "token-provider";
 
-export const REGISTER_USECASE = "register";
-export const SEND_EMAIL_TOKEN_USECASE = "send-verification-email";
+// ===============================
+// Use Cases
+// ===============================
+
+// auth
+export const CHANGE_USER_PASSWORD_USE_CASE = "change-user-password";
+export const LOGIN_USER_USE_CASE = "login-user";
+export const LOGOUT_USER_USE_CASE = "logout-user";
+export const REFRESH_TOKEN_USE_CASE = "refresh-token";
+export const REGISTER_USER_USE_CASE = "register-user";
+export const RESET_USER_PASSWORD_USE_CASE = "reset-user-password";
+export const SEND_PASSWORD_RESET_EMAIL_USE_CASE = "send-password-reset-email";
+export const SEND_VERIFICATION_EMAIL_USE_CASE = "send-verification-email";
+export const VERIFY_USER_EMAIL_USE_CASE = "verify-user-email";
+
+// bootcamps
+export const GET_BOOTCAMPS_FEED_USE_CASE = "get-bootcamps-feed";
+export const LIST_BOOTCAMPS_USE_CASE = "list-bootcamps";
+
+// certifications
+export const GET_CERTIFICATIONS_FEED_USE_CASE = "get-certifications-feed";
+export const LIST_CERTIFICATIONS_USE_CASE = "list-certifications";
+
+// comments
+export const CREATE_COMMENT_USE_CASE = "create-comment";
+export const DELETE_COMMENT_USE_CASE = "delete-comment";
+export const LIST_COMMENTS_USE_CASE = "list-comments";
+
+// communities
+export const GET_COMMUNITIES_FEED_USE_CASE = "get-communities-feed";
+export const JOIN_COMMUNITY_USE_CASE = "join-community";
+export const LEAVE_COMMUNITY_USE_CASE = "leave-community";
+export const LIST_COMMUNITIES_USE_CASE = "list-communities";
+
+// cvs
+export const AI_GENERATE_CV_USE_CASE = "ai-generate-cv";
+export const DOWNLOAD_CV_USE_CASE = "download-cv";
+export const GET_CV_USE_CASE = "get-cv";
+export const SAVE_CV_USE_CASE = "save-cv";
+export const UPDATE_CV_USE_CASE = "update-cv";
+
+// files
+export const GET_FILE_USE_CASE = "get-file";
+export const UPLOAD_FILE_USE_CASE = "upload-file";
+
+// posts
+export const CREATE_POST_USE_CASE = "create-post";
+export const DELETE_POST_LIKE_USE_CASE = "delete-post-like";
+export const DELETE_POST_USE_CASE = "delete-post";
+export const GET_POSTS_FEED_USE_CASE = "get-posts-feed";
+export const LIKE_POST_USE_CASE = "like-post";
+
+// proftos
+export const GET_PROFTO_USE_CASE = "get-profto";
+export const LIST_PROFTOS_USE_CASE = "list-proftos";
+export const UPDATE_PROFTO_USE_CASE = "update-profto";

@@ -3,7 +3,9 @@ import z from "zod";
 // request
 export const loginUserPasswordRequestDtoSchema = z.object({
   email: z.email().max(255),
-  password: z.string().min(8),
+  password: z.string().min(8).max(255),
+  ipAddress: z.ipv4(),
+  userAgent: z.string().max(512),
 });
 
 export type LoginUserPasswordRequestDto = z.infer<

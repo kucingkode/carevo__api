@@ -36,18 +36,6 @@ class UserValidationError extends DomainError {
   }
 }
 
-export class UsernameTakenError extends DomainError {
-  constructor() {
-    super("Username is already taken", "USERNAME_TAKEN");
-  }
-}
-
-export class EmailTakenError extends DomainError {
-  constructor() {
-    super("Email is already taken", "EMAIL_TAKEN");
-  }
-}
-
 // ===============================
 // Entity
 // ===============================

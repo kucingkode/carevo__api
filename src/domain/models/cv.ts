@@ -8,7 +8,7 @@ export const cvContentPersonalInformationSchema = z.object({
   firstName: z.string().max(255).optional(),
   lastName: z.string().max(255).optional(),
   profile: z.string().max(255).optional(),
-  websiteUrl: z.url().max(255).optional(),
+  websiteUrl: z.url().max(500).optional(),
   address: z.string().max(255).optional(),
   phone: z
     .string()
@@ -47,7 +47,7 @@ export const cvContentWorkExperienceSchema = z.object({
 export const cvContentCourseSchema = z.object({
   name: z.string().max(255),
   organizer: z.string().max(255),
-  link: z.url().max(255).optional(),
+  url: z.url().max(500).optional(),
   description: z.string().max(2000).optional(),
   startYear: z.number().min(1900).optional(),
   endYear: z.number().min(1900).optional(),
@@ -67,7 +67,7 @@ export const cvContentCertificateSchema = z.object({
   name: z.string().max(255),
   publisher: z.string().max(255),
   publishDate: z.coerce.date().optional(),
-  verificationUrl: z.coerce.date().optional(),
+  verificationUrl: z.url().max(500).optional(),
   certificateNumber: z.string().optional(),
 });
 

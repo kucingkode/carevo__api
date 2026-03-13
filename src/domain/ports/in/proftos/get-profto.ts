@@ -1,4 +1,4 @@
-import type { ProftoContent } from "@/domain/models/profto";
+import type { ProftoData } from "@/domain/models/profto";
 import z from "zod";
 
 // request
@@ -11,9 +11,7 @@ export type GetProftoRequestDto = z.infer<typeof getProftoRequestDtoSchema>;
 
 // response
 export type GetProftoResponseDto = {
-  userId: string;
-  username: string;
-  content: ProftoContent;
+  profto: ProftoData
 };
 
 // use case

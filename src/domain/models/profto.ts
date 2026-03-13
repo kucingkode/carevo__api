@@ -34,7 +34,7 @@ export type ProftoProject = z.infer<typeof proftoProjectSchema>;
 
 export const proftoLinkSchema = z.object({
   name: z.string().max(255),
-  link: z.string().max(255),
+  url: z.url().max(500),
 });
 
 export type ProftoLink = z.infer<typeof proftoLinkSchema>;
