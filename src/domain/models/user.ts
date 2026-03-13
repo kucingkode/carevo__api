@@ -90,7 +90,10 @@ export class User {
   // ===============================
   verifyEmail(): void {
     if (this._isEmailVerified) {
-      throw new DomainError("Email is already verified", "CONFLICT");
+      throw new DomainError(
+        "Email is already verified",
+        "EMAIL_ALREADY_VERIFIED",
+      );
     }
 
     this._isEmailVerified = true;
@@ -99,7 +102,8 @@ export class User {
 
   changePasswordHash(passwordHash: string): void {
     if (!passwordHash)
-      throw new DomainError("Password can't be empty", "CONFLICT");
+      throw new DomainError("Password can't be empty", "VALIDATION_ERROR");
+    
     this._passwordHash = passwordHash;
     this._updatedAt = new Date();
   }

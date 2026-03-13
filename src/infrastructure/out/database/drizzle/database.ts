@@ -15,6 +15,7 @@ import * as schema from "./schema";
 import { getLogger, type Logger } from "@/observability/logging";
 import { DATABASE_PORT, OUTBOUND_DIRECTION } from "@/constants";
 import { DatabaseError } from "@/domain/errors/infrastructure/database-error";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 export type DrizzleDatabaseParams = {
   host: string;
@@ -26,7 +27,7 @@ export type DrizzleDatabaseParams = {
 };
 
 export class DrizzleDatabase implements Database<DrizzleTxContext> {
-  private readonly db: ReturnType<typeof this.createDrizzle>;
+  public readonly db: ReturnType<typeof this.createDrizzle>;
   private readonly log: Logger;
 
   constructor(private readonly params: DrizzleDatabaseParams) {
@@ -70,6 +71,10 @@ export class DrizzleDatabase implements Database<DrizzleTxContext> {
     }
 
     this.log.trace("Transaction committed");
+  }
+
+  async migrate() {
+    await migrate(this.db, { migrationsFolder: "./drizzle" });
   }
 
   private createDrizzle() {

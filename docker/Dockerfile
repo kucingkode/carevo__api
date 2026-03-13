@@ -20,13 +20,15 @@ FROM base AS builder
 
 # Copy configuration files
 COPY ./package.json ./
-COPY ./package-lock.yaml ./
+COPY ./pnpm-lock.yaml ./
 
 # Install dependencies
 ENV CI=true
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
+
+RUN pnpm build
 
 # =========================
 # Runtime

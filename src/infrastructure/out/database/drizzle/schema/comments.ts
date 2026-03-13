@@ -5,7 +5,7 @@ import { users } from "./users";
 export const comments = pgTable(
   "comments",
   {
-    id: uuid().notNull(),
+    id: uuid().primaryKey(),
     userId: uuid()
       .notNull()
       .references(() => users.id, {

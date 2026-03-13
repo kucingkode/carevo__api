@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { DomainError } from "@/domain/errors/domain/domain-error";
 import { RatelimitedError } from "@/domain/errors/rate-limited-error";
 import { authRoutes } from "./routes/auth-routes";
+import { ERROR_HTTP_STATUS_CODES } from "./error-http-status-codes";
 
 export async function createFastifyRestServer(params: FastifyRestServerParams) {
   const log = getLogger().child({
@@ -44,7 +45,9 @@ export async function createFastifyRestServer(params: FastifyRestServerParams) {
     }
 
     if (err instanceof DomainError) {
-      return reply.status(err.httpStatusCode).send({
+      const statusCode = ERROR_HTTP_STATUS_CODES[err.code] ?? 500;
+
+      return reply.status(statusCode).send({
         error: err.code,
         message: err.message,
       });
@@ -62,4 +65,6 @@ export async function createFastifyRestServer(params: FastifyRestServerParams) {
     host: params.host,
     port: params.port,
   });
+
+  return app;
 }

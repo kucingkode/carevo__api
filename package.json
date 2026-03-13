@@ -2,18 +2,18 @@
   "name": "@carevo/api",
   "version": "0.1.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "build": "tsdown",
     "dev": "dotenv -- tsx watch src/index.ts",
     "start": "dotenv -- node entrypoint.mjs run",
     "migrate": "dotenv -- tsx src/migrate.ts",
-    "docker": "docker build -f ./Dockerfile -t carevo/api:latest ../.."
+    "docker": "docker build -f ./docker/Dockerfile -t carevo/api:latest ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@carevo/contracts": "github:kucingkode/carevo__contracts#release",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
     "@fastify/helmet": "^13.0.2",
@@ -35,6 +35,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@carevo/contracts": "github:kucingkode/carevo__contracts#release",
     "@types/html-to-pdfmake": "^2.4.5",
     "@types/node": "^25.3.3",
     "@types/nodemailer": "^7.0.11",

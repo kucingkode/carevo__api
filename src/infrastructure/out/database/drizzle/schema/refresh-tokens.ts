@@ -14,7 +14,7 @@ export const refreshTokens = pgTable(
   {
     id: uuid().primaryKey(),
     userId: uuid()
-      .primaryKey()
+      .notNull()
       .references(() => users.id, {
         onUpdate: "cascade",
         onDelete: "cascade",

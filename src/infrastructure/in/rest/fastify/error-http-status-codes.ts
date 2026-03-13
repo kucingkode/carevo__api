@@ -1,0 +1,8 @@
+export const ERROR_HTTP_STATUS_CODES: {
+  [key: string]: number;
+} = {
+  VALIDATION_ERROR: 400,
+  EMAIL_ALREADY_VERIFIED: 409,
+  EMAIL_TAKEN: 409,
+  USERNAME_TAKEN: 409,
+};

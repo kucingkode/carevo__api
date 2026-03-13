@@ -1,7 +1,7 @@
-import { AuthRegisterBody } from "@carevo/contracts/zod";
 import type { FastifyApp } from "../create-app";
 import { RatelimitedError } from "@/domain/errors/rate-limited-error";
 import type { FastifyRestServerParams } from "../params";
+import { registerUserRequestDtoSchema } from "@/domain/ports/in/auth/register-user";
 
 export function authRoutes(params: FastifyRestServerParams) {
   return async (app: FastifyApp) => {
@@ -18,14 +18,16 @@ export function authRoutes(params: FastifyRestServerParams) {
       }
 
       // validate request
-      const data = AuthRegisterBody.parse(req.body);
+      const data = registerUserRequestDtoSchema.parse(req.body);
 
-      // call service
+      // register user
       await params.registerUserService.registerUser({
         email: data.email,
         password: data.password,
         username: data.username,
       });
+
+      // send verification email
 
       return reply.status(201).send({
         message: "Registration successful, please verify your email",

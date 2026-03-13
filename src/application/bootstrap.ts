@@ -114,7 +114,7 @@ export async function bootstrap() {
   // ===============================
   // Inbounds
   // ===============================
-  createFastifyRestServer({
+  const app = createFastifyRestServer({
     host: appConfig.HOST,
     port: appConfig.PORT,
     allowedOrigins: appConfig.ALLOWED_ORIGINS.split(","),
@@ -122,6 +122,8 @@ export async function bootstrap() {
     // services
     registerUserService,
   });
+
+  return app;
 }
 
 async function shutdown(code: 0 | 1) {

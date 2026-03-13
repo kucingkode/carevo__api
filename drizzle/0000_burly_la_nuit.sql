@@ -26,7 +26,7 @@ CREATE TABLE "certifications" (
 );
 --> statement-breakpoint
 CREATE TABLE "comments" (
-	"id" uuid NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
 	"post_id" uuid NOT NULL,
 	"parent_id" uuid,
@@ -51,7 +51,7 @@ CREATE TABLE "cv_embeddings" (
 );
 --> statement-breakpoint
 CREATE TABLE "cvs" (
-	"user_id" uuid,
+	"user_id" uuid PRIMARY KEY NOT NULL,
 	"skills" jsonb NOT NULL,
 	"personal_info" jsonb NOT NULL,
 	"educations" jsonb NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE "proftos" (
 --> statement-breakpoint
 CREATE TABLE "refresh_tokens" (
 	"id" uuid PRIMARY KEY NOT NULL,
-	"user_id" uuid PRIMARY KEY NOT NULL,
+	"user_id" uuid NOT NULL,
 	"token_hash" text NOT NULL,
 	"ip_address" "inet",
 	"user_agent" text,
@@ -130,13 +130,30 @@ CREATE TABLE "refresh_tokens" (
 );
 --> statement-breakpoint
 CREATE TABLE "user_communities" (
-	"user_id" uuid PRIMARY KEY NOT NULL,
-	"community_id" uuid PRIMARY KEY NOT NULL
+	"user_id" uuid NOT NULL,
+	"community_id" uuid NOT NULL,
+	CONSTRAINT "user_communities_user_id_community_id_pk" PRIMARY KEY("user_id","community_id")
 );
 --> statement-breakpoint
 CREATE TABLE "user_likes" (
-	"user_id" uuid PRIMARY KEY NOT NULL,
-	"post_id" uuid PRIMARY KEY NOT NULL
+	"user_id" uuid NOT NULL,
+	"post_id" uuid NOT NULL,
+	CONSTRAINT "user_likes_user_id_post_id_pk" PRIMARY KEY("user_id","post_id")
+);
+--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"username" text NOT NULL,
+	"email" text NOT NULL,
+	"is_email_verified" boolean NOT NULL,
+	"password_hash" text,
+	"google_id" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "users_username_unique" UNIQUE("username"),
+	CONSTRAINT "users_email_unique" UNIQUE("email"),
+	CONSTRAINT "username_length" CHECK (char_length("users"."username") <= 30),
+	CONSTRAINT "email_length" CHECK (char_length("users"."email") <= 255)
 );
 --> statement-breakpoint
 ALTER TABLE "comments" ADD CONSTRAINT "comments_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
@@ -155,6 +172,4 @@ ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_user_id_users_id_fk"
 ALTER TABLE "user_communities" ADD CONSTRAINT "user_communities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "user_communities" ADD CONSTRAINT "user_communities_community_id_communities_id_fk" FOREIGN KEY ("community_id") REFERENCES "public"."communities"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "user_likes" ADD CONSTRAINT "user_likes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "user_likes" ADD CONSTRAINT "user_likes_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "username_length" CHECK (char_length("users"."username") <= 30);--> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "email_length" CHECK (char_length("users"."email") <= 255);
+ALTER TABLE "user_likes" ADD CONSTRAINT "user_likes_post_id_posts_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE cascade;
