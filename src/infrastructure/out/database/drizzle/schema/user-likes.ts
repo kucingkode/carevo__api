@@ -1,17 +1,17 @@
 import { pgTable, uuid } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { communities } from "./communities";
+import { posts } from "./posts";
 
-export const userCommunities = pgTable("user_communities", {
+export const userLikes = pgTable("user_likes", {
   userId: uuid()
     .primaryKey()
     .references(() => users.id, {
       onUpdate: "cascade",
       onDelete: "cascade",
     }),
-  communityId: uuid()
+  postId: uuid()
     .primaryKey()
-    .references(() => communities.id, {
+    .references(() => posts.id, {
       onUpdate: "cascade",
       onDelete: "cascade",
     }),
