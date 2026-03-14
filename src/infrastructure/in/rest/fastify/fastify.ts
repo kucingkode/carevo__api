@@ -1,5 +1,4 @@
 import { INBOUND_DIRECTION, REST_SERVER_PORT } from "@/constants";
-import { getLogger } from "@/observability/logging";
 import type { FastifyRestServerParams } from "./params";
 import { createApp } from "./create-app";
 import { ZodError } from "zod";
@@ -7,23 +6,61 @@ import { DomainError } from "@/domain/errors/domain/domain-error";
 import { RatelimitedError } from "@/domain/errors/rate-limited-error";
 import { authRoutes } from "./routes/auth-routes";
 import { ERROR_HTTP_STATUS_CODES } from "./error-http-status-codes";
+import { createAdapterLogger } from "@/shared/utils/create-adapter-logger";
+import { bootcampsRoutes } from "./routes/bootcamps-routes";
+import { certificationsRoutes } from "./routes/certifications-routes";
+import { communitiesRoutes } from "./routes/communities-routes";
+import { cvsRoutes } from "./routes/cvs-routes";
+import { filesRoutes } from "./routes/files-routes";
+import { postsRoutes } from "./routes/posts-routes";
+import { proftosRoutes } from "./routes/proftos-routes";
 
 export async function createFastifyRestServer(params: FastifyRestServerParams) {
-  const log = getLogger().child({
-    component: "Fastify",
-    port: REST_SERVER_PORT,
-    direction: INBOUND_DIRECTION,
-  });
+  const log = createAdapterLogger(
+    "Fastify",
+    REST_SERVER_PORT,
+    INBOUND_DIRECTION,
+  );
+
+  const config = params.config;
 
   const app = createApp(log, params);
 
-  app.get("/health", async () => {
-    return { ok: true };
-  });
+  // register application routes
 
   app.register(authRoutes(params) as any, {
     prefix: "/api/v1/auth",
   });
+
+  app.register(bootcampsRoutes(params) as any, {
+    prefix: "/api/v1/bootcamps",
+  });
+
+  app.register(certificationsRoutes(params) as any, {
+    prefix: "/api/v1/certifications",
+  });
+
+  app.register(communitiesRoutes(params) as any, {
+    prefix: "/api/v1/communities",
+  });
+
+  app.register(cvsRoutes(params) as any, {
+    prefix: "/api/v1/cvs",
+  });
+
+  app.register(filesRoutes(params) as any, {
+    prefix: "/api/v1/files",
+  });
+
+  app.register(postsRoutes(params) as any, {
+    prefix: "/api/v1/posts",
+  });
+
+  app.register(proftosRoutes(params) as any, {
+    prefix: "/api/v1/proftos",
+  });
+
+  // error handler
 
   app.setErrorHandler((err, _req, reply) => {
     if (err instanceof ZodError) {
@@ -62,8 +99,8 @@ export async function createFastifyRestServer(params: FastifyRestServerParams) {
   });
 
   await app.listen({
-    host: params.host,
-    port: params.port,
+    host: config.host,
+    port: config.port,
   });
 
   return app;

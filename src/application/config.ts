@@ -29,13 +29,36 @@ const appConfigSchema = z.object({
 
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().default(3000),
-  ALLOWED_ORIGINS: z.string().default("localhost"),
+  ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
+
+  RATE_LIMIT_MAX: z.coerce.number().int().default(100),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().default(60_000),
+
+  MAX_EVENT_LOOP_DELAY: z.coerce.number().int().default(1000),
+  MAX_HEAP_USED_BYTES: z.coerce
+    .number()
+    .int()
+    .default(900 * 1024 * 1024), // 900MB
+  MAX_RSS_BYTES: z.coerce
+    .number()
+    .int()
+    .default(1024 * 1024 * 1024), // 1GB
+  MAX_ELU: z.coerce.number().default(0.98),
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number().int(),
   SMTP_SECURE: z.enum(["true", "false"]).transform((v) => v === "true"),
   SMTP_AUTH_EMAIL: z.string(),
   SMTP_AUTH_PASSWORD: z.string(),
+
+  // REDIRECT_BASE_URL: z.url(),
+
+  // OPENAI_API_KEY: z.string(),
+
+  // REDIS_URL: z.string(),
+
+  // JWT_SECRET: z.string(),
+  // JWT_ALGO: z.string(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

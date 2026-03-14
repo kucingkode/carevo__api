@@ -1,7 +1,7 @@
 import z from "zod";
 
 // request
-export const aiGenerateCvRequestDtoSchema = z.object({
+export const aiGenerateCvInputSchema = z.object({
   requestUserId: z.uuidv7(),
   input: z.string().max(2000),
   section: z.enum([
@@ -12,11 +12,9 @@ export const aiGenerateCvRequestDtoSchema = z.object({
   ]),
 });
 
-export type AiGenerateCvRequestDto = z.infer<
-  typeof aiGenerateCvRequestDtoSchema
->;
+export type AiGenerateCvInput = z.infer<typeof aiGenerateCvInputSchema>;
 
 // use case
 export type AiGenerateCvUseCase = {
-  aiGenerateCv(dto: AiGenerateCvRequestDto): AsyncIterable<string>;
+  aiGenerateCv(dto: AiGenerateCvInput): AsyncIterable<string>;
 };

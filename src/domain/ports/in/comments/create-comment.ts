@@ -1,7 +1,7 @@
 import z from "zod";
 
 // request
-export const createCommentRequestDto = z.object({
+export const createCommentInput = z.object({
   requestUserId: z.uuidv7(),
   userId: z.uuidv7(),
   postId: z.uuidv7(),
@@ -9,14 +9,14 @@ export const createCommentRequestDto = z.object({
   content: z.string().max(2000),
 });
 
-export type CreateCommentRequestDto = z.infer<typeof createCommentRequestDto>;
+export type CreateCommentInput = z.infer<typeof createCommentInput>;
 
 // response
-export type CreateCommentResponseDto = {
-  commentId: string;
+export type CreateCommentOutput = {
+  createdAt: Date;
 };
 
 // use case
 export type CreateCommentUseCase = {
-  createComment(dto: CreateCommentRequestDto): Promise<void>;
+  createComment(dto: CreateCommentInput): Promise<CreateCommentOutput>;
 };

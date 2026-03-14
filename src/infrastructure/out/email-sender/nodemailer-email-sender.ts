@@ -1,7 +1,9 @@
+import { EMAIL_SENDER_PORT, OUTBOUND_DIRECTION } from "@/constants";
 import type {
   EmailSender,
   SendMailParams,
 } from "@/domain/ports/out/email-sender";
+import { BaseAdapter } from "@/shared/classes/base-adapter";
 import { createTransport, type Transporter } from "nodemailer";
 
 export type NodemailerEmailSenderParams = {
@@ -14,10 +16,12 @@ export type NodemailerEmailSenderParams = {
   };
 };
 
-export class NodemailerEmailSender implements EmailSender {
+export class NodemailerEmailSender extends BaseAdapter implements EmailSender {
   private readonly transporter: Transporter;
 
   constructor(params: NodemailerEmailSenderParams) {
+    super(EMAIL_SENDER_PORT, OUTBOUND_DIRECTION);
+
     this.transporter = createTransport({
       host: params.host,
       port: params.port,

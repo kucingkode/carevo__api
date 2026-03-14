@@ -2,24 +2,24 @@ import type { CertificationData } from "@/domain/models/certification";
 import z from "zod";
 
 // request
-export const getCertificationsFeedRequestDtoSchema = z.object({
+export const getCertificationsFeedInputSchema = z.object({
   requestUserId: z.uuidv7(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });
 
-export type GetCertificationsFeedRequestDto = z.infer<
-  typeof getCertificationsFeedRequestDtoSchema
+export type GetCertificationsFeedInput = z.infer<
+  typeof getCertificationsFeedInputSchema
 >;
 
 // response
-export type GetCertificationsFeedResponseDto = {
+export type GetCertificationsFeedOutput = {
   bcertifications: CertificationData[];
 };
 
 // use case
 export type GetCertificationsFeedUseCase = {
   getCertificationsFeed(
-    dto: GetCertificationsFeedRequestDto,
-  ): Promise<GetCertificationsFeedResponseDto>;
+    dto: GetCertificationsFeedInput,
+  ): Promise<GetCertificationsFeedOutput>;
 };

@@ -2,22 +2,20 @@ import type { PostData } from "@/domain/models/post";
 import z from "zod";
 
 // request
-export const getPostsFeedRequestDtoSchema = z.object({
+export const getPostsFeedInputSchema = z.object({
   requestUserId: z.uuidv7(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });
 
-export type GetPostsFeedRequestDto = z.infer<
-  typeof getPostsFeedRequestDtoSchema
->;
+export type GetPostsFeedInput = z.infer<typeof getPostsFeedInputSchema>;
 
 // response
-export type GetPostsFeedResponseDto = {
+export type GetPostsFeedOutput = {
   posts: PostData[];
 };
 
 // use case
 export type GetPostsFeedUseCase = {
-  getPostsFeed(dto: GetPostsFeedRequestDto): Promise<GetPostsFeedResponseDto>;
+  getPostsFeed(dto: GetPostsFeedInput): Promise<GetPostsFeedOutput>;
 };

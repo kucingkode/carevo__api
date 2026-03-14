@@ -1,20 +1,20 @@
 import z from "zod";
 
 // request
-export const getFileRequestDtoSchema = z.object({
+export const getFileInputSchema = z.object({
   requestUserId: z.uuidv7(),
   fileId: z.uuidv7(),
 });
 
-export type GetFileRequestDto = z.infer<typeof getFileRequestDtoSchema>;
+export type GetFileInput = z.infer<typeof getFileInputSchema>;
 
 // response
-export type GetFileResponseDto = {
+export type GetFileOutput = {
   data: Buffer;
   mimeType: string;
 };
 
 // use case
 export type GetFileUseCase = {
-  getFile(dto: GetFileRequestDto): Promise<GetFileResponseDto>;
+  getFile(dto: GetFileInput): Promise<GetFileOutput>;
 };

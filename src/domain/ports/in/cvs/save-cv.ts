@@ -1,13 +1,13 @@
 import z from "zod";
 
 // request
-export const saveCvRequestDtoSchema = z.object({
+export const saveCvInputSchema = z.object({
   requestUserId: z.uuidv7(),
 });
 
-export type SaveCvRequestDto = z.infer<typeof saveCvRequestDtoSchema>;
+export type SaveCvInput = z.infer<typeof saveCvInputSchema>;
 
 // use case
 export type SaveCvUseCase = {
-  saveCv(dto: SaveCvRequestDto): Promise<void>;
+  saveCv(dto: SaveCvInput): Promise<void>;
 };

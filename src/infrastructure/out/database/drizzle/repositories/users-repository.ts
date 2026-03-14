@@ -2,23 +2,20 @@ import type { User } from "@/domain/models/user";
 import type { DrizzleTxContext } from "../database";
 import * as schema from "../schema";
 import { UsersRepositoryError } from "@/domain/errors/infrastructure/users-repository-error";
-import { getLogger, type Logger } from "@/observability/logging";
 import { OUTBOUND_DIRECTION, USERS_REPOSITORY_PORT } from "@/constants";
 import type {
   EmailUsernameAvailability,
   UsersRepository,
 } from "@/domain/ports/out/database/users-repository";
 import { eq, or } from "drizzle-orm";
+import { BaseAdapter } from "@/shared/classes/base-adapter";
 
-export class DrizzleUsersRepository implements UsersRepository<DrizzleTxContext> {
-  log: Logger;
-
+export class DrizzleUsersRepository
+  extends BaseAdapter
+  implements UsersRepository<DrizzleTxContext>
+{
   constructor() {
-    this.log = getLogger().child({
-      component: DrizzleUsersRepository.name,
-      port: USERS_REPOSITORY_PORT,
-      direction: OUTBOUND_DIRECTION,
-    });
+    super(USERS_REPOSITORY_PORT, OUTBOUND_DIRECTION);
   }
 
   async insertUser(ctx: DrizzleTxContext, user: User) {

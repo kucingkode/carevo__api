@@ -1,20 +1,20 @@
 import z from "zod";
 
 // request
-export const uploadFileRequestDtoSchema = z.object({
+export const uploadFileInputSchema = z.object({
   requestUserId: z.uuidv7(),
   mimeType: z.string(),
   data: z.any(),
 });
 
-export type UploadFileRequestDto = z.infer<typeof uploadFileRequestDtoSchema>;
+export type UploadFileInput = z.infer<typeof uploadFileInputSchema>;
 
 // response
-export type UploadFileResponseDto = {
+export type UploadFileOutput = {
   fileId: string;
 };
 
 // use case
 export type UploadFileUseCase = {
-  uploadFile(dto: UploadFileRequestDto): Promise<UploadFileResponseDto>;
+  uploadFile(dto: UploadFileInput): Promise<UploadFileOutput>;
 };

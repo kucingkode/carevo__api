@@ -1,5 +1,5 @@
 import type { Hasher } from "@/domain/ports/out/hasher";
-import { argon2id, hash, verify } from "argon2";
+import { hash, verify } from "argon2";
 
 export type ArgonHasherParams = {
   secret: Buffer<ArrayBufferLike>;
@@ -10,7 +10,7 @@ export type ArgonHasherParams = {
   parallelism: number;
 };
 
-export class Argon2idHasher implements Hasher {
+export class ArgonHasher implements Hasher {
   private readonly secret: Buffer<ArrayBufferLike>;
   private readonly hashConfig: {
     secret: Buffer<ArrayBufferLike>;

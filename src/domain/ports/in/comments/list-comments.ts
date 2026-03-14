@@ -2,22 +2,20 @@ import type { CommentData } from "@/domain/models/comment";
 import z from "zod";
 
 // request
-export const listCommentsRequestDtoSchema = z.object({
+export const listCommentsInputSchema = z.object({
   postId: z.uuidv7(),
   parrentId: z.uuidv7().optional(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });
 
-export type ListCommentsRequestDto = z.infer<
-  typeof listCommentsRequestDtoSchema
->;
+export type ListCommentsInput = z.infer<typeof listCommentsInputSchema>;
 
 // response
-export type ListCommentsResponseDto = {
+export type ListCommentsOutput = {
   comments: CommentData[];
 };
 
-export type ListCommentUseCase = {
-  listComment(dto: ListCommentsRequestDto): Promise<ListCommentsResponseDto>;
+export type ListCommentsUseCase = {
+  listComments(dto: ListCommentsInput): Promise<ListCommentsOutput>;
 };

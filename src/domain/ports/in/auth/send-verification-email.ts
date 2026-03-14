@@ -1,15 +1,15 @@
 import z from "zod";
 
 // request
-export const sendVerificationEmailRequestDtoSchema = z.object({
+export const sendVerificationEmailInputSchema = z.object({
   email: z.email().max(255),
 });
 
-export type SendVerificationEmailRequestDto = z.infer<
-  typeof sendVerificationEmailRequestDtoSchema
+export type SendVerificationEmailInput = z.infer<
+  typeof sendVerificationEmailInputSchema
 >;
 
 // use case
 export type SendVerificationEmailUseCase = {
-  sendVerificationEmail(dto: SendVerificationEmailRequestDto): Promise<void>;
+  sendVerificationEmail(dto: SendVerificationEmailInput): Promise<void>;
 };

@@ -1,27 +1,24 @@
 import z from "zod";
 
 // request
-export const loginUserPasswordRequestDtoSchema = z.object({
+export const loginUserInputSchema = z.object({
   email: z.email().max(255),
   password: z.string().min(8).max(255),
+  rememberMe: z.boolean(),
   ipAddress: z.ipv4(),
   userAgent: z.string().max(512),
 });
 
-export type LoginUserPasswordRequestDto = z.infer<
-  typeof loginUserPasswordRequestDtoSchema
->;
+export type LoginUserInput = z.infer<typeof loginUserInputSchema>;
 
 // response
-export type LoginUserPasswordResponseDto = {
+export type LoginUserOutput = {
   userId: string;
   accessToken: string;
   refreshToken: string;
 };
 
 // use case
-export type LoginUserPasswordUseCase = {
-  loginUserPassword(
-    dto: LoginUserPasswordRequestDto,
-  ): Promise<LoginUserPasswordResponseDto>;
+export type LoginUserUseCase = {
+  loginUser(dto: LoginUserInput): Promise<LoginUserOutput>;
 };

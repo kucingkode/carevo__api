@@ -1,3 +1,4 @@
+import { professionRoleSchema } from "@/shared/schemas/zod/profession-role-schema";
 import z from "zod";
 
 // ===============================
@@ -24,7 +25,7 @@ export type ProftoExperience = z.infer<typeof proftoExperienceSchema>;
 
 export const proftoProjectSchema = z.object({
   name: z.string().max(255),
-  professionRole: z.string().max(255),
+  professionRole: professionRoleSchema,
   imageFileId: z.uuidv7(),
   date: z.coerce.date(),
   description: z.string().max(2000),
@@ -43,7 +44,7 @@ export const proftoDataSchema = z.object({
   userId: z.uuidv7(),
   avatarFileId: z.uuidv7().nullable(),
   name: z.string().max(255).nullable(),
-  professionRole: z.string().max(255).nullable(),
+  professionRole: professionRoleSchema.nullable(),
   lastEducation: z.string().max(255).nullable(),
   email: z.email().max(255).nullable(),
   summary: z.string().max(2000).nullable(),

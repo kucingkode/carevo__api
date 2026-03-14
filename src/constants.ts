@@ -35,7 +35,7 @@ export const EMBEDDING_PROVIDER_PORT = "embedding-provider";
 export const FILE_STORAGE_PORT = "file-storage";
 export const HASHER_PORT = "hasher";
 export const JWT_SIGNER_PORT = "jwt-signer";
-export const LLM_API_PORT = "llm-api";
+export const LLM_PROVIDER_PORT = "llm-provider";
 export const PDF_GENERATOR_PORT = "pdf-generator";
 export const TOKEN_PROVIDER_PORT = "token-provider";
 
@@ -47,7 +47,7 @@ export const TOKEN_PROVIDER_PORT = "token-provider";
 export const CHANGE_USER_PASSWORD_USE_CASE = "change-user-password";
 export const LOGIN_USER_USE_CASE = "login-user";
 export const LOGOUT_USER_USE_CASE = "logout-user";
-export const REFRESH_TOKEN_USE_CASE = "refresh-token";
+export const REFRESH_USER_TOKEN_USE_CASE = "refresh-user-token";
 export const REGISTER_USER_USE_CASE = "register-user";
 export const RESET_USER_PASSWORD_USE_CASE = "reset-user-password";
 export const SEND_PASSWORD_RESET_EMAIL_USE_CASE = "send-password-reset-email";

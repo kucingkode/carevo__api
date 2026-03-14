@@ -2,25 +2,21 @@ import type { CommunityData } from "@/domain/models/community";
 import z from "zod";
 
 // request
-export const listCommunitiesRequestDtoSchema = z.object({
+export const listCommunitiesInputSchema = z.object({
   query: z.string().max(255).optional(),
   professionRole: z.string().max(255).optional(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });
 
-export type ListCommunitiesRequestDto = z.infer<
-  typeof listCommunitiesRequestDtoSchema
->;
+export type ListCommunitiesInput = z.infer<typeof listCommunitiesInputSchema>;
 
 // response
-export type ListCommunitiesResponseDto = {
+export type ListCommunitiesOutput = {
   communities: CommunityData[];
 };
 
 // use case
 export type ListCommunitiesUseCase = {
-  listCommunitiesFeed(
-    dto: ListCommunitiesRequestDto,
-  ): Promise<ListCommunitiesResponseDto>;
+  listCommunities(dto: ListCommunitiesInput): Promise<ListCommunitiesOutput>;
 };

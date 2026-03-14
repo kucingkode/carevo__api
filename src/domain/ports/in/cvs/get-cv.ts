@@ -2,18 +2,18 @@ import type { CvData } from "@/domain/models/cv";
 import z from "zod";
 
 // request
-export const getCvRequestDtoSchema = z.object({
+export const getCvInputSchema = z.object({
   requestUserId: z.uuidv7(),
 });
 
-export type GetCvRequestDto = z.infer<typeof getCvRequestDtoSchema>;
+export type GetCvInput = z.infer<typeof getCvInputSchema>;
 
 // response
-export type GetCvResponseDto = {
+export type GetCvOutput = {
   cv: CvData;
 };
 
 // use case
 export type GetCvUseCase = {
-  getCv(dto: GetCvRequestDto): Promise<void>;
+  getCv(dto: GetCvInput): Promise<GetCvOutput>;
 };

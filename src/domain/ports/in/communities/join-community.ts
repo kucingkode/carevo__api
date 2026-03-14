@@ -1,14 +1,14 @@
 import z from "zod";
 
 // request
-export const joinCommunityRequestDto = z.object({
+export const joinCommunityInput = z.object({
   requestUserId: z.uuidv7(),
   communityId: z.uuidv7(),
 });
 
-export type JoinCommunityRequestDto = z.infer<typeof joinCommunityRequestDto>;
+export type JoinCommunityInput = z.infer<typeof joinCommunityInput>;
 
 // use case
 export type JoinCommunityUseCase = {
-  joinCommunityFeed(dto: JoinCommunityRequestDto): Promise<void>;
+  joinCommunity(dto: JoinCommunityInput): Promise<void>;
 };

@@ -1,15 +1,15 @@
 import z from "zod";
 
 // request
-export const sendPasswordResetEmailRequestDtoSchema = z.object({
+export const sendPasswordResetEmailInputSchema = z.object({
   email: z.email().max(255),
 });
 
-export type SendPasswordResetEmailRequestDto = z.infer<
-  typeof sendPasswordResetEmailRequestDtoSchema
+export type SendPasswordResetEmailInput = z.infer<
+  typeof sendPasswordResetEmailInputSchema
 >;
 
 // use case
 export type SendPasswordResetEmailUseCase = {
-  sendPasswordResetEmail(dto: SendPasswordResetEmailRequestDto): Promise<void>;
+  sendPasswordResetEmail(dto: SendPasswordResetEmailInput): Promise<void>;
 };
