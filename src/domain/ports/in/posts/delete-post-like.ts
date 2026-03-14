@@ -10,5 +10,5 @@ export type DeletePostLikeInput = z.infer<typeof deletePostLikeInputSchema>;
 
 // use case
 export type DeletePostLikeUseCase = {
-  deletePostLike(dto: DeletePostLikeInput): Promise<void>;
+  deletePostLike(input: DeletePostLikeInput): Promise<void>;
 };

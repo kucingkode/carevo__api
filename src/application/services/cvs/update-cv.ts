@@ -16,7 +16,7 @@ export class UpdateCvService<TxCtx extends TxContext<any>>
     super(UPDATE_CV_USE_CASE);
   }
 
-  updateCv(dto: UpdateCvInput): Promise<void> {
+  updateCv(input: UpdateCvInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

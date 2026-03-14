@@ -1,6 +1,6 @@
 import type { ProfessionRole } from "@/shared/schemas/zod/profession-role-schema";
 
-export type CertificationData = {
+export type Certification = {
   readonly id: string;
   readonly professionRole: ProfessionRole;
   readonly thumbnailFileId: string;

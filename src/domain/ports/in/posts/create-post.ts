@@ -16,5 +16,5 @@ export type CreatePostOutput = {
 
 // use case
 export type CreatePostUseCase = {
-  createPost(dto: CreatePostInput): Promise<CreatePostOutput>;
+  createPost(input: CreatePostInput): Promise<CreatePostOutput>;
 };

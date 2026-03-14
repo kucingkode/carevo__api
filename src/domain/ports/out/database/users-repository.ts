@@ -7,6 +7,8 @@ export type EmailUsernameAvailability = {
 };
 
 export type UsersRepository<TxCtx extends TxContext<any>> = {
+  getByEmail(ctx: TxCtx, email: string): Promise<User | null>;
+
   insertUser(ctx: TxCtx, user: User): Promise<void>;
   checkAvailability(
     ctx: TxCtx,

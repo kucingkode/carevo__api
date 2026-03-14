@@ -1,4 +1,4 @@
-import type { CommunityData } from "@/domain/models/community";
+import type { Community } from "@/domain/models/community";
 import z from "zod";
 
 // request
@@ -13,10 +13,10 @@ export type ListCommunitiesInput = z.infer<typeof listCommunitiesInputSchema>;
 
 // response
 export type ListCommunitiesOutput = {
-  communities: CommunityData[];
+  communities: Community[];
 };
 
 // use case
 export type ListCommunitiesUseCase = {
-  listCommunities(dto: ListCommunitiesInput): Promise<ListCommunitiesOutput>;
+  listCommunities(input: ListCommunitiesInput): Promise<ListCommunitiesOutput>;
 };

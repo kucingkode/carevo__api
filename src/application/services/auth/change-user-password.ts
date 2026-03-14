@@ -16,7 +16,7 @@ export class ChangeUserPasswordService<TxCtx extends TxContext<any>>
     super(CHANGE_USER_PASSWORD_USE_CASE);
   }
 
-  changeUserPassword(dto: ChangeUserPasswordInput): Promise<void> {
+  changeUserPassword(input: ChangeUserPasswordInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

@@ -17,7 +17,7 @@ export class CreatePostService<TxCtx extends TxContext<any>>
     super(CREATE_POST_USE_CASE);
   }
 
-  createPost(dto: CreatePostInput): Promise<CreatePostOutput> {
+  createPost(input: CreatePostInput): Promise<CreatePostOutput> {
     throw new Error("not implemented");
   }
 }

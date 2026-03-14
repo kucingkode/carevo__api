@@ -16,7 +16,7 @@ export class DeletePostService<TxCtx extends TxContext<any>>
     super(DELETE_POST_USE_CASE);
   }
 
-  deletePost(dto: DeletePostInput): Promise<void> {
+  deletePost(input: DeletePostInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

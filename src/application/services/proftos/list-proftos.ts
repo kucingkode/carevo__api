@@ -17,7 +17,7 @@ export class ListProftosService<TxCtx extends TxContext<any>>
     super(LIST_PROFTOS_USE_CASE);
   }
 
-  listProftos(dto: ListProftosInput): Promise<ListProftosOutput> {
+  listProftos(input: ListProftosInput): Promise<ListProftosOutput> {
     throw new Error("not implemented");
   }
 }

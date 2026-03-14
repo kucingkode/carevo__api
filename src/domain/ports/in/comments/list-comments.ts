@@ -17,5 +17,5 @@ export type ListCommentsOutput = {
 };
 
 export type ListCommentsUseCase = {
-  listComments(dto: ListCommentsInput): Promise<ListCommentsOutput>;
+  listComments(input: ListCommentsInput): Promise<ListCommentsOutput>;
 };

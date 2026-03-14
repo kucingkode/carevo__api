@@ -10,5 +10,5 @@ export type LeaveCommunityInput = z.infer<typeof leaveCommunityInput>;
 
 // use case
 export type LeaveCommunityUseCase = {
-  leaveCommunity(dto: LeaveCommunityInput): Promise<void>;
+  leaveCommunity(input: LeaveCommunityInput): Promise<void>;
 };

@@ -17,15 +17,7 @@ export class LocalFileStorage extends BaseAdapter implements FileStorage {
     throw new Error("not implemented");
   }
 
-  download(key: string): Promise<Buffer> {
-    throw new Error("not implemented");
-  }
-
   delete(key: string): Promise<void> {
-    throw new Error("not implemented");
-  }
-
-  getMetadata(key: string): Promise<FileMetadata> {
     throw new Error("not implemented");
   }
 

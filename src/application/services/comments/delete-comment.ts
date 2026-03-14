@@ -16,7 +16,7 @@ export class DeleteCommentService<TxCtx extends TxContext<any>>
     super(CREATE_COMMENT_USE_CASE);
   }
 
-  deleteComment(dto: DeleteCommentInput): Promise<void> {
+  deleteComment(input: DeleteCommentInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

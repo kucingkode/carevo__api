@@ -17,5 +17,5 @@ export type ListProftosOutput = {
 
 // use case
 export type ListProftosUseCase = {
-  listProftos(dto: ListProftosInput): Promise<ListProftosOutput>;
+  listProftos(input: ListProftosInput): Promise<ListProftosOutput>;
 };

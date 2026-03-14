@@ -17,7 +17,7 @@ export class GetFileService<TxCtx extends TxContext<any>>
     super(GET_FILE_USE_CASE);
   }
 
-  getFile(dto: GetFileInput): Promise<GetFileOutput> {
+  getFile(input: GetFileInput): Promise<GetFileOutput> {
     throw new Error("not implemented");
   }
 }

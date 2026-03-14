@@ -57,8 +57,10 @@ const appConfigSchema = z.object({
 
   // REDIS_URL: z.string(),
 
-  // JWT_SECRET: z.string(),
-  // JWT_ALGO: z.string(),
+  JWT_SECRET: z.string(),
+
+  ACCESS_TOKEN_TTL: z.coerce.number().default(15 * 60_000),
+  REFRESH_TOKEN_TTL: z.coerce.number().default(30 * 24 * 60 * 60_000),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

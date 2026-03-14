@@ -10,5 +10,5 @@ export type DeleteCommentInput = z.infer<typeof deleteCommentInput>;
 
 // use case
 export type DeleteCommentUseCase = {
-  deleteComment(dto: DeleteCommentInput): Promise<void>;
+  deleteComment(input: DeleteCommentInput): Promise<void>;
 };

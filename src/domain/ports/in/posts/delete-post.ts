@@ -10,5 +10,5 @@ export type DeletePostInput = z.infer<typeof deletePostInputSchema>;
 
 // use case
 export type DeletePostUseCase = {
-  deletePost(dto: DeletePostInput): Promise<void>;
+  deletePost(input: DeletePostInput): Promise<void>;
 };

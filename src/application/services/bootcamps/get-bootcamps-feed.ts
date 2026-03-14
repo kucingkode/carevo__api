@@ -18,7 +18,7 @@ export class GetBootcampsFeedService<TxCtx extends TxContext<any>>
   }
 
   getBootcampsFeed(
-    dto: GetBootcampsFeedInput,
+    input: GetBootcampsFeedInput,
   ): Promise<GetBootcampsFeedOutput> {
     throw new Error("not implemented");
   }

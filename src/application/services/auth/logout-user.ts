@@ -16,7 +16,7 @@ export class LogoutUserService<TxCtx extends TxContext<any>>
     super(LOGOUT_USER_USE_CASE);
   }
 
-  logoutUser(dto: LogoutUserInput): Promise<void> {
+  logoutUser(input: LogoutUserInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

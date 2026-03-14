@@ -11,8 +11,8 @@ export const userDataSchema = z.object({
   username: z.string().regex(/^[a-zA-Z0-9_-]{3,30}$/),
   email: z.email().max(255),
   isEmailVerified: z.boolean(),
-  passwordHash: z.string().optional(),
-  googleId: z.string().optional(),
+  passwordHash: z.string().nullable(),
+  googleId: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -45,17 +45,18 @@ export class User {
   private _username: string;
   private _email: string;
   private _isEmailVerified: boolean;
-  private _passwordHash?: string;
-  private _googleId?: string;
+  private _passwordHash: string | null;
+  private _googleId: string | null;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
-  constructor(data: UserData) {
+  private constructor(data: UserData) {
     this._id = data.id;
     this._username = data.username;
     this._email = data.email;
     this._isEmailVerified = data.isEmailVerified;
     this._passwordHash = data.passwordHash;
+    this._googleId = data.googleId;
     this._createdAt = data.createdAt;
     this._updatedAt = data.updatedAt;
   }
@@ -85,6 +86,10 @@ export class User {
     return new User(result.data);
   }
 
+  static rehydrate(data: UserData) {
+    return new User(data);
+  }
+
   // ===============================
   // Domain
   // ===============================
@@ -103,7 +108,7 @@ export class User {
   changePasswordHash(passwordHash: string): void {
     if (!passwordHash)
       throw new DomainError("Password can't be empty", "VALIDATION_ERROR");
-    
+
     this._passwordHash = passwordHash;
     this._updatedAt = new Date();
   }
@@ -111,12 +116,20 @@ export class User {
   // ===============================
   // Getter
   // ===============================
+  get id() {
+    return this._id;
+  }
+
   get email() {
     return this._email;
   }
 
   get username() {
     return this._username;
+  }
+
+  get isEmailVerified() {
+    return this._isEmailVerified;
   }
 
   // ===============================

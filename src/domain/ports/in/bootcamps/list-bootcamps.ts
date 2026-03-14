@@ -1,4 +1,4 @@
-import type { BootcampData } from "@/domain/models/bootcamp";
+import type { Bootcamp } from "@/domain/models/bootcamp";
 import z from "zod";
 
 // request
@@ -13,9 +13,9 @@ export type ListBootcampsInput = z.infer<typeof listBootcampsInputSchema>;
 
 // responses
 export type ListBootcampsOutput = {
-  bootcamps: BootcampData[];
+  bootcamps: Bootcamp[];
 };
 
 export type ListBootcampsUseCase = {
-  listBootcamps(dto: ListBootcampsInput): Promise<ListBootcampsOutput>;
+  listBootcamps(input: ListBootcampsInput): Promise<ListBootcampsOutput>;
 };

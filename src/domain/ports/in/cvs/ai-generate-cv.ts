@@ -16,5 +16,5 @@ export type AiGenerateCvInput = z.infer<typeof aiGenerateCvInputSchema>;
 
 // use case
 export type AiGenerateCvUseCase = {
-  aiGenerateCv(dto: AiGenerateCvInput): AsyncIterable<string>;
+  aiGenerateCv(input: AiGenerateCvInput): AsyncIterable<string>;
 };

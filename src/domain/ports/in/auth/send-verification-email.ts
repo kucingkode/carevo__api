@@ -11,5 +11,5 @@ export type SendVerificationEmailInput = z.infer<
 
 // use case
 export type SendVerificationEmailUseCase = {
-  sendVerificationEmail(dto: SendVerificationEmailInput): Promise<void>;
+  sendVerificationEmail(input: SendVerificationEmailInput): Promise<void>;
 };

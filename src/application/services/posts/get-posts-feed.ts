@@ -17,7 +17,7 @@ export class GetPostsFeedService<TxCtx extends TxContext<any>>
     super(GET_POSTS_FEED_USE_CASE);
   }
 
-  getPostsFeed(dto: GetPostsFeedInput): Promise<GetPostsFeedOutput> {
+  getPostsFeed(input: GetPostsFeedInput): Promise<GetPostsFeedOutput> {
     throw new Error("not implemented");
   }
 }

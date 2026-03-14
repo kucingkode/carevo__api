@@ -17,7 +17,7 @@ export class SendPasswordResetEmailService<TxCtx extends TxContext<any>>
     super(SEND_PASSWORD_RESET_EMAIL_USE_CASE);
   }
 
-  sendPasswordResetEmail(dto: SendPasswordResetEmailInput): Promise<void> {
+  sendPasswordResetEmail(input: SendPasswordResetEmailInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

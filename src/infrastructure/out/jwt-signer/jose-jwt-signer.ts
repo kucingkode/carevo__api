@@ -1,15 +1,37 @@
+import { JwtSignerError } from "@/domain/errors/infrastructure/jwt-signer-error";
 import type { JwtPayload, JwtSigner } from "@/domain/ports/out/jwt-signer";
+import { jwtVerify, SignJWT } from "jose";
 
-export type JoseJwtSignerParams = {};
+export type JoseJwtSignerParams = {
+  secret: string;
+};
 
 export class JoseJwtSigner implements JwtSigner {
-  constructor(params: JoseJwtSignerParams) {}
+  private readonly secret: Buffer;
 
-  sign(payload: Omit<JwtPayload, "iat">): string {
-    throw new Error("not implemented");
+  constructor(params: JoseJwtSignerParams) {
+    this.secret = Buffer.from(params.secret, "utf-8");
   }
 
-  verify(token: string): JwtPayload {
-    throw new Error("not implemented");
+  async sign(payload: Omit<JwtPayload, "iat">): Promise<string> {
+    return new SignJWT({ sub: payload.sub })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(payload.exp)
+      .sign(this.secret);
+  }
+
+  async verify(token: string): Promise<JwtPayload> {
+    const { payload } = await jwtVerify(token, this.secret);
+
+    if (!payload.sub || !payload.iat || !payload.exp) {
+      throw new JwtSignerError("Invalid token payload");
+    }
+
+    return {
+      sub: payload.sub,
+      iat: payload.iat,
+      exp: payload.exp,
+    };
   }
 }

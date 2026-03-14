@@ -20,5 +20,5 @@ export type LoginUserOutput = {
 
 // use case
 export type LoginUserUseCase = {
-  loginUser(dto: LoginUserInput): Promise<LoginUserOutput>;
+  loginUser(input: LoginUserInput): Promise<LoginUserOutput>;
 };

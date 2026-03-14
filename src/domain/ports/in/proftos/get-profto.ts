@@ -16,5 +16,5 @@ export type GetProftoOutput = {
 
 // use case
 export type GetProftoUseCase = {
-  getProfto(dto: GetProftoInput): Promise<GetProftoOutput>;
+  getProfto(input: GetProftoInput): Promise<GetProftoOutput>;
 };

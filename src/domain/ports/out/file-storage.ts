@@ -14,8 +14,6 @@ export type FileMetadata = {
 
 export type FileStorage = {
   upload(params: UploadFileParams): Promise<FileMetadata>;
-  getMetadata(key: string): Promise<FileMetadata>;
-  download(key: string): Promise<Buffer>;
   delete(key: string): Promise<void>;
   getUrl(key: string): Promise<string>;
 };

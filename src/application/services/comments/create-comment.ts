@@ -17,7 +17,7 @@ export class CreateCommentService<TxCtx extends TxContext<any>>
     super(CREATE_COMMENT_USE_CASE);
   }
 
-  createComment(dto: CreateCommentInput): Promise<CreateCommentOutput> {
+  createComment(input: CreateCommentInput): Promise<CreateCommentOutput> {
     throw new Error("not implemented");
   }
 }

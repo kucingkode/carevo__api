@@ -11,5 +11,5 @@ export type UpdateProftoInput = z.infer<typeof updateProftoInputSchema>;
 
 // use case
 export type UpdateProftoUseCase = {
-  updateProfto(dto: UpdateProftoInput): Promise<void>;
+  updateProfto(input: UpdateProftoInput): Promise<void>;
 };

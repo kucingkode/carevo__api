@@ -10,5 +10,5 @@ export type LikePostInput = z.infer<typeof likePostInputSchema>;
 
 // use case
 export type LikePostUseCase = {
-  likePost(dto: LikePostInput): Promise<void>;
+  likePost(input: LikePostInput): Promise<void>;
 };

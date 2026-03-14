@@ -35,15 +35,15 @@ export class RegisterUserService<TxCtx extends TxContext<any>>
     this.hasher = params.hasher;
   }
 
-  async registerUser(dto: RegisterUserInput): Promise<void> {
+  async registerUser(input: RegisterUserInput): Promise<void> {
     const logCtx: any = {};
 
     // get row user data
-    const passwordHash = await this.hasher.hash(dto.password);
+    const passwordHash = await this.hasher.hash(input.password);
 
     const user = User.create({
-      email: dto.email,
-      username: dto.username,
+      email: input.email,
+      username: input.username,
       passwordHash: passwordHash,
     });
 

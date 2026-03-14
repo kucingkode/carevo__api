@@ -17,7 +17,7 @@ export class ListCommunitiesService<TxCtx extends TxContext<any>>
     super(LIST_COMMUNITIES_USE_CASE);
   }
 
-  listCommunities(dto: ListCommunitiesInput): Promise<ListCommunitiesOutput> {
+  listCommunities(input: ListCommunitiesInput): Promise<ListCommunitiesOutput> {
     throw new Error("not implemented");
   }
 }

@@ -1,7 +1,5 @@
-import type { User } from "@/domain/models/user";
+import { User } from "@/domain/models/user";
 import type { DrizzleTxContext } from "../database";
-import * as schema from "../schema";
-import { UsersRepositoryError } from "@/domain/errors/infrastructure/users-repository-error";
 import { OUTBOUND_DIRECTION, USERS_REPOSITORY_PORT } from "@/constants";
 import type {
   EmailUsernameAvailability,
@@ -9,6 +7,10 @@ import type {
 } from "@/domain/ports/out/database/users-repository";
 import { eq, or } from "drizzle-orm";
 import { BaseAdapter } from "@/shared/classes/base-adapter";
+import { InfrastructureError } from "@/domain/errors/infrastructure/infrastructure-error";
+import { users } from "../schema";
+
+export class UsersRepositoryError extends InfrastructureError {}
 
 export class DrizzleUsersRepository
   extends BaseAdapter
@@ -18,12 +20,27 @@ export class DrizzleUsersRepository
     super(USERS_REPOSITORY_PORT, OUTBOUND_DIRECTION);
   }
 
+  async getByEmail(ctx: DrizzleTxContext, email: string) {
+    try {
+      const result = await ctx.tx.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
+      if (!result) return null;
+      return User.rehydrate(result);
+    } catch (err) {
+      throw new UsersRepositoryError("Database query failed", {
+        cause: err,
+      });
+    }
+  }
+
   async insertUser(ctx: DrizzleTxContext, user: User) {
     try {
-      await ctx.tx.insert(schema.users).values(user.toPersistence());
+      await ctx.tx.insert(users).values(user.toPersistence());
       this.log.debug("User inserted");
     } catch (err) {
-      throw new UsersRepositoryError("Database insert failed", {
+      throw new UsersRepositoryError("Database query failed", {
         cause: err,
       });
     }
@@ -36,10 +53,7 @@ export class DrizzleUsersRepository
   ): Promise<EmailUsernameAvailability> {
     try {
       const user = await ctx.tx.query.users.findFirst({
-        where: or(
-          eq(schema.users.email, email),
-          eq(schema.users.username, username),
-        ),
+        where: or(eq(users.email, email), eq(users.username, username)),
       });
 
       const availability: EmailUsernameAvailability = {
@@ -54,4 +68,6 @@ export class DrizzleUsersRepository
       });
     }
   }
+
+  //
 }

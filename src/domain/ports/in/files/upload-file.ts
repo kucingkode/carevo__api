@@ -16,5 +16,5 @@ export type UploadFileOutput = {
 
 // use case
 export type UploadFileUseCase = {
-  uploadFile(dto: UploadFileInput): Promise<UploadFileOutput>;
+  uploadFile(input: UploadFileInput): Promise<UploadFileOutput>;
 };

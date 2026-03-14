@@ -9,5 +9,5 @@ export type SaveCvInput = z.infer<typeof saveCvInputSchema>;
 
 // use case
 export type SaveCvUseCase = {
-  saveCv(dto: SaveCvInput): Promise<void>;
+  saveCv(input: SaveCvInput): Promise<void>;
 };

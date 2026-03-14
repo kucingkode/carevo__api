@@ -18,5 +18,7 @@ export type RefreshUserTokenOutput = {
 
 // use case
 export type RefreshUserTokenUseCase = {
-  refreshUserToken(dto: RefreshUserTokenInput): Promise<RefreshUserTokenOutput>;
+  refreshUserToken(
+    input: RefreshUserTokenInput,
+  ): Promise<RefreshUserTokenOutput>;
 };

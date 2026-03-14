@@ -16,7 +16,7 @@ export class LeaveCommunityService<TxCtx extends TxContext<any>>
     super(LEAVE_COMMUNITY_USE_CASE);
   }
 
-  leaveCommunity(dto: LeaveCommunityInput): Promise<void> {
+  leaveCommunity(input: LeaveCommunityInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

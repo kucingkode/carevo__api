@@ -3,7 +3,6 @@ import type { FastifyRestServerParams } from "./params";
 import { createApp } from "./create-app";
 import { ZodError } from "zod";
 import { DomainError } from "@/domain/errors/domain/domain-error";
-import { RatelimitedError } from "@/domain/errors/rate-limited-error";
 import { authRoutes } from "./routes/auth-routes";
 import { ERROR_HTTP_STATUS_CODES } from "./error-http-status-codes";
 import { createAdapterLogger } from "@/shared/utils/create-adapter-logger";
@@ -71,13 +70,6 @@ export async function createFastifyRestServer(params: FastifyRestServerParams) {
           field: e.path.join("."),
           message: e.message,
         })),
-      });
-    }
-
-    if (err instanceof RatelimitedError) {
-      return reply.status(429).send({
-        error: "RATE_LIMITED",
-        message: "Too many attempts, please try again later",
       });
     }
 

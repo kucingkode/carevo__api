@@ -17,5 +17,5 @@ export type GetPostsFeedOutput = {
 
 // use case
 export type GetPostsFeedUseCase = {
-  getPostsFeed(dto: GetPostsFeedInput): Promise<GetPostsFeedOutput>;
+  getPostsFeed(input: GetPostsFeedInput): Promise<GetPostsFeedOutput>;
 };

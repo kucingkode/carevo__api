@@ -17,7 +17,7 @@ export class ListCommentsService<TxCtx extends TxContext<any>>
     super(LIST_COMMENTS_USE_CASE);
   }
 
-  listComments(dto: ListCommentsInput): Promise<ListCommentsOutput> {
+  listComments(input: ListCommentsInput): Promise<ListCommentsOutput> {
     throw new Error("not implemented");
   }
 }

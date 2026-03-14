@@ -18,7 +18,7 @@ export class ListCertificationsService<TxCtx extends TxContext<any>>
   }
 
   listCertifications(
-    dto: ListCertificationsInput,
+    input: ListCertificationsInput,
   ): Promise<ListCertificationsOutput> {
     throw new Error("not implemented");
   }

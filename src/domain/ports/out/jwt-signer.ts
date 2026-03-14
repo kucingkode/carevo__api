@@ -5,6 +5,6 @@ export type JwtPayload = {
 };
 
 export type JwtSigner = {
-  sign(payload: Omit<JwtPayload, "iat">): string;
-  verify(token: string): JwtPayload;
+  sign(payload: Omit<JwtPayload, "iat">): Promise<string>;
+  verify(token: string): Promise<JwtPayload>;
 };

@@ -16,7 +16,7 @@ export class DeletePostLikeService<TxCtx extends TxContext<any>>
     super(DELETE_POST_LIKE_USE_CASE);
   }
 
-  deletePostLike(dto: DeletePostLikeInput): Promise<void> {
+  deletePostLike(input: DeletePostLikeInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

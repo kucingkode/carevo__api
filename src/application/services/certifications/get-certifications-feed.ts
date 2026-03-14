@@ -19,7 +19,7 @@ export class GetCertificationsFeedService<TxCtx extends TxContext<any>>
   }
 
   getCertificationsFeed(
-    dto: GetCertificationsFeedInput,
+    input: GetCertificationsFeedInput,
   ): Promise<GetCertificationsFeedOutput> {
     throw new Error("not implemented");
   }

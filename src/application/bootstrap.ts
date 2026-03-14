@@ -56,6 +56,10 @@ import { JoseJwtSigner } from "@/infrastructure/out/jwt-signer/jose-jwt-signer";
 import { OpenaiLlmProvider } from "@/infrastructure/out/llm-provider/openai-llm-provider";
 import { PdfmakePdfGenerator } from "@/infrastructure/out/pdf-generator/pdfmake-pdf-generator";
 import { DefaultTokenProvider } from "@/infrastructure/out/token-provider/default-token-provider";
+import { DrizzleRefreshTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/refresh-tokens-repository";
+import { DrizzlePasswordTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/password-tokens-repository";
+import { EmailTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
+import { DrizzleEmailTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/email-tokens-repository";
 
 export async function bootstrap() {
   // ===============================
@@ -119,7 +123,6 @@ export async function bootstrap() {
     ssl: appConfig.DB_SSL,
   });
   await db.ping();
-  log.info("Database connected");
 
   const bootcampsRepository = new DrizzleBootcampsRepository();
   const certificationsRepository = new DrizzleCertificationsRepository();
@@ -129,6 +132,10 @@ export async function bootstrap() {
   const filesRepository = new DrizzleFilesRepository();
   const postsRepositort = new DrizzlePostsRepository();
   const usersRepository = new DrizzleUsersRepository();
+
+  const refreshTokensRepository = new DrizzleRefreshTokensRepository();
+  const passwordTokensRepository = new DrizzlePasswordTokensRepository();
+  const emailTokensRepository = new DrizzleEmailTokensRepository();
 
   // others
 
@@ -161,13 +168,25 @@ export async function bootstrap() {
     parallelism: appConfig.HASH_PARALLELISM,
   });
 
-  const jwtSigner = new JoseJwtSigner({});
+  const jwtSigner = new JoseJwtSigner({
+    secret: appConfig.JWT_SECRET,
+  });
 
   const llmProvider = new OpenaiLlmProvider({});
 
   const pdfGenerator = new PdfmakePdfGenerator({});
 
-  const tokenProvider = new DefaultTokenProvider({});
+  const tokenProvider = new DefaultTokenProvider({
+    config: {
+      accessTokenTtl: appConfig.ACCESS_TOKEN_TTL,
+      refreshTokenTtl: appConfig.REFRESH_TOKEN_TTL,
+    },
+
+    db,
+    hasher,
+    jwtSigner,
+    refreshTokensRepository,
+  });
 
   // ===============================
   // Application
@@ -175,13 +194,24 @@ export async function bootstrap() {
 
   // auth
 
-  const changeUserPasswordService = new ChangeUserPasswordService({});
+  const changeUserPasswordService = new ChangeUserPasswordService({
+    db,
+    usersRepository,
+  });
 
-  const loginUserService = new LoginUserService({});
+  const loginUserService = new LoginUserService({
+    db,
+    usersRepository,
+    tokenProvider,
+  });
 
-  const logoutUserService = new LogoutUserService({});
+  const logoutUserService = new LogoutUserService({
+    tokenProvider,
+  });
 
-  const refreshUserTokenService = new RefreshUserTokenService({});
+  const refreshUserTokenService = new RefreshUserTokenService({
+    tokenProvider,
+  });
 
   const registerUserService = new RegisterUserService({
     db,
@@ -190,13 +220,39 @@ export async function bootstrap() {
     emailSender,
   });
 
-  const resetUserPasswordService = new ResetUserPasswordService({});
+  const resetUserPasswordService = new ResetUserPasswordService({
+    db,
+    usersRepository,
+    tokenProvider,
+    passwordTokensRepository,
+  });
 
-  const sendPasswordResetEmailService = new SendPasswordResetEmailService({});
+  const sendPasswordResetEmailService = new SendPasswordResetEmailService({
+    db,
+    emailSender,
+    usersRepository,
+    passwordTokensRepository,
+  });
 
-  const sendVerificationEmailService = new SendVerificationEmailService({});
+  const sendVerificationEmailService = new SendVerificationEmailService({
+    config: {
+      fromEmail: appConfig.SMTP_AUTH_EMAIL,
+      redirectBaseUrl: appConfig.REDIRECT_BASE_URL,
+    },
 
-  const verifyUserEmailService = new VerifyUserEmailService({});
+    db,
+    emailSender,
+    usersRepository,
+    emailTokensRepository,
+    hasher,
+  });
+
+  const verifyUserEmailService = new VerifyUserEmailService({
+    db,
+    usersRepository,
+    emailTokensRepository,
+    hasher,
+  });
 
   // bootcamps
 

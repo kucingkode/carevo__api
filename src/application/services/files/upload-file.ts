@@ -17,7 +17,7 @@ export class UploadFileService<TxCtx extends TxContext<any>>
     super(UPLOAD_FILE_USE_CASE);
   }
 
-  uploadFile(dto: UploadFileInput): Promise<UploadFileOutput> {
+  uploadFile(input: UploadFileInput): Promise<UploadFileOutput> {
     throw new Error("not implemented");
   }
 }

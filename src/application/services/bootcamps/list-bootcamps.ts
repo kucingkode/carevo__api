@@ -17,7 +17,7 @@ export class ListBootcampsService<TxCtx extends TxContext<any>>
     super(LIST_BOOTCAMPS_USE_CASE);
   }
 
-  listBootcamps(dto: ListBootcampsInput): Promise<ListBootcampsOutput> {
+  listBootcamps(input: ListBootcampsInput): Promise<ListBootcampsOutput> {
     throw new Error("not implemented");
   }
 }

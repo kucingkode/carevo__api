@@ -16,5 +16,5 @@ export type GetFileOutput = {
 
 // use case
 export type GetFileUseCase = {
-  getFile(dto: GetFileInput): Promise<GetFileOutput>;
+  getFile(input: GetFileInput): Promise<GetFileOutput>;
 };

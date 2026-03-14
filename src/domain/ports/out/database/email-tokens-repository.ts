@@ -1,0 +1,6 @@
+import type { EmailToken } from "@/domain/models/email-token";
+
+export type EmailTokensRepository<TxCtx> = {
+  getByUserId(ctx: TxCtx, userId: string): Promise<EmailToken | null>;
+  save(ctx: TxCtx, token: EmailToken): Promise<void>;
+};

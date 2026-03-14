@@ -1,4 +1,4 @@
-import type { BootcampData } from "@/domain/models/bootcamp";
+import type { Bootcamp } from "@/domain/models/bootcamp";
 import z from "zod";
 
 // request
@@ -12,10 +12,12 @@ export type GetBootcampsFeedInput = z.infer<typeof getBootcampsFeedInputSchema>;
 
 // response
 export type GetBootcampsFeedOutput = {
-  bootcamps: BootcampData[];
+  bootcamps: Bootcamp[];
 };
 
 // use case
 export type GetBootcampsFeedUseCase = {
-  getBootcampsFeed(dto: GetBootcampsFeedInput): Promise<GetBootcampsFeedOutput>;
+  getBootcampsFeed(
+    input: GetBootcampsFeedInput,
+  ): Promise<GetBootcampsFeedOutput>;
 };

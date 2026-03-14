@@ -11,5 +11,5 @@ export type RegisterUserInput = z.infer<typeof registerUserInputSchema>;
 
 // use case
 export type RegisterUserUseCase = {
-  registerUser(dto: RegisterUserInput): Promise<void>;
+  registerUser(input: RegisterUserInput): Promise<void>;
 };

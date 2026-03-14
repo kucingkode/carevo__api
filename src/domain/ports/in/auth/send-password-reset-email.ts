@@ -11,5 +11,5 @@ export type SendPasswordResetEmailInput = z.infer<
 
 // use case
 export type SendPasswordResetEmailUseCase = {
-  sendPasswordResetEmail(dto: SendPasswordResetEmailInput): Promise<void>;
+  sendPasswordResetEmail(input: SendPasswordResetEmailInput): Promise<void>;
 };

@@ -9,5 +9,5 @@ export type LogoutUserInput = z.infer<typeof logoutUserInputSchema>;
 
 // use case
 export type LogoutUserUseCase = {
-  logoutUser(dto: LogoutUserInput): Promise<void>;
+  logoutUser(input: LogoutUserInput): Promise<void>;
 };

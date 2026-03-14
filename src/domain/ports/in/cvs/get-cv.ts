@@ -15,5 +15,5 @@ export type GetCvOutput = {
 
 // use case
 export type GetCvUseCase = {
-  getCv(dto: GetCvInput): Promise<GetCvOutput>;
+  getCv(input: GetCvInput): Promise<GetCvOutput>;
 };

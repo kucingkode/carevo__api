@@ -13,7 +13,7 @@ export class SaveCvService<TxCtx extends TxContext<any>>
     super(SAVE_CV_USE_CASE);
   }
 
-  saveCv(dto: SaveCvInput): Promise<void> {
+  saveCv(input: SaveCvInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

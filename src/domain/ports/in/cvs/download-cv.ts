@@ -17,5 +17,5 @@ export type DownloadCvOutput = {
 
 // use case
 export type DownloadCvUseCase = {
-  downloadCv(dto: DownloadCvInput): Promise<DownloadCvOutput>;
+  downloadCv(input: DownloadCvInput): Promise<DownloadCvOutput>;
 };

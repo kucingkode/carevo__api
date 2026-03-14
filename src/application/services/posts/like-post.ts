@@ -16,7 +16,7 @@ export class LikePostService<TxCtx extends TxContext<any>>
     super(LIKE_POST_USE_CASE);
   }
 
-  likePost(dto: LikePostInput): Promise<void> {
+  likePost(input: LikePostInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

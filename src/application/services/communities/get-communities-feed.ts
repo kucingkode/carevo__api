@@ -18,7 +18,7 @@ export class GetCommunitiesFeedService<TxCtx extends TxContext<any>>
   }
 
   getCommunitiesFeed(
-    dto: GetCommunitiesFeedInput,
+    input: GetCommunitiesFeedInput,
   ): Promise<GetCommunitiesFeedOutput> {
     throw new Error("not implemented");
   }

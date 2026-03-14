@@ -16,7 +16,7 @@ export class AiGenerateCvService<TxCtx extends TxContext<any>>
     super(AI_GENERATE_CV_USE_CASE);
   }
 
-  aiGenerateCv(dto: AiGenerateCvInput): AsyncIterable<string> {
+  aiGenerateCv(input: AiGenerateCvInput): AsyncIterable<string> {
     throw new Error("not implemented");
   }
 }

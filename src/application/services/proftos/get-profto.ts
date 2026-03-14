@@ -17,7 +17,7 @@ export class GetProftoService<TxCtx extends TxContext<any>>
     super(GET_PROFTO_USE_CASE);
   }
 
-  getProfto(dto: GetProftoInput): Promise<GetProftoOutput> {
+  getProfto(input: GetProftoInput): Promise<GetProftoOutput> {
     throw new Error("not implemented");
   }
 }

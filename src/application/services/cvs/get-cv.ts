@@ -17,7 +17,7 @@ export class GetCvService<TxCtx extends TxContext<any>>
     super(GET_CV_USE_CASE);
   }
 
-  getCv(dto: GetCvInput): Promise<GetCvOutput> {
+  getCv(input: GetCvInput): Promise<GetCvOutput> {
     throw new Error("not implemented");
   }
 }

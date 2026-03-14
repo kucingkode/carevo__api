@@ -16,7 +16,7 @@ export class UpdateProftoService<TxCtx extends TxContext<any>>
     super(UPDATE_PROFTO_USE_CASE);
   }
 
-  updateProfto(dto: UpdateProftoInput): Promise<void> {
+  updateProfto(input: UpdateProftoInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

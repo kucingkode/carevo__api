@@ -1,4 +1,4 @@
-export type FileData = {
+export type File = {
   id: string;
   ownerId: string;
   key: string;

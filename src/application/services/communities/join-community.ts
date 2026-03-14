@@ -16,7 +16,7 @@ export class JoinCommunityService<TxCtx extends TxContext<any>>
     super(JOIN_COMMUNITY_USE_CASE);
   }
 
-  joinCommunity(dto: JoinCommunityInput): Promise<void> {
+  joinCommunity(input: JoinCommunityInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

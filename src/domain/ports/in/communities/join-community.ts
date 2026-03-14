@@ -10,5 +10,5 @@ export type JoinCommunityInput = z.infer<typeof joinCommunityInput>;
 
 // use case
 export type JoinCommunityUseCase = {
-  joinCommunity(dto: JoinCommunityInput): Promise<void>;
+  joinCommunity(input: JoinCommunityInput): Promise<void>;
 };

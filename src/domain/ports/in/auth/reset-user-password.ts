@@ -12,5 +12,5 @@ export type ResetUserPasswordInput = z.infer<
 
 // use case
 export type ResetUserPasswordUseCase = {
-  resetUserPassword(dto: ResetUserPasswordInput): Promise<void>;
+  resetUserPassword(input: ResetUserPasswordInput): Promise<void>;
 };

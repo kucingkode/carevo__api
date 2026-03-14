@@ -1,4 +1,4 @@
-export type CommunityData = {
+export type Community = {
   id: string;
   name: string;
   totalMembers: number;

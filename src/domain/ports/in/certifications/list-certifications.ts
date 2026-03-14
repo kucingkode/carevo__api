@@ -1,4 +1,4 @@
-import type { CertificationData } from "@/domain/models/certification";
+import type { Certification } from "@/domain/models/certification";
 import z from "zod";
 
 // request
@@ -15,12 +15,12 @@ export type ListCertificationsInput = z.infer<
 
 // response
 export type ListCertificationsOutput = {
-  certifications: CertificationData[];
+  certifications: Certification[];
 };
 
 // use case
 export type ListCertificationsUseCase = {
   listCertifications(
-    dto: ListCertificationsInput,
+    input: ListCertificationsInput,
   ): Promise<ListCertificationsOutput>;
 };

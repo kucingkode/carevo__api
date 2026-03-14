@@ -11,5 +11,5 @@ export type ChangeUserPasswordInput = z.infer<
 >;
 
 export type ChangeUserPasswordUseCase = {
-  changeUserPassword(dto: ChangeUserPasswordInput): Promise<void>;
+  changeUserPassword(input: ChangeUserPasswordInput): Promise<void>;
 };

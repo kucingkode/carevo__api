@@ -17,7 +17,7 @@ export class DownloadCvService<TxCtx extends TxContext<any>>
     super(DOWNLOAD_CV_USE_CASE);
   }
 
-  downloadCv(dto: DownloadCvInput): Promise<DownloadCvOutput> {
+  downloadCv(input: DownloadCvInput): Promise<DownloadCvOutput> {
     throw new Error("not implemented");
   }
 }

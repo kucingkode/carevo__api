@@ -18,7 +18,7 @@ export class ResetUserPasswordService<TxCtx extends TxContext<any>>
     super(RESET_USER_PASSWORD_USE_CASE);
   }
 
-  resetUserPassword(dto: ResetUserPasswordInput): Promise<void> {
+  resetUserPassword(input: ResetUserPasswordInput): Promise<void> {
     throw new Error("not implemented");
   }
 }

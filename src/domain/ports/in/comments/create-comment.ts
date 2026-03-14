@@ -18,5 +18,5 @@ export type CreateCommentOutput = {
 
 // use case
 export type CreateCommentUseCase = {
-  createComment(dto: CreateCommentInput): Promise<CreateCommentOutput>;
+  createComment(input: CreateCommentInput): Promise<CreateCommentOutput>;
 };

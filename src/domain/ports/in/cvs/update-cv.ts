@@ -11,5 +11,5 @@ export type UpdateCvInput = z.infer<typeof updateCvInputSchema>;
 
 // use case
 export type UpdateCvUseCase = {
-  updateCv(dto: UpdateCvInput): Promise<void>;
+  updateCv(input: UpdateCvInput): Promise<void>;
 };

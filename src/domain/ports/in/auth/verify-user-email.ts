@@ -10,5 +10,5 @@ export type VerifyUserEmailInput = z.infer<typeof verifyUserEmailInputSchema>;
 
 // use case
 export type VerifyUserEmailUseCase = {
-  verifyUserEmail(dto: VerifyUserEmailInput): Promise<void>;
+  verifyUserEmail(input: VerifyUserEmailInput): Promise<void>;
 };
