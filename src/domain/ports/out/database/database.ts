@@ -1,5 +1,5 @@
 export interface Database<TxCtx extends TxContext<any>> {
-  beginTx(fn: (ctx: TxCtx) => Promise<void>, config?: TxConfig): Promise<void>;
+  beginTx<T>(fn: (ctx: TxCtx) => Promise<T>, config?: TxConfig): Promise<T>;
 }
 
 export type TxContext<Tx = any> = {

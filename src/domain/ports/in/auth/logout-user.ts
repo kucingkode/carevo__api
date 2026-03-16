@@ -2,7 +2,7 @@ import z from "zod";
 
 // request
 export const logoutUserInputSchema = z.object({
-  refreshToken: z.string().length(43),
+  refreshToken: z.string().length(80),
 });
 
 export type LogoutUserInput = z.infer<typeof logoutUserInputSchema>;

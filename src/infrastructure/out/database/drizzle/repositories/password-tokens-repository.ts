@@ -5,9 +5,9 @@ import {
 import type { PasswordTokensRepository } from "@/domain/ports/out/database/password-tokens-repository";
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
-import type { PasswordToken } from "@/domain/models/password-token";
+import { PasswordToken } from "@/domain/entities/password-token";
 import { PasswordTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { passwordTokens } from "../schema";
 
 export class DrizzlePasswordTokensRepository
@@ -24,12 +24,15 @@ export class DrizzlePasswordTokensRepository
   ): Promise<PasswordToken | null> {
     try {
       const result = await ctx.tx.query.passwordTokens.findFirst({
-        where: eq(passwordTokens.userId, userId),
+        where: and(
+          eq(passwordTokens.userId, userId),
+          isNull(passwordTokens.usedAt),
+        ),
       });
 
       if (!result) return null;
 
-      return result;
+      return PasswordToken.rehydrate(result);
     } catch (err) {
       throw new PasswordTokensRepositoryError("Database query failed", {
         cause: err,
@@ -41,14 +44,14 @@ export class DrizzlePasswordTokensRepository
     try {
       await ctx.tx
         .insert(passwordTokens)
-        .values(token)
+        .values(token.toPersistence())
         .onConflictDoUpdate({
           target: passwordTokens.userId,
           set: {
-            tokenHash: token.tokenHash,
-            expiresAt: token.expiresAt,
-            usedAt: token.usedAt,
-            createdAt: token.createdAt,
+            tokenHash: sql`excluded.token_hash`,
+            expiresAt: sql`excluded.expires_at`,
+            usedAt: sql`excluded.used_at`,
+            createdAt: sql`excluded.created_at`,
           },
         });
       this.log.debug({ userId: token.userId }, "Password token upserted");

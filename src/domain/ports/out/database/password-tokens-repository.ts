@@ -1,4 +1,4 @@
-import type { PasswordToken } from "@/domain/models/password-token";
+import type { PasswordToken } from "@/domain/entities/password-token";
 
 export type PasswordTokensRepository<TxCtx> = {
   getByUserId(ctx: TxCtx, userId: string): Promise<PasswordToken | null>;

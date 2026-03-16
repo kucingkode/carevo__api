@@ -1,4 +1,4 @@
-import type { CommentData } from "@/domain/models/comment";
+import type { CommentData } from "@/domain/entities/comment";
 import z from "zod";
 
 // request

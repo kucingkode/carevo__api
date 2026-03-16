@@ -1,7 +1,11 @@
 import type { FastifyApp } from "../create-app";
-import type { FastifyRestServerParams } from "../params";
+import type { FastifyRestServerConfig } from "../config";
+import type { FastifyRestServerDeps } from "../deps";
 
-export function certificationsRoutes(params: FastifyRestServerParams) {
+export function certificationsRoutes(
+  config: FastifyRestServerConfig,
+  deps: FastifyRestServerDeps,
+) {
   return async (app: FastifyApp) => {
     // ===============================
     // listCertifications

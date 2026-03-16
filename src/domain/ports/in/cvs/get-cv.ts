@@ -1,4 +1,4 @@
-import type { CvData } from "@/domain/models/cv";
+import type { CvData } from "@/domain/entities/cv";
 import z from "zod";
 
 // request

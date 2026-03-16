@@ -1,4 +1,4 @@
-import { cvContentSchema } from "@/domain/models/cv";
+import { cvContentSchema } from "@/domain/entities/cv";
 import z from "zod";
 
 // request

@@ -6,7 +6,7 @@ import z from "zod";
 // Schema & Types
 // ===============================
 
-export const postDataSchema = z.object({
+export const postPropsSchema = z.object({
   id: z.uuidv7(),
   communityId: z.uuidv7(),
   userId: z.uuidv7(),
@@ -15,7 +15,7 @@ export const postDataSchema = z.object({
   createdAt: z.date(),
 });
 
-export type PostData = z.infer<typeof postDataSchema>;
+export type PostProps = z.infer<typeof postPropsSchema>;
 
 export type CreatePostParams = {
   readonly communityId: string;
@@ -45,7 +45,7 @@ export class Post {
   readonly _totalLikes: number;
   readonly _createdAt: Date;
 
-  private constructor(data: PostData) {
+  private constructor(data: PostProps) {
     this._id = data.id;
     this._communityId = data.communityId;
     this._userId = data.userId;
@@ -58,7 +58,7 @@ export class Post {
   // Factory
   // ===============================
   static create(params: CreatePostParams) {
-    const result = postDataSchema.safeParse({
+    const result = postPropsSchema.safeParse({
       ...params,
       id: uuidV7(),
       totalLikes: 0,
@@ -72,14 +72,14 @@ export class Post {
     return new Post(result.data);
   }
 
-  static rehydrate(data: PostData) {
+  static rehydrate(data: PostProps) {
     return new Post(data);
   }
 
   // ===============================
   // Persistence
   // ===============================
-  toPersistence(): PostData {
+  toPersistence(): PostProps {
     return {
       id: this._id,
       content: this._content,

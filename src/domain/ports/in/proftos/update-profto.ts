@@ -1,4 +1,4 @@
-import { proftoDataSchema } from "@/domain/models/profto";
+import { proftoDataSchema } from "@/domain/entities/profto";
 import z from "zod";
 
 // request

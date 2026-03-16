@@ -6,7 +6,7 @@ import type {
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import { createTransport, type Transporter } from "nodemailer";
 
-export type NodemailerEmailSenderParams = {
+export type NodemailerEmailSenderConfig = {
   host: string;
   port: number;
   secure: boolean;
@@ -19,16 +19,16 @@ export type NodemailerEmailSenderParams = {
 export class NodemailerEmailSender extends BaseAdapter implements EmailSender {
   private readonly transporter: Transporter;
 
-  constructor(params: NodemailerEmailSenderParams) {
+  constructor(config: NodemailerEmailSenderConfig) {
     super(EMAIL_SENDER_PORT, OUTBOUND_DIRECTION);
 
     this.transporter = createTransport({
-      host: params.host,
-      port: params.port,
-      secure: params.secure,
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
       auth: {
-        user: params.auth.email,
-        pass: params.auth.password,
+        user: config.auth.email,
+        pass: config.auth.password,
       },
     });
   }

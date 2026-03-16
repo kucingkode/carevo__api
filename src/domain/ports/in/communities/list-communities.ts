@@ -1,4 +1,4 @@
-import type { Community } from "@/domain/models/community";
+import type { Community } from "@/domain/entities/community";
 import z from "zod";
 
 // request

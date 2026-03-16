@@ -1,5 +1,16 @@
+import type { TxConfig } from "./domain/ports/out/database/database";
+
 export const SERVICE_NAME = "api";
 export const SERVICE_VERSION = "0.1.0";
+
+export const EMAIL_TOKEN_TTL = 24 * 60 * 60_000; // 24h
+export const ACCESS_TOKEN_TTL = 15 * 60_000; // 15m
+export const REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60_000; // 30d
+export const REFRESH_TOKEN_SHORT_TTL = 60 * 60_000; // 1h
+
+export const READ_ONLY_DB_TX: TxConfig = {
+  accessMode: "read only",
+};
 
 // ===============================
 // Port Directions
@@ -56,6 +67,7 @@ export const RESET_USER_PASSWORD_USE_CASE = "reset-user-password";
 export const SEND_PASSWORD_RESET_EMAIL_USE_CASE = "send-password-reset-email";
 export const SEND_VERIFICATION_EMAIL_USE_CASE = "send-verification-email";
 export const VERIFY_USER_EMAIL_USE_CASE = "verify-user-email";
+export const GOOGLE_OAUTH_USE_CASE = "google-oauth";
 
 // bootcamps
 export const GET_BOOTCAMPS_FEED_USE_CASE = "get-bootcamps-feed";

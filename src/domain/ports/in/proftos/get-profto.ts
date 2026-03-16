@@ -1,4 +1,4 @@
-import type { ProftoData } from "@/domain/models/profto";
+import type { ProftoData } from "@/domain/entities/profto";
 import z from "zod";
 
 // request

@@ -6,7 +6,7 @@ import { DomainError } from "../errors/domain/domain-error";
 // Schema & Types
 // ===============================
 
-export const commentDataSchema = z.object({
+export const commentPropsSchema = z.object({
   id: z.uuidv7(),
   userId: z.uuidv7(),
   postId: z.uuidv7(),
@@ -15,7 +15,7 @@ export const commentDataSchema = z.object({
   createdAt: z.date(),
 });
 
-export type CommentData = z.infer<typeof commentDataSchema>;
+export type CommentProps = z.infer<typeof commentPropsSchema>;
 
 export type CreateCommentParams = {
   userId: string;
@@ -46,7 +46,7 @@ export class Comment {
   private readonly _content: string;
   private readonly _createdAt: Date;
 
-  private constructor(data: CommentData) {
+  private constructor(data: CommentProps) {
     this._id = data.id;
     this._userId = data.userId;
     this._postId = data.postId;
@@ -59,7 +59,7 @@ export class Comment {
   // Factory
   // ===============================
   static create(params: CreateCommentParams) {
-    const result = commentDataSchema.safeParse({
+    const result = commentPropsSchema.safeParse({
       ...params,
       id: uuidV7(),
       createdAt: new Date(),
@@ -72,14 +72,14 @@ export class Comment {
     return new Comment(result.data);
   }
 
-  static rehydrate(data: CommentData) {
+  static rehydrate(data: CommentProps) {
     return new Comment(data);
   }
 
   // ===============================
   // Persistence
   // ===============================
-  toPersistence(): CommentData {
+  toPersistence(): CommentProps {
     return {
       id: this._id,
       userId: this._userId,

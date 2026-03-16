@@ -1,0 +1,84 @@
+@baseUrl = http://localhost:3000
+
+### Registration
+# @prompt username
+# @prompt email
+# @prompt password StrongPassword123
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Verify email
+# @prompt token
+POST {{baseUrl}}/api/v1/auth/email/verify
+Content-Type: application/json
+
+{
+  "token": {{token}}
+}
+
+### Login
+# @prompt email
+# @prompt password StrongPassword123
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "rememberMe": true
+}
+
+### Logout 
+POST {{baseUrl}}/api/v1/auth/logout
+Cookie: refresh_token=019cf6c9-49d9-7008-b748-2cdfcfb5b3e6.LRxDARo2BhIckI9s-9zzEmJAFIn7kclio4LlCT9FkU4.TrZnvJSFIL3NVjKC4TMpXyTmYjhICVEciR3cDkpAsUI;
+
+### Refresh token
+POST {{baseUrl}}/api/v1/auth/refresh
+Cookie: refresh_token=019cf6de-aa1f-704c-a4ee-dce81a040ec6.HrGa9ToD6M1FK-BbEpX7YgRbEn6CSYzmW0D3hTLeZd8.xPRqp6s3ljFRW8Chc2cNvPAV9dTcvXf3oxW4i%2FVDciM;
+Content-Type: application/json
+
+{
+  "rememberMe": false
+}
+
+### Forgot Password
+POST {{baseUrl}}/api/v1/auth/password/forgot
+Content-Type: application/json
+
+{
+  "email": "fazleadyuta4@gmail.com"
+}
+
+### Reset Password
+POST {{baseUrl}}/api/v1/auth/password/reset
+Content-Type: application/json
+
+{
+  "token": "019cf4f4-f936-7718-9a6e-eac9a02eb277.ezSnaX6zo6Q1n8gIS6XPE0GY2TzztcniaY44XIO-g6s",
+  "newPassword": "StrongPassword123"
+}
+
+### Change Password
+POST {{baseUrl}}/api/v1/auth/password/change
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTljZjRmNC1mOTM2LTc3MTgtOWE2ZS1lYWM5YTAyZWIyNzciLCJpYXQiOjE3NzM2NjgzMTMsImV4cCI6MTc3MzY2OTIxMzYyOX0.ppyZO6_jvpUm13Fx581VHALkNP1abAcm1wp-n_Z7AL4
+
+{
+  "oldPassword": "StrongPassword123",
+  "newPassword": "StrongPass123"
+}
+
+### Resend email verification
+POST {{baseUrl}}/api/v1/auth/email/resend
+Content-Type: application/json
+
+{
+  "token": "",
+  "newPassword": ""
+}

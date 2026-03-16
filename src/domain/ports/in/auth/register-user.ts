@@ -5,6 +5,7 @@ export const registerUserInputSchema = z.object({
   username: z.string().regex(/^[a-zA-Z0-9_-]{3,30}$/),
   email: z.email().max(255),
   password: z.string().min(8),
+  ipAddress: z.string().nullable(),
 });
 
 export type RegisterUserInput = z.infer<typeof registerUserInputSchema>;

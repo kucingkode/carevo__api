@@ -48,17 +48,21 @@ export class DrizzleDatabase implements Database<DrizzleTxContext> {
     }
   }
 
-  async beginTx(
-    fn: (ctx: DrizzleTxContext) => Promise<void>,
+  async beginTx<T>(
+    fn: (ctx: DrizzleTxContext) => Promise<T>,
     config?: TxConfig,
-  ) {
+  ): Promise<T> {
     this.log.trace("Transaction started");
 
     try {
+      let result: T;
       await this.db.transaction(async (tx) => {
         const txContext = new DrizzleTxContext(tx);
-        await fn(txContext);
+        result = await fn(txContext);
       }, config);
+
+      this.log.trace("Transaction committed");
+      return result!;
     } catch (err) {
       if (err instanceof DrizzleError) {
         this.log.trace("Transaction failed");
@@ -69,8 +73,6 @@ export class DrizzleDatabase implements Database<DrizzleTxContext> {
 
       throw err;
     }
-
-    this.log.trace("Transaction committed");
   }
 
   async migrate() {

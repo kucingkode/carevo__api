@@ -1,8 +1,34 @@
+import { sendVerificationEmailInputSchema } from "@/domain/ports/in/auth/send-verification-email";
 import type { FastifyApp } from "../create-app";
-import type { FastifyRestServerParams } from "../params";
 import { registerUserInputSchema } from "@/domain/ports/in/auth/register-user";
+import { verifyUserEmailInputSchema } from "@/domain/ports/in/auth/verify-user-email";
+import { loginUserInputSchema } from "@/domain/ports/in/auth/login-user";
+import type { FastifyRestServerConfig } from "../config";
+import type { FastifyRestServerDeps } from "../deps";
+import { logoutUserInputSchema } from "@/domain/ports/in/auth/logout-user";
+import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
+import { refreshUserTokenInputSchema } from "@/domain/ports/in/auth/refresh-user-token";
+import { sendPasswordResetEmailInputSchema } from "@/domain/ports/in/auth/send-password-reset-email";
+import { resetUserPasswordInputSchema } from "@/domain/ports/in/auth/reset-user-password";
+import { changeUserPasswordInputSchema } from "@/domain/ports/in/auth/change-user-password";
+import type { FastifyRequest } from "fastify";
 
-export function authRoutes(params: FastifyRestServerParams) {
+export function authRoutes(
+  config: FastifyRestServerConfig,
+  deps: FastifyRestServerDeps,
+) {
+  const getRefreshToken = (req: FastifyRequest) => {
+    const refreshTokenCookie = req.cookies["refresh_token"];
+    if (!refreshTokenCookie)
+      throw new UnauthorizedError("Missing refresh token");
+
+    const refreshToken = req.unsignCookie(refreshTokenCookie);
+    if (!refreshToken.valid)
+      throw new UnauthorizedError("Invalid refresh token");
+
+    return refreshToken.value;
+  };
+
   return async (app: FastifyApp) => {
     // ===============================
     // registerUser
@@ -19,21 +45,24 @@ export function authRoutes(params: FastifyRestServerParams) {
         },
       },
       async (req, reply) => {
-        // validate request
-        const data = registerUserInputSchema.parse(req.body);
-
         // register user
-        await params.registerUserService.registerUser({
-          email: data.email,
-          password: data.password,
-          username: data.username,
+        const registerUserInput = registerUserInputSchema.parse({
+          ...(req.body || {}),
+          ipAddress: req.clientIp,
         });
+        await deps.registerUserService.registerUser(registerUserInput);
 
         // send verification email
+        const sendVerificationEmailInput =
+          sendVerificationEmailInputSchema.parse({
+            email: registerUserInput.email,
+            ipAddress: req.clientIp,
+          });
+        await deps.sendVerificationEmailService.sendVerificationEmail(
+          sendVerificationEmailInput,
+        );
 
-        return reply.status(201).send({
-          message: "Registration successful, please verify your email",
-        });
+        return reply.status(201).send();
       },
     );
 
@@ -51,7 +80,31 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const loginUserInput = loginUserInputSchema.parse({
+          ...(req.body || {}),
+          ipAddress: req.clientIp,
+          userAgent: req.clientUa,
+        });
+
+        const loginUserOutput =
+          await deps.loginUserService.loginUser(loginUserInput);
+
+        reply.setCookie("refresh_token", loginUserOutput.refreshToken, {
+          ...config.cookieOptions,
+          httpOnly: true,
+          path: "/auth",
+          expires: loginUserInput.rememberMe
+            ? loginUserOutput.refreshTokenExpiredAt
+            : undefined,
+          signed: true,
+        });
+
+        return reply.status(200).send({
+          userId: loginUserOutput.userId,
+          accessToken: loginUserOutput.accessToken,
+        });
+      },
     );
 
     // ===============================
@@ -68,7 +121,17 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const logoutUserInput = logoutUserInputSchema.parse({
+          refreshToken: getRefreshToken(req),
+        });
+
+        await deps.logoutUserService.logoutUser(logoutUserInput);
+
+        reply.clearCookie("refresh_token");
+
+        return reply.status(200).send();
+      },
     );
 
     // ===============================
@@ -85,7 +148,33 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const refreshUserTokenInput = refreshUserTokenInputSchema.parse({
+          ...(req.body || {}),
+          refreshToken: getRefreshToken(req),
+          ipAddress: req.clientIp,
+          userAgent: req.clientUa,
+        });
+
+        const refreshUserTokenOutput =
+          await deps.refreshUserTokenService.refreshUserToken(
+            refreshUserTokenInput,
+          );
+
+        reply.setCookie("refresh_token", refreshUserTokenOutput.refreshToken, {
+          ...config.cookieOptions,
+          httpOnly: true,
+          path: "/auth",
+          expires: refreshUserTokenInput.rememberMe
+            ? refreshUserTokenOutput.refreshTokenExpiredAt
+            : undefined,
+          signed: true,
+        });
+
+        return reply.status(200).send({
+          accessToken: refreshUserTokenOutput.accessToken,
+        });
+      },
     );
 
     // ===============================
@@ -102,7 +191,19 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const sendPasswordResetEmailInput =
+          sendPasswordResetEmailInputSchema.parse({
+            ...(req.body || {}),
+            ipAddress: req.clientIp,
+          });
+
+        await deps.sendPasswordResetEmailService.sendPasswordResetEmail(
+          sendPasswordResetEmailInput,
+        );
+
+        return reply.status(200).send();
+      },
     );
 
     // ===============================
@@ -119,7 +220,19 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const resetUserPasswordInput = resetUserPasswordInputSchema.parse({
+          ...(req.body || {}),
+          ipAddress: req.clientIp,
+          userAgent: req.clientUa,
+        });
+
+        await deps.resetUserPasswordService.resetUserPassword(
+          resetUserPasswordInput,
+        );
+
+        return reply.status(200).send();
+      },
     );
 
     // ===============================
@@ -136,7 +249,22 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        console.log("jhwe", req.userId);
+
+        const changeUserPasswordInput = changeUserPasswordInputSchema.parse({
+          ...(req.body || {}),
+          requestUserId: req.userId,
+          ipAddress: req.clientIp,
+          userAgent: req.clientUa,
+        });
+
+        await deps.changeUserPasswordService.changeUserPassword(
+          changeUserPasswordInput,
+        );
+
+        return reply.status(200).send();
+      },
     );
 
     // ===============================
@@ -153,7 +281,16 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const verifyUserEmailInput = verifyUserEmailInputSchema.parse({
+          ...(req.body || {}),
+          ipAddress: req.clientIp,
+        });
+
+        await deps.verifyUserEmailService.verifyUserEmail(verifyUserEmailInput);
+
+        return reply.status(200).send();
+      },
     );
 
     // ===============================
@@ -170,7 +307,19 @@ export function authRoutes(params: FastifyRestServerParams) {
           },
         },
       },
-      async (req, reply) => {},
+      async (req, reply) => {
+        const sendVerificationEmailInput =
+          sendVerificationEmailInputSchema.parse({
+            ...(req.body || {}),
+            ipAddress: req.clientIp,
+          });
+
+        await deps.sendVerificationEmailService.sendVerificationEmail(
+          sendVerificationEmailInput,
+        );
+
+        return reply.status(200).send();
+      },
     );
   };
 }

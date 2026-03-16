@@ -2,8 +2,8 @@ import z from "zod";
 
 // request
 export const verifyUserEmailInputSchema = z.object({
-  email: z.email().max(255),
-  token: z.string().length(43),
+  token: z.string().length(80),
+  ipAddress: z.string().nullable(),
 });
 
 export type VerifyUserEmailInput = z.infer<typeof verifyUserEmailInputSchema>;

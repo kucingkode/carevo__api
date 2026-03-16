@@ -1,4 +1,4 @@
-import type { RefreshToken } from "@/domain/models/refresh-token";
+import type { RefreshToken } from "@/domain/entities/refresh-token";
 import type { TxContext } from "./database";
 
 export type RefreshTokensRepository<TxCtx extends TxContext<any>> = {

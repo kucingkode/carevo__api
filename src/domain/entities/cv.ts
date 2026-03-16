@@ -83,7 +83,7 @@ export const cvContentSchema = z.object({
 
 export type CvContent = z.infer<typeof cvContentSchema>;
 
-export type CvData = {
+export type CvProps = {
   userId: string;
   content: CvContent;
 };
@@ -96,7 +96,7 @@ export class Cv {
   private readonly _userId: string;
   private readonly _content: CvContent;
 
-  constructor(data: CvData) {
+  constructor(data: CvProps) {
     this._userId = data.userId;
     this._content = data.content;
   }
@@ -109,7 +109,7 @@ export class Cv {
   // ===============================
   // Persistence
   // ===============================
-  toPersistence(): CvData {
+  toPersistence(): CvProps {
     return {
       userId: this._userId,
       content: this._content,

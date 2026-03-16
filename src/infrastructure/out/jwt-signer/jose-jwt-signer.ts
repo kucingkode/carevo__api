@@ -2,15 +2,15 @@ import { JwtSignerError } from "@/domain/errors/infrastructure/jwt-signer-error"
 import type { JwtPayload, JwtSigner } from "@/domain/ports/out/jwt-signer";
 import { jwtVerify, SignJWT } from "jose";
 
-export type JoseJwtSignerParams = {
+export type JoseJwtSignerConfig = {
   secret: string;
 };
 
 export class JoseJwtSigner implements JwtSigner {
   private readonly secret: Buffer;
 
-  constructor(params: JoseJwtSignerParams) {
-    this.secret = Buffer.from(params.secret, "utf-8");
+  constructor(config: JoseJwtSignerConfig) {
+    this.secret = Buffer.from(config.secret, "utf-8");
   }
 
   async sign(payload: Omit<JwtPayload, "iat">): Promise<string> {

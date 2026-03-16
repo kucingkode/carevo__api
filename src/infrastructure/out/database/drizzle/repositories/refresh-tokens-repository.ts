@@ -2,14 +2,15 @@ import {
   OUTBOUND_DIRECTION,
   REFRESH_TOKENS_REPOSITORY_PORT,
 } from "@/constants";
-import type { RefreshToken } from "@/domain/models/refresh-token";
+import type { RefreshToken } from "@/domain/entities/refresh-token";
 import type { RefreshTokensRepository } from "@/domain/ports/out/database/refresh-tokens-repository";
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import { refreshTokens } from "../schema";
-import { eq, lte } from "drizzle-orm";
+import { and, eq, isNull, lte } from "drizzle-orm";
 import { RefreshTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
 import { NotFoundError } from "@/domain/errors/common";
+import { parseToken } from "@/shared/utils/token-format";
 
 export class DrizzleRefreshTokensRepository
   extends BaseAdapter
@@ -24,9 +25,9 @@ export class DrizzleRefreshTokensRepository
     token: string,
   ): Promise<RefreshToken | null> {
     try {
-      const [id, _] = token.split(".");
+      const { id } = parseToken(token);
       const result = await ctx.tx.query.refreshTokens.findFirst({
-        where: eq(refreshTokens.id, id),
+        where: and(eq(refreshTokens.id, id), isNull(refreshTokens.revokedAt)),
       });
 
       if (!result) {
@@ -61,7 +62,10 @@ export class DrizzleRefreshTokensRepository
   ): Promise<void> {
     try {
       await ctx.tx
-        .delete(refreshTokens)
+        .update(refreshTokens)
+        .set({
+          revokedAt: new Date(),
+        })
         .where(eq(refreshTokens.userId, userId));
 
       this.log.debug({ userId }, "User refresh tokens revoked");
@@ -74,9 +78,12 @@ export class DrizzleRefreshTokensRepository
 
   async revokeByToken(ctx: DrizzleTxContext, token: string): Promise<void> {
     try {
-      const [id, _] = token.split(".");
+      const { id } = parseToken(token);
       const result = await ctx.tx
-        .delete(refreshTokens)
+        .update(refreshTokens)
+        .set({
+          revokedAt: new Date(),
+        })
         .where(eq(refreshTokens.id, id))
         .returning({
           id: refreshTokens.id,

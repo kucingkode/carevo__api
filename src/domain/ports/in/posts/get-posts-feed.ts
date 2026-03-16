@@ -1,4 +1,4 @@
-import type { PostData } from "@/domain/models/post";
+import type { PostData } from "@/domain/entities/post";
 import z from "zod";
 
 // request

@@ -2,9 +2,9 @@ import { EMAIL_TOKENS_REPOSITORY_PORT, OUTBOUND_DIRECTION } from "@/constants";
 import type { EmailTokensRepository } from "@/domain/ports/out/database/email-tokens-repository";
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
-import type { EmailToken } from "@/domain/models/email-token";
+import { EmailToken } from "@/domain/entities/email-token";
 import { emailTokens } from "../schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { EmailTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
 
 export class DrizzleEmailTokensRepository
@@ -26,7 +26,7 @@ export class DrizzleEmailTokensRepository
 
       if (!result) return null;
 
-      return result;
+      return EmailToken.rehydrate(result);
     } catch (err) {
       throw new EmailTokensRepositoryError("Database query failed", {
         cause: err,
@@ -38,14 +38,14 @@ export class DrizzleEmailTokensRepository
     try {
       await ctx.tx
         .insert(emailTokens)
-        .values(token)
+        .values(token.toPersistence())
         .onConflictDoUpdate({
           target: emailTokens.userId,
           set: {
-            tokenHash: token.tokenHash,
-            expiresAt: token.expiresAt,
-            usedAt: token.usedAt,
-            createdAt: token.createdAt,
+            tokenHash: sql`excluded.token_hash`,
+            expiresAt: sql`excluded.expires_at`,
+            usedAt: sql`excluded.used_at`,
+            createdAt: sql`excluded.created_at`,
           },
         });
       this.log.debug({ userId: token.userId }, "Password token upserted");

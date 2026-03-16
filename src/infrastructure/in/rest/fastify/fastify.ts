@@ -1,5 +1,5 @@
 import { INBOUND_DIRECTION, REST_SERVER_PORT } from "@/constants";
-import type { FastifyRestServerParams } from "./params";
+import type { FastifyRestServerConfig } from "./config";
 import { createApp } from "./create-app";
 import { ZodError } from "zod";
 import { DomainError } from "@/domain/errors/domain/domain-error";
@@ -13,49 +13,85 @@ import { cvsRoutes } from "./routes/cvs-routes";
 import { filesRoutes } from "./routes/files-routes";
 import { postsRoutes } from "./routes/posts-routes";
 import { proftosRoutes } from "./routes/proftos-routes";
+import type { FastifyRestServerDeps } from "./deps";
+import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 
-export async function createFastifyRestServer(params: FastifyRestServerParams) {
+export async function createFastifyRestServer(
+  config: FastifyRestServerConfig,
+  deps: FastifyRestServerDeps,
+) {
   const log = createAdapterLogger(
     "Fastify",
     REST_SERVER_PORT,
     INBOUND_DIRECTION,
   );
 
-  const config = params.config;
+  const app = createApp(log, config);
 
-  const app = createApp(log, params);
+  // add hooks
+
+  app.addHook("onRequest", async (req) => {
+    req.clientIp =
+      (req.headers["cf-connecting-ip"] as string) ?? req.ip ?? null;
+
+    req.clientUa = req.headers["user-agent"] ?? null;
+
+    if (req.headers["authorization"]) {
+      try {
+        console.log(
+          "iowwi",
+          req.headers["authorization"].replace("Bearer ", "")[0],
+        );
+        const accessTokenPayload = await deps.tokenProvider.verifyAccessToken(
+          req.headers["authorization"].replace("Bearer ", ""),
+        );
+
+        req.userId = accessTokenPayload.userId;
+      } catch (err) {
+        log.debug(
+          { err, ipAddress: req.clientIp },
+          "Access token verification failed",
+        );
+        throw new UnauthorizedError("Invalid access token");
+      }
+    }
+  });
+
+  app.addHook("onSend", async (req, reply) => {
+    reply.header("x-request-id", req.id);
+  });
 
   // register application routes
 
-  app.register(authRoutes(params) as any, {
+  app.register(authRoutes(config, deps) as any, {
     prefix: "/api/v1/auth",
   });
 
-  app.register(bootcampsRoutes(params) as any, {
+  app.register(bootcampsRoutes(config, deps) as any, {
     prefix: "/api/v1/bootcamps",
   });
 
-  app.register(certificationsRoutes(params) as any, {
+  app.register(certificationsRoutes(config, deps) as any, {
     prefix: "/api/v1/certifications",
   });
 
-  app.register(communitiesRoutes(params) as any, {
+  app.register(communitiesRoutes(config, deps) as any, {
     prefix: "/api/v1/communities",
   });
 
-  app.register(cvsRoutes(params) as any, {
+  app.register(cvsRoutes(config, deps) as any, {
     prefix: "/api/v1/cvs",
   });
 
-  app.register(filesRoutes(params) as any, {
+  app.register(filesRoutes(config, deps) as any, {
     prefix: "/api/v1/files",
   });
 
-  app.register(postsRoutes(params) as any, {
+  app.register(postsRoutes(config, deps) as any, {
     prefix: "/api/v1/posts",
   });
 
-  app.register(proftosRoutes(params) as any, {
+  app.register(proftosRoutes(config, deps) as any, {
     prefix: "/api/v1/proftos",
   });
 

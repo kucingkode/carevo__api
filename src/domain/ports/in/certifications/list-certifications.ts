@@ -1,4 +1,4 @@
-import type { Certification } from "@/domain/models/certification";
+import type { Certification } from "@/domain/entities/certification";
 import z from "zod";
 
 // request

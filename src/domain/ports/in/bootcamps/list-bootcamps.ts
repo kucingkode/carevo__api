@@ -1,4 +1,4 @@
-import type { Bootcamp } from "@/domain/models/bootcamp";
+import type { Bootcamp } from "@/domain/entities/bootcamp";
 import z from "zod";
 
 // request

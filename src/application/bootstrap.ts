@@ -58,7 +58,6 @@ import { PdfmakePdfGenerator } from "@/infrastructure/out/pdf-generator/pdfmake-
 import { DefaultTokenProvider } from "@/infrastructure/out/token-provider/default-token-provider";
 import { DrizzleRefreshTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/refresh-tokens-repository";
 import { DrizzlePasswordTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/password-tokens-repository";
-import { EmailTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
 import { DrizzleEmailTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/email-tokens-repository";
 
 export async function bootstrap() {
@@ -156,8 +155,8 @@ export async function bootstrap() {
   const fileStorage = new LocalFileStorage({});
 
   const hasher = new ArgonHasher({
-    secret: appConfig.HASH_SECRET
-      ? Buffer.from(appConfig.HASH_SECRET, "utf-8")
+    secret: appConfig.HASH_PEPPER
+      ? Buffer.from(appConfig.HASH_PEPPER, "utf-8")
       : Buffer.alloc(0),
     salt: appConfig.HASH_SALT
       ? Buffer.from(appConfig.HASH_SALT, "utf-8")
@@ -176,17 +175,19 @@ export async function bootstrap() {
 
   const pdfGenerator = new PdfmakePdfGenerator({});
 
-  const tokenProvider = new DefaultTokenProvider({
-    config: {
+  const tokenProvider = new DefaultTokenProvider(
+    {
       accessTokenTtl: appConfig.ACCESS_TOKEN_TTL,
       refreshTokenTtl: appConfig.REFRESH_TOKEN_TTL,
+      refreshTokenTtlExtended: appConfig.REFRESH_TOKEN_TTL_EXTENDED,
     },
-
-    db,
-    hasher,
-    jwtSigner,
-    refreshTokensRepository,
-  });
+    {
+      db,
+      hasher,
+      jwtSigner,
+      refreshTokensRepository,
+    },
+  );
 
   // ===============================
   // Application
@@ -197,12 +198,14 @@ export async function bootstrap() {
   const changeUserPasswordService = new ChangeUserPasswordService({
     db,
     usersRepository,
+    hasher,
   });
 
   const loginUserService = new LoginUserService({
     db,
     usersRepository,
     tokenProvider,
+    hasher,
   });
 
   const logoutUserService = new LogoutUserService({
@@ -223,29 +226,38 @@ export async function bootstrap() {
   const resetUserPasswordService = new ResetUserPasswordService({
     db,
     usersRepository,
+    hasher,
+    passwordTokensRepository,
     tokenProvider,
-    passwordTokensRepository,
   });
 
-  const sendPasswordResetEmailService = new SendPasswordResetEmailService({
-    db,
-    emailSender,
-    usersRepository,
-    passwordTokensRepository,
-  });
-
-  const sendVerificationEmailService = new SendVerificationEmailService({
-    config: {
+  const sendPasswordResetEmailService = new SendPasswordResetEmailService(
+    {
       fromEmail: appConfig.SMTP_AUTH_EMAIL,
       redirectBaseUrl: appConfig.REDIRECT_BASE_URL,
     },
+    {
+      db,
+      emailSender,
+      usersRepository,
+      passwordTokensRepository,
+      hasher,
+    },
+  );
 
-    db,
-    emailSender,
-    usersRepository,
-    emailTokensRepository,
-    hasher,
-  });
+  const sendVerificationEmailService = new SendVerificationEmailService(
+    {
+      fromEmail: appConfig.SMTP_AUTH_EMAIL,
+      redirectBaseUrl: appConfig.REDIRECT_BASE_URL,
+    },
+    {
+      db,
+      emailSender,
+      usersRepository,
+      emailTokensRepository,
+      hasher,
+    },
+  );
 
   const verifyUserEmailService = new VerifyUserEmailService({
     db,
@@ -327,74 +339,88 @@ export async function bootstrap() {
   // ===============================
   const pingDatabase = () => db.ping();
 
-  const app = createFastifyRestServer({
-    config: {
+  const app = createFastifyRestServer(
+    {
       host: appConfig.HOST,
       port: appConfig.PORT,
       allowedOrigins: appConfig.ALLOWED_ORIGINS.split(","),
+
+      // rate limit
       rateLimitMax: appConfig.RATE_LIMIT_MAX,
       rateLimitWindowMs: appConfig.RATE_LIMIT_WINDOW_MS,
+
+      // under pressure
       maxElu: appConfig.MAX_ELU,
       maxEventLoopDelay: appConfig.MAX_EVENT_LOOP_DELAY,
       maxHeapBytes: appConfig.MAX_HEAP_USED_BYTES,
       maxRssBytes: appConfig.MAX_RSS_BYTES,
+
+      // cookie
+      cookieOptions: {
+        secure: appConfig.COOKIE_SECURE,
+        domain: appConfig.COOKIE_DOMAIN,
+        sameSite: appConfig.COOKIE_SAME_SITE,
+      },
+      signedCookieSecret: appConfig.SIGNED_COOKIE_SECRET,
+      pingDatabase,
     },
+    {
+      tokenProvider,
 
-    pingDatabase,
+      // auth
+      changeUserPasswordService,
+      loginUserService,
+      logoutUserService,
+      refreshUserTokenService,
+      registerUserService,
+      resetUserPasswordService,
+      sendPasswordResetEmailService,
+      sendVerificationEmailService,
+      verifyUserEmailService,
 
-    // auth
-    changeUserPasswordService,
-    loginUserService,
-    logoutUserService,
-    refreshUserTokenService,
-    registerUserService,
-    resetUserPasswordService,
-    sendPasswordResetEmailService,
-    sendVerificationEmailService,
-    verifyUserEmailService,
+      // bootcamps
+      getBootcampsFeedService,
+      listBootcampsService,
 
-    // bootcamps
-    getBootcampsFeedService,
-    listBootcampsService,
+      // certifications
+      getCertificationsFeedService,
+      listCertificationsService,
 
-    // certifications
-    getCertificationsFeedService,
-    listCertificationsService,
+      // comments
+      createCommentService,
+      deleteCommentService,
+      listCommentsService,
 
-    // comments
-    createCommentService,
-    deleteCommentService,
-    listCommentsService,
+      // communities
+      getCommunitiesFeedService,
+      joinCommunityService,
+      leaveCommunityService,
+      listCommunitiesService,
 
-    // communities
-    getCommunitiesFeedService,
-    joinCommunityService,
-    leaveCommunityService,
-    listCommunitiesService,
+      // cvs
+      aiGenerateCvService,
+      downloadCvService,
+      getCvService,
+      saveCvService,
+      updateCvService,
 
-    // cvs
-    aiGenerateCvService,
-    downloadCvService,
-    getCvService,
-    saveCvService,
-    updateCvService,
+      // files
+      getFileService,
+      uploadFileService,
 
-    // files
-    getFileService,
-    uploadFileService,
+      // posts
+      createPostService,
+      deletePostLikeService,
+      deletePostService,
+      getPostsFeedService,
+      likePostService,
 
-    // posts
-    createPostService,
-    deletePostLikeService,
-    deletePostService,
-    getPostsFeedService,
-    likePostService,
-
-    // proftos
-    getProftoService,
-    listProftosService,
-    updateProftoService,
-  });
+      // proftos
+      getProftoService,
+      listProftosService,
+      updateProftoService,
+    },
+  );
 
   return app;
 }

@@ -5,23 +5,23 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import underPressure from "@fastify/under-pressure";
 import throttle from "@fastify/throttle";
+import cookie from "@fastify/cookie";
 import { v7 as uuidV7 } from "uuid";
 
-import type { FastifyRestServerParams } from "./params";
+import type { FastifyRestServerConfig } from "./config";
 
-export function createApp(log: Logger, params: FastifyRestServerParams) {
-  const { config } = params;
-
+export function createApp(log: Logger, config: FastifyRestServerConfig) {
   const app = Fastify({
     loggerInstance: log,
     genReqId: () => uuidV7(),
+    trustProxy: true,
   });
 
   app.register(cors, {
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
 
-      if (params.config.allowedOrigins.includes(origin)) {
+      if (config.allowedOrigins.includes(origin)) {
         cb(null, true);
       } else {
         cb(new Error("Not allowed by CORS"), false);
@@ -42,7 +42,7 @@ export function createApp(log: Logger, params: FastifyRestServerParams) {
     timeWindow: config.rateLimitWindowMs,
     cache: 10000,
     keyGenerator: (req) => req.ip,
-    errorResponseBuilder: (req, context) => ({
+    errorResponseBuilder: (_req, context) => ({
       statusCode: 429,
       error: "RATE_LIMITED",
       message: `Too many attempts, try again in ${context.after}`,
@@ -58,7 +58,7 @@ export function createApp(log: Logger, params: FastifyRestServerParams) {
     exposeStatusRoute: "/health",
     healthCheck: async () => {
       try {
-        await params.pingDatabase();
+        await config.pingDatabase();
       } catch (err) {
         log.error({ err }, "Health check failed");
         return false;
@@ -72,6 +72,10 @@ export function createApp(log: Logger, params: FastifyRestServerParams) {
 
   app.register(throttle, {
     bytesPerSecond: 1024 * 512, // 512KB/s default for all routes
+  });
+
+  app.register(cookie, {
+    secret: config.signedCookieSecret,
   });
 
   return app;

@@ -6,7 +6,7 @@ const appConfigSchema = z.object({
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),
 
-  HASH_SECRET: z.string().optional(),
+  HASH_PEPPER: z.string(),
   HASH_SALT: z.string().optional(),
   HASH_LENGTH: z.coerce.number().int().default(32),
   HASH_TIME_COST: z.coerce.number().int().default(3),
@@ -51,16 +51,32 @@ const appConfigSchema = z.object({
   SMTP_AUTH_EMAIL: z.string(),
   SMTP_AUTH_PASSWORD: z.string(),
 
-  // REDIRECT_BASE_URL: z.url(),
+  REDIRECT_BASE_URL: z.url(),
 
-  // OPENAI_API_KEY: z.string(),
-
-  // REDIS_URL: z.string(),
+  OPENAI_API_KEY: z.string(),
 
   JWT_SECRET: z.string(),
 
-  ACCESS_TOKEN_TTL: z.coerce.number().default(15 * 60_000),
-  REFRESH_TOKEN_TTL: z.coerce.number().default(30 * 24 * 60 * 60_000),
+  ACCESS_TOKEN_TTL: z.coerce
+    .number()
+    .int()
+    .default(15 * 60_000),
+  REFRESH_TOKEN_TTL: z.coerce
+    .number()
+    .int()
+    .default(7 * 24 * 60 * 60_000),
+  REFRESH_TOKEN_TTL_EXTENDED: z.coerce
+    .number()
+    .int()
+    .default(30 * 24 * 60 * 60_000),
+
+  COOKIE_SAME_SITE: z.enum(["none", "lax", "strict"]).default("lax"),
+  COOKIE_DOMAIN: z.string().optional(),
+  COOKIE_SECURE: z
+    .enum(["true", "false"])
+    .transform((v) => v === "true")
+    .default(true),
+  SIGNED_COOKIE_SECRET: z.string(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

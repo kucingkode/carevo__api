@@ -6,7 +6,7 @@ import { v7 as uuidV7 } from "uuid";
 // Schema & Types
 // ===============================
 
-export const userDataSchema = z.object({
+export const userPropsSchema = z.object({
   id: z.uuidv7(),
   username: z.string().regex(/^[a-zA-Z0-9_-]{3,30}$/),
   email: z.email().max(255),
@@ -17,13 +17,13 @@ export const userDataSchema = z.object({
   updatedAt: z.date(),
 });
 
-export type UserData = z.infer<typeof userDataSchema>;
+export type UserProps = z.infer<typeof userPropsSchema>;
 
 export type CreateUserParams = {
   username: string;
   email: string;
-  passwordHash?: string;
-  googleId?: string;
+  passwordHash: string | null;
+  googleId: string | null;
 };
 
 // ===============================
@@ -31,8 +31,8 @@ export type CreateUserParams = {
 // ===============================
 
 class UserValidationError extends DomainError {
-  constructor(message?: string) {
-    super(message || "Invalid user", "VALIDATION_ERROR");
+  constructor(message: string) {
+    super(message, "VALIDATION_ERROR");
   }
 }
 
@@ -41,23 +41,23 @@ class UserValidationError extends DomainError {
 // ===============================
 
 export class User {
-  private readonly _id: string;
+  public readonly id: string;
   private _username: string;
   private _email: string;
   private _isEmailVerified: boolean;
   private _passwordHash: string | null;
   private _googleId: string | null;
-  private readonly _createdAt: Date;
+  public readonly createdAt: Date;
   private _updatedAt: Date;
 
-  private constructor(data: UserData) {
-    this._id = data.id;
+  private constructor(data: UserProps) {
+    this.id = data.id;
     this._username = data.username;
     this._email = data.email;
     this._isEmailVerified = data.isEmailVerified;
     this._passwordHash = data.passwordHash;
     this._googleId = data.googleId;
-    this._createdAt = data.createdAt;
+    this.createdAt = data.createdAt;
     this._updatedAt = data.updatedAt;
   }
 
@@ -65,7 +65,7 @@ export class User {
   // Factory
   // ===============================
   static create(params: CreateUserParams): User {
-    const result = userDataSchema.safeParse({
+    const result = userPropsSchema.parse({
       ...params,
       id: uuidV7(),
       isEmailVerified: false,
@@ -73,41 +73,30 @@ export class User {
       updatedAt: new Date(),
     });
 
-    if (!result.success) {
-      throw new UserValidationError();
-    }
-
     if (!params.passwordHash && !params.googleId) {
       throw new UserValidationError(
         "User must have either a password or a Google account",
       );
     }
 
-    return new User(result.data);
+    return new User(result);
   }
 
-  static rehydrate(data: UserData) {
+  static rehydrate(data: UserProps) {
     return new User(data);
   }
 
   // ===============================
   // Domain
   // ===============================
-  verifyEmail(): void {
-    if (this._isEmailVerified) {
-      throw new DomainError(
-        "Email is already verified",
-        "EMAIL_ALREADY_VERIFIED",
-      );
-    }
 
+  verifyEmail(): void {
     this._isEmailVerified = true;
     this._updatedAt = new Date();
   }
 
   changePasswordHash(passwordHash: string): void {
-    if (!passwordHash)
-      throw new DomainError("Password can't be empty", "VALIDATION_ERROR");
+    if (!passwordHash) throw new UserValidationError("Password can't be empty");
 
     this._passwordHash = passwordHash;
     this._updatedAt = new Date();
@@ -116,9 +105,6 @@ export class User {
   // ===============================
   // Getter
   // ===============================
-  get id() {
-    return this._id;
-  }
 
   get email() {
     return this._email;
@@ -132,18 +118,22 @@ export class User {
     return this._isEmailVerified;
   }
 
+  get passwordHash() {
+    return this._passwordHash;
+  }
+
   // ===============================
   // Persistence
   // ===============================
-  toPersistence(): UserData {
+  toPersistence(): UserProps {
     return {
-      id: this._id,
+      id: this.id,
       username: this._username,
       email: this._email,
       isEmailVerified: this._isEmailVerified,
       passwordHash: this._passwordHash,
       googleId: this._googleId,
-      createdAt: this._createdAt,
+      createdAt: this.createdAt,
       updatedAt: this._updatedAt,
     };
   }

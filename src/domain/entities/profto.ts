@@ -40,7 +40,7 @@ export const proftoLinkSchema = z.object({
 
 export type ProftoLink = z.infer<typeof proftoLinkSchema>;
 
-export const proftoDataSchema = z.object({
+export const proftoPropsSchema = z.object({
   userId: z.uuidv7(),
   avatarFileId: z.uuidv7().nullable(),
   name: z.string().max(255).nullable(),
@@ -55,7 +55,7 @@ export const proftoDataSchema = z.object({
   links: z.array(proftoLinkSchema),
 });
 
-export type ProftoData = z.infer<typeof proftoDataSchema>;
+export type ProftoProps = z.infer<typeof proftoPropsSchema>;
 
 export type ProftoSummary = {
   userId: string;

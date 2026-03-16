@@ -33,28 +33,10 @@ import type { LikePostUseCase } from "@/domain/ports/in/posts/like-post";
 import type { GetProftoUseCase } from "@/domain/ports/in/proftos/get-profto";
 import type { ListProftosUseCase } from "@/domain/ports/in/proftos/list-proftos";
 import type { UpdateProftoUseCase } from "@/domain/ports/in/proftos/update-profto";
+import type { TokenProvider } from "@/domain/ports/out/token-provider";
 
-export type FastifyRestServerParams = {
-  config: {
-    host: string;
-    port: number;
-
-    // cors
-    allowedOrigins: string[];
-
-    // rate limit
-    rateLimitMax: number;
-    rateLimitWindowMs: number;
-
-    // under presssure
-    maxEventLoopDelay: number;
-    maxHeapBytes: number;
-    maxRssBytes: number;
-    maxElu: number;
-  };
-
-  // health check
-  pingDatabase: () => Promise<void>;
+export type FastifyRestServerDeps = {
+  tokenProvider: TokenProvider;
 
   // auth
   changeUserPasswordService: ChangeUserPasswordUseCase;

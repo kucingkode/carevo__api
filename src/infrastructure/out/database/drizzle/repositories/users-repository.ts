@@ -1,4 +1,4 @@
-import { User } from "@/domain/models/user";
+import { User } from "@/domain/entities/user";
 import type { DrizzleTxContext } from "../database";
 import { OUTBOUND_DIRECTION, USERS_REPOSITORY_PORT } from "@/constants";
 import type {
@@ -20,6 +20,21 @@ export class DrizzleUsersRepository
     super(USERS_REPOSITORY_PORT, OUTBOUND_DIRECTION);
   }
 
+  async getById(ctx: DrizzleTxContext, id: string) {
+    try {
+      const result = await ctx.tx.query.users.findFirst({
+        where: eq(users.id, id),
+      });
+
+      if (!result) return null;
+      return User.rehydrate(result);
+    } catch (err) {
+      throw new UsersRepositoryError("Database query failed", {
+        cause: err,
+      });
+    }
+  }
+
   async getByEmail(ctx: DrizzleTxContext, email: string) {
     try {
       const result = await ctx.tx.query.users.findFirst({
@@ -35,10 +50,22 @@ export class DrizzleUsersRepository
     }
   }
 
-  async insertUser(ctx: DrizzleTxContext, user: User) {
+  async insert(ctx: DrizzleTxContext, user: User) {
     try {
       await ctx.tx.insert(users).values(user.toPersistence());
-      this.log.debug("User inserted");
+      this.log.debug({ id: user.id }, "User inserted");
+    } catch (err) {
+      throw new UsersRepositoryError("Database query failed", {
+        cause: err,
+      });
+    }
+  }
+
+  async update(ctx: DrizzleTxContext, user: User) {
+    try {
+      const { id, ...values } = user.toPersistence();
+      await ctx.tx.update(users).set(values).where(eq(users.id, id));
+      this.log.debug({ id }, "User updated");
     } catch (err) {
       throw new UsersRepositoryError("Database query failed", {
         cause: err,
