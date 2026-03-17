@@ -1,4 +1,5 @@
 import { LOGIN_USER_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
+import { EmailNotVerifiedError } from "@/domain/errors/domain/email-not-verified-error";
 import { IncorrectCredentialsError } from "@/domain/errors/domain/incorrent-credentials-error";
 import type {
   LoginUserInput,
@@ -53,6 +54,12 @@ export class LoginUserService<TxCtx extends TxContext<any>>
     if (!user || !user.passwordHash) {
       this.log.warn(logCtx, "Failed login attempt: incorrect credentials");
       throw new IncorrectCredentialsError();
+    }
+
+    // check email verification
+    if (!user.isEmailVerified) {
+      this.log.warn(logCtx, "Failed login attempt: email is not verified");
+      throw new EmailNotVerifiedError();
     }
 
     // verify password

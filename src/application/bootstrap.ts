@@ -59,6 +59,7 @@ import { DefaultTokenProvider } from "@/infrastructure/out/token-provider/defaul
 import { DrizzleRefreshTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/refresh-tokens-repository";
 import { DrizzlePasswordTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/password-tokens-repository";
 import { DrizzleEmailTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/email-tokens-repository";
+import { GoogleOauthService } from "./services/auth/google-oauth";
 
 export async function bootstrap() {
   // ===============================
@@ -234,7 +235,7 @@ export async function bootstrap() {
   const sendPasswordResetEmailService = new SendPasswordResetEmailService(
     {
       fromEmail: appConfig.SMTP_AUTH_EMAIL,
-      redirectBaseUrl: appConfig.REDIRECT_BASE_URL,
+      redirectBaseUrl: appConfig.UI_BASE_URL,
     },
     {
       db,
@@ -248,7 +249,7 @@ export async function bootstrap() {
   const sendVerificationEmailService = new SendVerificationEmailService(
     {
       fromEmail: appConfig.SMTP_AUTH_EMAIL,
-      redirectBaseUrl: appConfig.REDIRECT_BASE_URL,
+      redirectBaseUrl: appConfig.UI_BASE_URL,
     },
     {
       db,
@@ -265,6 +266,18 @@ export async function bootstrap() {
     emailTokensRepository,
     hasher,
   });
+
+  const googleOauthService = new GoogleOauthService(
+    {
+      fromEmail: appConfig.SMTP_AUTH_EMAIL,
+    },
+    {
+      db,
+      usersRepository,
+      emailSender,
+      tokenProvider,
+    },
+  );
 
   // bootcamps
 
@@ -310,7 +323,10 @@ export async function bootstrap() {
 
   // files
 
-  const getFileService = new GetFileService({});
+  const getFileService = new GetFileService({
+    fileStorage,
+    filesRepository,
+  });
 
   const uploadFileService = new UploadFileService({});
 
@@ -362,7 +378,17 @@ export async function bootstrap() {
         sameSite: appConfig.COOKIE_SAME_SITE,
       },
       signedCookieSecret: appConfig.SIGNED_COOKIE_SECRET,
+
+      // health check
       pingDatabase,
+
+      // google oauth
+      googleOauthClientId: appConfig.GOOGLE_OAUTH_CLIENT_ID,
+      googleOauthSecret: appConfig.GOOGLE_OAUTH_SECRET,
+
+      // base urls
+      apiBaseUrl: appConfig.API_BASE_URL,
+      uiBaseUrl: appConfig.UI_BASE_URL,
     },
     {
       tokenProvider,
@@ -377,6 +403,7 @@ export async function bootstrap() {
       sendPasswordResetEmailService,
       sendVerificationEmailService,
       verifyUserEmailService,
+      googleOauthService,
 
       // bootcamps
       getBootcampsFeedService,

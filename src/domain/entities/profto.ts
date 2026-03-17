@@ -27,7 +27,7 @@ export const proftoProjectSchema = z.object({
   name: z.string().max(255),
   professionRole: professionRoleSchema,
   imageFileId: z.uuidv7(),
-  date: z.coerce.date(),
+  date: z.iso.date(),
   description: z.string().max(2000),
 });
 

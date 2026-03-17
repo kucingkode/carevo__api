@@ -51,7 +51,8 @@ const appConfigSchema = z.object({
   SMTP_AUTH_EMAIL: z.string(),
   SMTP_AUTH_PASSWORD: z.string(),
 
-  REDIRECT_BASE_URL: z.url(),
+  UI_BASE_URL: z.url(),
+  API_BASE_URL: z.url(),
 
   OPENAI_API_KEY: z.string(),
 
@@ -77,6 +78,9 @@ const appConfigSchema = z.object({
     .transform((v) => v === "true")
     .default(true),
   SIGNED_COOKIE_SECRET: z.string(),
+
+  GOOGLE_OAUTH_CLIENT_ID: z.string(),
+  GOOGLE_OAUTH_SECRET: z.string(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

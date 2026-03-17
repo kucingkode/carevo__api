@@ -50,6 +50,24 @@ export class DrizzleUsersRepository
     }
   }
 
+  async getByGoogleId(
+    ctx: DrizzleTxContext,
+    googleId: string,
+  ): Promise<User | null> {
+    try {
+      const result = await ctx.tx.query.users.findFirst({
+        where: eq(users.googleId, googleId),
+      });
+
+      if (!result) return null;
+      return User.rehydrate(result);
+    } catch (err) {
+      throw new UsersRepositoryError("Database query failed", {
+        cause: err,
+      });
+    }
+  }
+
   async insert(ctx: DrizzleTxContext, user: User) {
     try {
       await ctx.tx.insert(users).values(user.toPersistence());
@@ -96,5 +114,29 @@ export class DrizzleUsersRepository
     }
   }
 
-  //
+  async checkEmailAvailability(
+    ctx: DrizzleTxContext,
+    email: string,
+  ): Promise<boolean> {
+    try {
+      const user = await ctx.tx.query.users.findFirst({
+        where: or(eq(users.email, email)),
+        columns: {
+          id: true,
+        },
+      });
+
+      return !user;
+    } catch (err) {
+      throw new UsersRepositoryError("Database query failed", {
+        cause: err,
+      });
+    }
+  }
+
+  list(ctx: DrizzleTxContext) {}
+
+  getProftoByUserId(ctx: DrizzleTxContext) {}
+
+  updateProfto(ctx: DrizzleTxContext) {}
 }

@@ -82,3 +82,6 @@ Content-Type: application/json
   "token": "",
   "newPassword": ""
 }
+
+### Google oauth
+GET {{baseUrl}}/api/v1/auth/oauth/google

@@ -62,7 +62,7 @@ export class SendVerificationEmailService<TxCtx extends TxContext<any>>
       return this.usersRepository.getByEmail(ctx, input.email);
     }, READ_ONLY_DB_TX);
 
-    // silent fail for verified user
+    // silent fail if user not found
     if (!user) {
       this.log.warn(
         logCtx,
@@ -71,6 +71,7 @@ export class SendVerificationEmailService<TxCtx extends TxContext<any>>
       return;
     }
 
+    // silent fail for verified user
     if (user.isEmailVerified) {
       this.log.warn(
         logCtx,

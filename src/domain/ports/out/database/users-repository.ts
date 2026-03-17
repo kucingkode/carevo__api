@@ -11,6 +11,8 @@ export type UsersRepository<TxCtx extends TxContext<any>> = {
 
   getByEmail(ctx: TxCtx, email: string): Promise<User | null>;
 
+  getByGoogleId(ctx: TxCtx, googleId: string): Promise<User | null>;
+
   insert(ctx: TxCtx, user: User): Promise<void>;
 
   update(ctx: TxCtx, user: User): Promise<void>;

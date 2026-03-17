@@ -9,4 +9,10 @@ export class DrizzleCommentsRepository
   constructor() {
     super(COMMENTS_REPOSITORY_PORT, OUTBOUND_DIRECTION);
   }
+
+  list() {}
+
+  insert() {}
+
+  delete() {}
 }

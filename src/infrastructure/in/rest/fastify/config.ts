@@ -23,6 +23,14 @@ export type FastifyRestServerConfig = {
   };
   signedCookieSecret: string;
 
-  // ping
+  // base urls
+  uiBaseUrl: string;
+  apiBaseUrl: string;
+
+  // health check
   pingDatabase(): Promise<void>;
+
+  // oauth
+  googleOauthClientId: string;
+  googleOauthSecret: string;
 };

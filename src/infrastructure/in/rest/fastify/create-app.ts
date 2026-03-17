@@ -6,6 +6,8 @@ import rateLimit from "@fastify/rate-limit";
 import underPressure from "@fastify/under-pressure";
 import throttle from "@fastify/throttle";
 import cookie from "@fastify/cookie";
+import oauth2 from "@fastify/oauth2";
+import multipart from "@fastify/multipart";
 import { v7 as uuidV7 } from "uuid";
 
 import type { FastifyRestServerConfig } from "./config";
@@ -81,6 +83,24 @@ export function createApp(log: Logger, config: FastifyRestServerConfig) {
 
   app.register(cookie, {
     secret: config.signedCookieSecret,
+  });
+
+  app.register(multipart);
+
+  app.register(oauth2, {
+    name: "GoogleOAuth2",
+    scope: ["profile", "email"],
+    credentials: {
+      client: {
+        id: config.googleOauthClientId,
+        secret: config.googleOauthSecret,
+      },
+    },
+    startRedirectPath: "/api/v1/auth/oauth/google",
+    callbackUri: `${config.apiBaseUrl}/api/v1/auth/oauth/google/callback`,
+    discovery: {
+      issuer: "https://accounts.google.com",
+    },
   });
 
   return app;

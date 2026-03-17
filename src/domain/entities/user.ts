@@ -102,6 +102,16 @@ export class User {
     this._updatedAt = new Date();
   }
 
+  changeEmail(email: string): void {
+    if (!z.email().safeParse(email).success)
+      throw new UserValidationError("Invalid email");
+    this._email = email;
+  }
+
+  changeGoogleId(googleId: string): void {
+    this._googleId = googleId;
+  }
+
   // ===============================
   // Getter
   // ===============================

@@ -42,6 +42,8 @@ export const USERS_REPOSITORY_PORT = "users-repository";
 export const REFRESH_TOKENS_REPOSITORY_PORT = "refresh-tokens-repository";
 export const PASSWORD_TOKENS_REPOSITORY_PORT = "password-tokens-repository";
 export const EMAIL_TOKENS_REPOSITORY_PORT = "email-tokens-repository";
+export const USER_LIKES_REPOSITORY_PORT = "user-likes-repository";
+export const USER_COMMUNITIES_REPOSITORY_PORT = "user-communities-repository";
 
 export const CACHE_PORT = "cache";
 export const EMAIL_SENDER_PORT = "email-sender";

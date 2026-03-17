@@ -1,4 +1,5 @@
 import type { ChangeUserPasswordUseCase } from "@/domain/ports/in/auth/change-user-password";
+import type { GoogleOauthUseCase } from "@/domain/ports/in/auth/google-oauth";
 import type { LoginUserUseCase } from "@/domain/ports/in/auth/login-user";
 import type { LogoutUserUseCase } from "@/domain/ports/in/auth/logout-user";
 import type { RefreshUserTokenUseCase } from "@/domain/ports/in/auth/refresh-user-token";
@@ -48,6 +49,7 @@ export type FastifyRestServerDeps = {
   sendPasswordResetEmailService: SendPasswordResetEmailUseCase;
   sendVerificationEmailService: SendVerificationEmailUseCase;
   verifyUserEmailService: VerifyUserEmailUseCase;
+  googleOauthService: GoogleOauthUseCase;
 
   // bootcamps
   getBootcampsFeedService: GetBootcampsFeedUseCase;

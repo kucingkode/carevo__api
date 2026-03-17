@@ -12,6 +12,7 @@ import { sendPasswordResetEmailInputSchema } from "@/domain/ports/in/auth/send-p
 import { resetUserPasswordInputSchema } from "@/domain/ports/in/auth/reset-user-password";
 import { changeUserPasswordInputSchema } from "@/domain/ports/in/auth/change-user-password";
 import type { FastifyRequest } from "fastify";
+import { googleOauthInputSchema } from "@/domain/ports/in/auth/google-oauth";
 
 export function authRoutes(
   config: FastifyRestServerConfig,
@@ -321,5 +322,41 @@ export function authRoutes(
         return reply.status(200).send();
       },
     );
+
+    // ===============================
+    // googleOauth
+    // ===============================
+
+    app.get("/oauth/google/callback", async (req, reply) => {
+      const { token } =
+        await app.GoogleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
+
+      const userinfo: any = await app.GoogleOAuth2.userinfo(token);
+
+      console.log(userinfo);
+
+      const googleOauthInput = googleOauthInputSchema.parse({
+        email: userinfo["email"],
+        emailVerified: userinfo["email_verified"],
+        name: userinfo["name"],
+        googleId: userinfo["sub"],
+        ipAddress: req.clientIp,
+        userAgent: req.clientUa,
+      });
+      const googleOauthOutput =
+        await deps.googleOauthService.googleOauth(googleOauthInput);
+
+      reply.setCookie("refresh_token", googleOauthOutput.refreshToken, {
+        ...config.cookieOptions,
+        httpOnly: true,
+        path: "/auth",
+        expires: googleOauthOutput.refreshTokenExpiresAt,
+        signed: true,
+      });
+
+      return reply.redirect(
+        `${config.uiBaseUrl}/auth/login#${googleOauthOutput.accessToken}?tokenType=access_token`,
+      );
+    });
   };
 }
