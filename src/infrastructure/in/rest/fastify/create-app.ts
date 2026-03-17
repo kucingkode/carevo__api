@@ -27,7 +27,12 @@ export function createApp(log: Logger, config: FastifyRestServerConfig) {
         cb(new Error("Not allowed by CORS"), false);
       }
     },
-    allowedHeaders: ["Content-Type", "traceparent", "x-request-id"],
+    allowedHeaders: [
+      "Content-Type",
+      "traceparent",
+      "x-request-id",
+      "authorization",
+    ],
     credentials: true,
   });
 
