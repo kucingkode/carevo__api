@@ -183,7 +183,7 @@ export class GoogleOauthService<TxCtx extends TxContext<any>>
 
   private nameToUsername(name: string) {
     const random = this.generateSecureRandomAlphanumeric(10);
-    return name.toLowerCase().replaceAll(" ", "-").slice(0, 20) + random;
+    return `${name.toLowerCase().replaceAll(" ", "-").slice(0, 20)}-${random}`;
   }
 
   private generateSecureRandomAlphanumeric(length: number) {

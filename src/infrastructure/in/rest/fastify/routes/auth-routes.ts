@@ -333,8 +333,6 @@ export function authRoutes(
 
       const userinfo: any = await app.GoogleOAuth2.userinfo(token);
 
-      console.log(userinfo);
-
       const googleOauthInput = googleOauthInputSchema.parse({
         email: userinfo["email"],
         emailVerified: userinfo["email_verified"],

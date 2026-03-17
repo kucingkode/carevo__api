@@ -22,4 +22,6 @@ export type UsersRepository<TxCtx extends TxContext<any>> = {
     email: string,
     username: string,
   ): Promise<EmailUsernameAvailability>;
+
+  checkEmailAvailability(ctx: TxCtx, email: string): Promise<boolean>;
 };
