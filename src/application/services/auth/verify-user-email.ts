@@ -1,6 +1,6 @@
 import { READ_ONLY_DB_TX, VERIFY_USER_EMAIL_USE_CASE } from "@/constants";
-import { InternalError } from "@/domain/errors/common";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
+import { InfrastructureError } from "@/domain/errors/infrastructure-errors";
 import type {
   VerifyUserEmailInput,
   VerifyUserEmailUseCase,
@@ -77,7 +77,7 @@ export class VerifyUserEmailService<TxCtx extends TxContext<any>>
         "Data integrity violation: valid verification token exists but user not found",
       );
 
-      throw new InternalError();
+      throw new InfrastructureError("Data integrity violation");
     }
 
     if (user.isEmailVerified) {
@@ -86,7 +86,7 @@ export class VerifyUserEmailService<TxCtx extends TxContext<any>>
         "Data integrity violation: valid verification token exists for verified user",
       );
 
-      throw new InternalError();
+      throw new InfrastructureError("Data integrity violation");
     }
 
     // update user & use token

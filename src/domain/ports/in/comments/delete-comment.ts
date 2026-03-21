@@ -1,12 +1,13 @@
 import z from "zod";
 
 // request
-export const deleteCommentInput = z.object({
+export const deleteCommentInputSchema = z.object({
   requestUserId: z.string(),
   commentId: z.uuidv7(),
+  postId: z.uuidv7(),
 });
 
-export type DeleteCommentInput = z.infer<typeof deleteCommentInput>;
+export type DeleteCommentInput = z.infer<typeof deleteCommentInputSchema>;
 
 // use case
 export type DeleteCommentUseCase = {

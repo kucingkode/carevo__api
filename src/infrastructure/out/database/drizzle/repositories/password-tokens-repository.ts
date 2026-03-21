@@ -6,59 +6,52 @@ import type { PasswordTokensRepository } from "@/domain/ports/out/database/passw
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import { PasswordToken } from "@/domain/entities/password-token";
-import { PasswordTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { passwordTokens } from "../schema";
+import { PasswordTokensRepositoryError } from "@/domain/errors/infrastructure-errors";
 
 export class DrizzlePasswordTokensRepository
   extends BaseAdapter
   implements PasswordTokensRepository<DrizzleTxContext>
 {
   constructor() {
-    super(PASSWORD_TOKENS_REPOSITORY_PORT, OUTBOUND_DIRECTION);
+    super(
+      PASSWORD_TOKENS_REPOSITORY_PORT,
+      OUTBOUND_DIRECTION,
+      PasswordTokensRepositoryError,
+    );
   }
 
   async getByUserId(
     ctx: DrizzleTxContext,
     userId: string,
-  ): Promise<PasswordToken | null> {
-    try {
-      const result = await ctx.tx.query.passwordTokens.findFirst({
-        where: and(
-          eq(passwordTokens.userId, userId),
-          isNull(passwordTokens.usedAt),
-        ),
-      });
+  ): Promise<PasswordToken | undefined> {
+    const result = await ctx.tx.query.passwordTokens.findFirst({
+      where: and(
+        eq(passwordTokens.userId, userId),
+        isNull(passwordTokens.usedAt),
+      ),
+    });
 
-      if (!result) return null;
+    if (!result) return;
 
-      return PasswordToken.rehydrate(result);
-    } catch (err) {
-      throw new PasswordTokensRepositoryError("Database query failed", {
-        cause: err,
-      });
-    }
+    return PasswordToken.rehydrate(result);
   }
 
   async save(ctx: DrizzleTxContext, token: PasswordToken): Promise<void> {
-    try {
-      await ctx.tx
-        .insert(passwordTokens)
-        .values(token.toPersistence())
-        .onConflictDoUpdate({
-          target: passwordTokens.userId,
-          set: {
-            tokenHash: sql`excluded.token_hash`,
-            expiresAt: sql`excluded.expires_at`,
-            usedAt: sql`excluded.used_at`,
-            createdAt: sql`excluded.created_at`,
-          },
-        });
-      this.log.debug({ userId: token.userId }, "Password token upserted");
-    } catch (err) {
-      throw new PasswordTokensRepositoryError("Database query failed", {
-        cause: err,
+    await ctx.tx
+      .insert(passwordTokens)
+      .values(token.toPersistence())
+      .onConflictDoUpdate({
+        target: passwordTokens.userId,
+        set: {
+          tokenHash: sql`excluded.token_hash`,
+          expiresAt: sql`excluded.expires_at`,
+          usedAt: sql`excluded.used_at`,
+          createdAt: sql`excluded.created_at`,
+        },
       });
-    }
+
+    this.log.debug({ userId: token.userId }, "Password token upserted");
   }
 }

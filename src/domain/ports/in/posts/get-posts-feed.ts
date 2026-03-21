@@ -1,4 +1,4 @@
-import type { PostData } from "@/domain/entities/post";
+import type { Post, PostDisplay } from "@/domain/entities/post";
 import z from "zod";
 
 // request
@@ -12,7 +12,7 @@ export type GetPostsFeedInput = z.infer<typeof getPostsFeedInputSchema>;
 
 // response
 export type GetPostsFeedOutput = {
-  posts: PostData[];
+  posts: PostDisplay[];
 };
 
 // use case

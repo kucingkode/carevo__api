@@ -1,4 +1,5 @@
 import { EMAIL_SENDER_PORT, OUTBOUND_DIRECTION } from "@/constants";
+import { EmailSenderError } from "@/domain/errors/infrastructure-errors";
 import type {
   EmailSender,
   SendMailParams,
@@ -20,7 +21,7 @@ export class NodemailerEmailSender extends BaseAdapter implements EmailSender {
   private readonly transporter: Transporter;
 
   constructor(config: NodemailerEmailSenderConfig) {
-    super(EMAIL_SENDER_PORT, OUTBOUND_DIRECTION);
+    super(EMAIL_SENDER_PORT, OUTBOUND_DIRECTION, EmailSenderError);
 
     this.transporter = createTransport({
       host: config.host,
@@ -34,12 +35,18 @@ export class NodemailerEmailSender extends BaseAdapter implements EmailSender {
   }
 
   async sendMail(params: SendMailParams) {
-    await this.transporter.sendMail({
-      from: params.from,
-      to: params.to,
-      subject: params.subject,
-      text: params.text,
-      html: params.html,
-    });
+    await this.call(
+      () =>
+        this.transporter.sendMail({
+          from: params.from,
+          to: params.to,
+          subject: params.subject,
+          text: params.text,
+          html: params.html,
+        }),
+      "sendMail: transporter error",
+    );
+
+    this.log.debug({ to: params.to, subject: params.subject }, "Email sent");
   }
 }

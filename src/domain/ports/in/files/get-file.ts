@@ -1,3 +1,4 @@
+import type { Readable } from "node:stream";
 import z from "zod";
 
 // request
@@ -10,7 +11,7 @@ export type GetFileInput = z.infer<typeof getFileInputSchema>;
 
 // response
 export type GetFileOutput = {
-  data: Buffer;
+  stream: Readable;
   mimeType: string;
 };
 

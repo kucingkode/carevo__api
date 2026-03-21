@@ -11,6 +11,7 @@ export type CreatePostInput = z.infer<typeof createPostInputSchema>;
 
 // response
 export type CreatePostOutput = {
+  postId: string;
   createdAt: Date;
 };
 

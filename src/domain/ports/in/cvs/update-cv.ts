@@ -1,10 +1,11 @@
-import { cvContentSchema } from "@/domain/entities/cv";
+import { cvPartialUpdateSchema } from "@/domain/entities/cv";
 import z from "zod";
 
 // request
 export const updateCvInputSchema = z.object({
   requestUserId: z.uuidv7(),
-  partialContent: cvContentSchema.partial(),
+  userId: z.uuidv7(),
+  partialCv: cvPartialUpdateSchema.partial(),
 });
 
 export type UpdateCvInput = z.infer<typeof updateCvInputSchema>;

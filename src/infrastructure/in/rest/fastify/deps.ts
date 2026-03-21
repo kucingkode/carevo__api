@@ -15,14 +15,12 @@ import type { ListCertificationsUseCase } from "@/domain/ports/in/certifications
 import type { CreateCommentUseCase } from "@/domain/ports/in/comments/create-comment";
 import type { DeleteCommentUseCase } from "@/domain/ports/in/comments/delete-comment";
 import type { ListCommentsUseCase } from "@/domain/ports/in/comments/list-comments";
-import type { GetCommunitiesFeedUseCase } from "@/domain/ports/in/communities/get-communities-feed";
 import type { JoinCommunityUseCase } from "@/domain/ports/in/communities/join-community";
 import type { LeaveCommunityUseCase } from "@/domain/ports/in/communities/leave-community";
 import type { ListCommunitiesUseCase } from "@/domain/ports/in/communities/list-communities";
 import type { AiGenerateCvUseCase } from "@/domain/ports/in/cvs/ai-generate-cv";
-import type { DownloadCvUseCase } from "@/domain/ports/in/cvs/download-cv";
+import type { RenderCvUseCase } from "@/domain/ports/in/cvs/render-cv";
 import type { GetCvUseCase } from "@/domain/ports/in/cvs/get-cv";
-import type { SaveCvUseCase } from "@/domain/ports/in/cvs/save-cv";
 import type { UpdateCvUseCase } from "@/domain/ports/in/cvs/update-cv";
 import type { GetFileUseCase } from "@/domain/ports/in/files/get-file";
 import type { UploadFileUseCase } from "@/domain/ports/in/files/upload-file";
@@ -31,10 +29,12 @@ import type { DeletePostUseCase } from "@/domain/ports/in/posts/delete-post";
 import type { DeletePostLikeUseCase } from "@/domain/ports/in/posts/delete-post-like";
 import type { GetPostsFeedUseCase } from "@/domain/ports/in/posts/get-posts-feed";
 import type { LikePostUseCase } from "@/domain/ports/in/posts/like-post";
-import type { GetProftoUseCase } from "@/domain/ports/in/proftos/get-profto";
-import type { ListProftosUseCase } from "@/domain/ports/in/proftos/list-proftos";
-import type { UpdateProftoUseCase } from "@/domain/ports/in/proftos/update-profto";
+import type { GetUserCommunitiesUseCase } from "@/domain/ports/in/users/get-user-communities";
+import type { GetUserProftoUseCase } from "@/domain/ports/in/users/get-user-profto";
+import type { ListUsersUseCase } from "@/domain/ports/in/users/list-users";
+import type { UpdateUserProftoUseCase } from "@/domain/ports/in/users/update-user-profto";
 import type { TokenProvider } from "@/domain/ports/out/token-provider";
+import type { UpdateCvEmbeddingUseCase } from "@/domain/ports/in/cvs/update-cv-embedding";
 
 export type FastifyRestServerDeps = {
   tokenProvider: TokenProvider;
@@ -65,17 +65,16 @@ export type FastifyRestServerDeps = {
   listCommentsService: ListCommentsUseCase;
 
   // communities
-  getCommunitiesFeedService: GetCommunitiesFeedUseCase;
   joinCommunityService: JoinCommunityUseCase;
   leaveCommunityService: LeaveCommunityUseCase;
   listCommunitiesService: ListCommunitiesUseCase;
 
   // cvs
   aiGenerateCvService: AiGenerateCvUseCase;
-  downloadCvService: DownloadCvUseCase;
+  renderCvService: RenderCvUseCase;
   getCvService: GetCvUseCase;
-  saveCvService: SaveCvUseCase;
   updateCvService: UpdateCvUseCase;
+  updateCvEmbeddingService: UpdateCvEmbeddingUseCase;
 
   // files
   getFileService: GetFileUseCase;
@@ -88,8 +87,9 @@ export type FastifyRestServerDeps = {
   getPostsFeedService: GetPostsFeedUseCase;
   likePostService: LikePostUseCase;
 
-  // proftos
-  getProftoService: GetProftoUseCase;
-  listProftosService: ListProftosUseCase;
-  updateProftoService: UpdateProftoUseCase;
+  // users
+  getUserCommunitiesService: GetUserCommunitiesUseCase;
+  getUserProftoService: GetUserProftoUseCase;
+  listUsersService: ListUsersUseCase;
+  updateUserProftoService: UpdateUserProftoUseCase;
 };

@@ -10,5 +10,7 @@ declare module "fastify" {
     clientIp: string | null;
     clientUa: string | null;
     userId: string | null;
+    query: Record<string, string>;
+    params: Record<string, string>;
   }
 }

@@ -7,7 +7,7 @@ import { NodemailerEmailSender } from "@/infrastructure/out/email-sender/nodemai
 import { RegisterUserService } from "./services/auth/register-user";
 import { createFastifyRestServer } from "@/infrastructure/in/rest/fastify/fastify";
 import { randomBytes } from "node:crypto";
-import { SERVICE_NAME, SERVICE_VERSION } from "@/constants";
+import { CACHE_MAX_SIZE, SERVICE_NAME, SERVICE_VERSION } from "@/constants";
 import { ChangeUserPasswordService } from "./services/auth/change-user-password";
 import { LoginUserService } from "./services/auth/login-user";
 import { LogoutUserService } from "./services/auth/logout-user";
@@ -23,14 +23,12 @@ import { ListCertificationsService } from "./services/certifications/list-certif
 import { CreateCommentService } from "./services/comments/create-comment";
 import { DeleteCommentService } from "./services/comments/delete-comment";
 import { ListCommentsService } from "./services/comments/list-comments";
-import { GetCommunitiesFeedService } from "./services/communities/get-communities-feed";
 import { JoinCommunityService } from "./services/communities/join-community";
 import { LeaveCommunityService } from "./services/communities/leave-community";
 import { ListCommunitiesService } from "./services/communities/list-communities";
 import { AiGenerateCvService } from "./services/cvs/ai-generate-cv";
-import { DownloadCvService } from "./services/cvs/download-cv";
+import { RenderCvService } from "./services/cvs/render-cv";
 import { GetCvService } from "./services/cvs/get-cv";
-import { SaveCvService } from "./services/cvs/save-cv";
 import { UpdateCvService } from "./services/cvs/update-cv";
 import { GetFileService } from "./services/files/get-file";
 import { UploadFileService } from "./services/files/upload-file";
@@ -39,9 +37,6 @@ import { DeletePostService } from "./services/posts/delete-post";
 import { DeletePostLikeService } from "./services/posts/delete-post-like";
 import { GetPostsFeedService } from "./services/posts/get-posts-feed";
 import { LikePostService } from "./services/posts/like-post";
-import { GetProftoService } from "./services/proftos/get-profto";
-import { ListProftosService } from "./services/proftos/list-proftos";
-import { UpdateProftoService } from "./services/proftos/update-profto";
 import { MemoryCache } from "@/infrastructure/out/cache/memory-cache";
 import { DrizzleBootcampsRepository } from "@/infrastructure/out/database/drizzle/repositories/bootcamps-repository";
 import { DrizzleCertificationsRepository } from "@/infrastructure/out/database/drizzle/repositories/certifications-repository";
@@ -60,6 +55,13 @@ import { DrizzleRefreshTokensRepository } from "@/infrastructure/out/database/dr
 import { DrizzlePasswordTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/password-tokens-repository";
 import { DrizzleEmailTokensRepository } from "@/infrastructure/out/database/drizzle/repositories/email-tokens-repository";
 import { GoogleOauthService } from "./services/auth/google-oauth";
+import { GetUserCommunitiesService } from "./services/users/get-user-communities";
+import { GetUserProftoService } from "./services/users/get-user-profto";
+import { ListUsersService } from "./services/users/list-users";
+import { UpdateUserProftoService } from "./services/users/update-user-profto";
+import { DrizzleUserCommunitiesRepository } from "@/infrastructure/out/database/drizzle/repositories/user-communities-repository";
+import { DrizzleUserLikesRepository } from "@/infrastructure/out/database/drizzle/repositories/user-likes-repository";
+import { UpdateCvEmbeddingService } from "./services/cvs/update-cv-embedding";
 
 export async function bootstrap() {
   // ===============================
@@ -130,16 +132,21 @@ export async function bootstrap() {
   const communitiesRepository = new DrizzleCommunitiesRepository();
   const cvsRepository = new DrizzleCvsRepository();
   const filesRepository = new DrizzleFilesRepository();
-  const postsRepositort = new DrizzlePostsRepository();
+  const postsRepository = new DrizzlePostsRepository();
   const usersRepository = new DrizzleUsersRepository();
 
   const refreshTokensRepository = new DrizzleRefreshTokensRepository();
   const passwordTokensRepository = new DrizzlePasswordTokensRepository();
   const emailTokensRepository = new DrizzleEmailTokensRepository();
 
+  const userCommunitiesRepository = new DrizzleUserCommunitiesRepository();
+  const userLikesRepository = new DrizzleUserLikesRepository();
+
   // others
 
-  const cache = new MemoryCache({});
+  const cache = new MemoryCache({
+    maxSize: CACHE_MAX_SIZE,
+  });
 
   const emailSender = new NodemailerEmailSender({
     host: appConfig.SMTP_HOST,
@@ -151,9 +158,13 @@ export async function bootstrap() {
     },
   });
 
-  const embeddingProvider = new OpenaiEmbeddingProvider({});
+  const embeddingProvider = new OpenaiEmbeddingProvider({
+    apiKey: appConfig.OPENAI_API_KEY,
+  });
 
-  const fileStorage = new LocalFileStorage({});
+  const fileStorage = new LocalFileStorage({
+    storageDir: appConfig.STORAGE_DIR,
+  });
 
   const hasher = new ArgonHasher({
     secret: appConfig.HASH_PEPPER
@@ -172,7 +183,9 @@ export async function bootstrap() {
     secret: appConfig.JWT_SECRET,
   });
 
-  const llmProvider = new OpenaiLlmProvider({});
+  const llmProvider = new OpenaiLlmProvider({
+    apiKey: appConfig.OPENAI_API_KEY,
+  });
 
   const pdfGenerator = new PdfmakePdfGenerator({});
 
@@ -281,74 +294,163 @@ export async function bootstrap() {
 
   // bootcamps
 
-  const getBootcampsFeedService = new GetBootcampsFeedService({});
+  const getBootcampsFeedService = new GetBootcampsFeedService({
+    db,
+    bootcampsRepository,
+    cvsRepository,
+  });
 
-  const listBootcampsService = new ListBootcampsService({});
+  const listBootcampsService = new ListBootcampsService({
+    db,
+    bootcampsRepository,
+  });
 
   // certifications
 
-  const getCertificationsFeedService = new GetCertificationsFeedService({});
+  const getCertificationsFeedService = new GetCertificationsFeedService({
+    db,
+    certificationsRepository,
+    cvsRepository,
+  });
 
-  const listCertificationsService = new ListCertificationsService({});
+  const listCertificationsService = new ListCertificationsService({
+    db,
+    certificationsRepository,
+  });
 
   // comments
 
-  const createCommentService = new CreateCommentService({});
+  const createCommentService = new CreateCommentService({
+    db,
+    commentsRepository,
+  });
 
-  const deleteCommentService = new DeleteCommentService({});
+  const deleteCommentService = new DeleteCommentService({
+    db,
+    commentsRepository,
+  });
 
-  const listCommentsService = new ListCommentsService({});
+  const listCommentsService = new ListCommentsService({
+    db,
+    commentsRepository,
+  });
 
   // communities
 
-  const getCommunitiesFeedService = new GetCommunitiesFeedService({});
+  const joinCommunityService = new JoinCommunityService({
+    db,
+    userCommunitiesRepository,
+  });
 
-  const joinCommunityService = new JoinCommunityService({});
+  const leaveCommunityService = new LeaveCommunityService({
+    db,
+    userCommunitiesRepository,
+  });
 
-  const leaveCommunityService = new LeaveCommunityService({});
-
-  const listCommunitiesService = new ListCommunitiesService({});
+  const listCommunitiesService = new ListCommunitiesService({
+    db,
+    communitiesRepository,
+  });
 
   // cvs
 
-  const aiGenerateCvService = new AiGenerateCvService({});
+  const aiGenerateCvService = new AiGenerateCvService({
+    llmProvider,
+  });
 
-  const downloadCvService = new DownloadCvService({});
+  const renderCvService = new RenderCvService({
+    db,
+    cvsRepository,
+    pdfGenerator,
+  });
 
-  const getCvService = new GetCvService({});
+  const getCvService = new GetCvService({
+    db,
+    cvsRepository,
+  });
 
-  const saveCvService = new SaveCvService({});
+  const updateCvService = new UpdateCvService({
+    db,
+    cvsRepository,
+  });
 
-  const updateCvService = new UpdateCvService({});
+  const updateCvEmbeddingService = new UpdateCvEmbeddingService({
+    db,
+    cvsRepository,
+    embeddingProvider,
+  });
 
   // files
 
-  const getFileService = new GetFileService({
-    fileStorage,
-    filesRepository,
-  });
+  const getFileService = new GetFileService(
+    {
+      storageDir: appConfig.STORAGE_DIR,
+    },
+    {
+      db,
+      filesRepository,
+    },
+  );
 
-  const uploadFileService = new UploadFileService({});
+  const uploadFileService = new UploadFileService({
+    db,
+    filesRepository,
+    fileStorage,
+  });
 
   // posts
 
-  const createPostService = new CreatePostService({});
+  const createPostService = new CreatePostService({
+    db,
+    postsRepository,
+  });
 
-  const deletePostLikeService = new DeletePostLikeService({});
+  const deletePostLikeService = new DeletePostLikeService({
+    db,
+    userLikesRepository,
+    cache,
+  });
 
-  const deletePostService = new DeletePostService({});
+  const deletePostService = new DeletePostService({
+    db,
+    postsRepository,
+  });
 
-  const getPostsFeedService = new GetPostsFeedService({});
+  const getPostsFeedService = new GetPostsFeedService({
+    db,
+    postsRepository,
+    userCommunitiesRepository,
+    userLikesRepository,
+    cache,
+  });
 
-  const likePostService = new LikePostService({});
+  const likePostService = new LikePostService({
+    db,
+    userLikesRepository,
+    cache,
+  });
 
-  // proftos
+  // users
 
-  const getProftoService = new GetProftoService({});
+  const getUserCommunitiesService = new GetUserCommunitiesService({
+    db,
+    userCommunitiesRepository,
+  });
 
-  const listProftosService = new ListProftosService({});
+  const getUserProftoService = new GetUserProftoService({
+    db,
+    usersRepository,
+  });
 
-  const updateProftoService = new UpdateProftoService({});
+  const listUsersService = new ListUsersService({
+    db,
+    usersRepository,
+  });
+
+  const updateUserProftoService = new UpdateUserProftoService({
+    db,
+    usersRepository,
+  });
 
   // ===============================
   // Inbound Ports
@@ -419,17 +521,16 @@ export async function bootstrap() {
       listCommentsService,
 
       // communities
-      getCommunitiesFeedService,
       joinCommunityService,
       leaveCommunityService,
       listCommunitiesService,
 
       // cvs
       aiGenerateCvService,
-      downloadCvService,
+      renderCvService,
       getCvService,
-      saveCvService,
       updateCvService,
+      updateCvEmbeddingService,
 
       // files
       getFileService,
@@ -442,10 +543,11 @@ export async function bootstrap() {
       getPostsFeedService,
       likePostService,
 
-      // proftos
-      getProftoService,
-      listProftosService,
-      updateProftoService,
+      // users
+      getUserCommunitiesService,
+      getUserProftoService,
+      listUsersService,
+      updateUserProftoService,
     },
   );
 

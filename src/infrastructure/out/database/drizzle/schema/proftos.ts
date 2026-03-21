@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { files } from "./files";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 export const proftos = pgTable(
   "proftos",
@@ -30,10 +30,10 @@ export const proftos = pgTable(
     cvFileId: uuid().references(() => files.id, {
       onUpdate: "cascade",
     }),
-    certificates: jsonb().notNull(),
-    experiences: jsonb().notNull(),
-    projects: jsonb().notNull(),
-    links: jsonb().notNull(),
+    certificates: jsonb().notNull().default([]),
+    experiences: jsonb().notNull().default([]),
+    projects: jsonb().notNull().default([]),
+    links: jsonb().notNull().default([]),
     updatedAt: timestamp({ withTimezone: true }).notNull(),
   },
   (t) => [
@@ -47,3 +47,10 @@ export const proftos = pgTable(
     check("summary_length", sql`char_length(${t.summary}) <= 2000`),
   ],
 );
+
+export const proftosRelations = relations(proftos, ({ one }) => ({
+  user: one(users, {
+    fields: [proftos.userId],
+    references: [users.id],
+  }),
+}));

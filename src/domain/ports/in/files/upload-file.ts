@@ -1,10 +1,11 @@
+import type { PipelineSource } from "node:stream";
 import z from "zod";
 
 // request
 export const uploadFileInputSchema = z.object({
   requestUserId: z.uuidv7(),
   mimeType: z.string(),
-  data: z.any(),
+  stream: z.custom<readonly PipelineSource<any>[] | PipelineSource<any>>(),
 });
 
 export type UploadFileInput = z.infer<typeof uploadFileInputSchema>;

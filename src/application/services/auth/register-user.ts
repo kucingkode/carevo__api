@@ -11,6 +11,8 @@ import type { Hasher } from "@/domain/ports/out/hasher";
 import type { UsersRepository } from "@/domain/ports/out/database/users-repository";
 import { REGISTER_USER_USE_CASE } from "@/constants";
 import { BaseUseCase } from "@/shared/classes/base-use-case";
+import { Profto } from "@/domain/entities/profto";
+import { Cv } from "@/domain/entities/cv";
 
 export type RegisterUserServiceDeps<TxCtx extends TxContext<any>> = {
   db: Database<TxCtx>;
@@ -70,9 +72,12 @@ export class RegisterUserService<TxCtx extends TxContext<any>>
       googleId: null,
     });
 
+    const profto = Profto.create(user.id);
+    const cv = Cv.create(user.id);
+
     // insert user
     await this.db.beginTx((ctx) => {
-      return this.usersRepository.insert(ctx, user);
+      return this.usersRepository.insert(ctx, user, profto, cv);
     });
 
     this.log.info(logCtx, "User registered");

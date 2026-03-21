@@ -33,7 +33,7 @@ export type TokenProvider = {
     params: IssueTokenPairParams,
     options?: TokenPairOptions,
   ): Promise<TokenPair>;
-  verifyAccessToken(token: string): Promise<AccessTokenPayload>;
+  verifyAccessToken(token: string): Promise<AccessTokenPayload | void>;
   refreshTokenPair(
     params: RefreshTokenPairParams,
     options?: TokenPairOptions,

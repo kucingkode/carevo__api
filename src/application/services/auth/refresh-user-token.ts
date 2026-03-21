@@ -1,5 +1,5 @@
 import { REFRESH_USER_TOKEN_USE_CASE } from "@/constants";
-import { NotFoundError } from "@/domain/errors/common";
+import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
   RefreshUserTokenInput,

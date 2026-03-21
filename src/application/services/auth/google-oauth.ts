@@ -1,4 +1,6 @@
 import { GOOGLE_OAUTH_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
+import { Cv } from "@/domain/entities/cv";
+import { Profto } from "@/domain/entities/profto";
 import { User } from "@/domain/entities/user";
 import { EmailNotVerifiedError } from "@/domain/errors/domain/email-not-verified-error";
 import type {
@@ -6,6 +8,7 @@ import type {
   GoogleOauthUseCase,
   GoogleOauthOutput,
 } from "@/domain/ports/in/auth/google-oauth";
+import type { CvsRepository } from "@/domain/ports/out/database/cvs-repository";
 import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import type { UsersRepository } from "@/domain/ports/out/database/users-repository";
 import type { EmailSender } from "@/domain/ports/out/email-sender";
@@ -146,8 +149,11 @@ export class GoogleOauthService<TxCtx extends TxContext<any>>
         });
         newUser.verifyEmail();
 
-        await this.db.beginTx((ctx) => {
-          return this.usersRepository.insert(ctx, newUser);
+        const newProfto = Profto.create(newUser.id);
+        const newCv = Cv.create(newUser.id);
+
+        await this.db.beginTx(async (ctx) => {
+          return this.usersRepository.insert(ctx, newUser, newProfto, newCv);
         });
       }
 
@@ -182,8 +188,8 @@ export class GoogleOauthService<TxCtx extends TxContext<any>>
   }
 
   private nameToUsername(name: string) {
-    const random = this.generateSecureRandomAlphanumeric(10);
-    return `${name.toLowerCase().replaceAll(" ", "-").slice(0, 20)}-${random}`;
+    const random = this.generateSecureRandomAlphanumeric(6);
+    return `${name.toLowerCase().replaceAll(" ", "-").slice(0, 23)}-${random}`;
   }
 
   private generateSecureRandomAlphanumeric(length: number) {

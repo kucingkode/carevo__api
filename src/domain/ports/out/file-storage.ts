@@ -1,19 +1,15 @@
+import type { PipelineSource } from "node:stream";
+
 export type UploadFileParams = {
   key: string;
-  buffer: Buffer;
-  mimeType: string;
+  source: readonly PipelineSource<any>[] | PipelineSource<any>;
 };
 
-export type FileMetadata = {
-  key: string;
-  url: string;
+export type UploadFileResult = {
   sizeBytes: number;
-  mimeType: string;
-  uploadedAt: Date;
 };
 
 export type FileStorage = {
-  upload(params: UploadFileParams): Promise<FileMetadata>;
+  upload(params: UploadFileParams): Promise<UploadFileResult>;
   delete(key: string): Promise<void>;
-  getUrl(key: string): Promise<string>;
 };

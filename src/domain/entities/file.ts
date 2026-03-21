@@ -3,7 +3,6 @@ export type File = {
   ownerId: string;
   key: string;
   mimeType: string;
-  size: number;
+  sizeBytes: number;
   createdAt: Date;
-  updatedAt: Date;
 };

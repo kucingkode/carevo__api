@@ -9,6 +9,7 @@ export const aiGenerateCvInputSchema = z.object({
     "WORK_EXPERIENCE_DESCRIPTION",
     "ORGANIZATION_DESCRIPTION",
     "COURSE_DESCRIPTION",
+    "EDUCATION_DESCRIPTION",
   ]),
 });
 

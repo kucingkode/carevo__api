@@ -3,8 +3,7 @@ import {
   OUTBOUND_DIRECTION,
   READ_ONLY_DB_TX,
 } from "@/constants";
-import { NotFoundError } from "@/domain/errors/common";
-import { TokenProviderError } from "@/domain/errors/infrastructure/token-provider-error";
+import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 import type { RefreshToken } from "@/domain/entities/refresh-token";
 import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import type { RefreshTokensRepository } from "@/domain/ports/out/database/refresh-tokens-repository";
@@ -12,7 +11,6 @@ import type { Hasher } from "@/domain/ports/out/hasher";
 import type { JwtSigner } from "@/domain/ports/out/jwt-signer";
 import type {
   AccessTokenPayload,
-  IssuedToken,
   IssueTokenPairParams,
   RefreshTokenPairParams,
   TokenPair,
@@ -20,9 +18,10 @@ import type {
   TokenProvider,
 } from "@/domain/ports/out/token-provider";
 import { BaseAdapter } from "@/shared/classes/base-adapter";
-import { stringifyToken } from "@/shared/utils/token-format";
+import { parseToken, stringifyToken } from "@/shared/utils/token-format";
 import { randomBytes } from "node:crypto";
 import { v7 as uuidV7 } from "uuid";
+import { TokenProviderError } from "@/domain/errors/infrastructure-errors";
 
 export type DefaultTokenProviderConfig = {
   accessTokenTtl: number;
@@ -50,7 +49,7 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     private readonly config: DefaultTokenProviderConfig,
     deps: DefaultTokenProviderDeps<TxCtx>,
   ) {
-    super(TOKEN_PROVIDER_PORT, OUTBOUND_DIRECTION);
+    super(TOKEN_PROVIDER_PORT, OUTBOUND_DIRECTION, TokenProviderError);
 
     this.db = deps.db;
     this.refreshTokensRepository = deps.refreshTokensRepository;
@@ -63,62 +62,68 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     options: TokenPairOptions = {},
   ): Promise<TokenPair> {
     // get access token
-    const exp = Date.now() + this.config.accessTokenTtl;
+    const accessTokenExp = Date.now() + this.config.accessTokenTtl;
 
-    let accessToken: IssuedToken;
-    try {
-      const value = await this.jwtSigner.sign({
-        sub: userId,
-        exp,
-      });
+    const accessTokenValue = await this.call(
+      () =>
+        this.jwtSigner.sign({
+          sub: userId,
+          exp: accessTokenExp,
+        }),
+      "issueTokenPair: JWT signing failed",
+    );
 
-      accessToken = {
-        value,
-        expiresAt: new Date(exp),
-      };
-    } catch (err) {
-      throw new TokenProviderError("Access token signing failed", {
-        cause: err,
-      });
-    }
+    const accessToken = {
+      value: accessTokenValue,
+      expiresAt: new Date(accessTokenExp),
+    };
 
     // get refresh token
-    const secret = randomBytes(32).toString("base64url");
-    const ttl = options.rememberMe
+    const refreshTokenSecret = randomBytes(32).toString("base64url");
+    const refreshTokenHash = await this.call(
+      () => this.hasher.hash(refreshTokenSecret),
+      "issueTokenPair: secret hashing failed",
+    );
+
+    const refreshTokenTtl = options.rememberMe
       ? this.config.refreshTokenTtlExtended
       : this.config.refreshTokenTtl;
 
-    const expiresAt = new Date(Date.now() + ttl);
+    const refreshTokenExpiresAt = new Date(Date.now() + refreshTokenTtl);
 
-    let refreshToken: IssuedToken;
-    try {
-      const entity: RefreshToken = {
-        id: uuidV7(),
-        userId,
-        expiresAt,
-        tokenHash: await this.hasher.hash(secret),
-        ipAddress,
-        userAgent,
-        revokedAt: null,
-        createdAt: new Date(),
-      };
+    const refreshTokenEntity: RefreshToken = {
+      id: uuidV7(),
+      userId,
+      expiresAt: refreshTokenExpiresAt,
+      tokenHash: refreshTokenHash,
+      ipAddress,
+      userAgent,
+      revokedAt: null,
+      createdAt: new Date(),
+    };
 
-      const value = await this.db.beginTx(async (ctx) => {
-        await this.refreshTokensRepository.save(ctx, entity);
-        return stringifyToken(entity.id, secret);
-      });
+    await this.call(
+      () =>
+        this.db.beginTx(async (ctx) => {
+          await this.refreshTokensRepository.save(ctx, refreshTokenEntity);
+        }),
+      "issueTokenPair: Refresh token save failed",
+    );
 
-      refreshToken = { value, expiresAt };
-    } catch (err) {
-      throw new TokenProviderError("Refresh token generation failed", {
-        cause: err,
-      });
-    }
+    const refreshTokenValue = stringifyToken(
+      refreshTokenEntity.id,
+      refreshTokenSecret,
+    );
 
-    // sanity check
-    if (!refreshToken) {
-      throw new TokenProviderError("Refresh token missing");
-    }
+    const refreshToken = {
+      value: refreshTokenValue,
+      expiresAt: refreshTokenExpiresAt,
+    };
+
+    this.log.debug(
+      { refreshTokenId: refreshTokenEntity.id },
+      "Token pair issued",
+    );
 
     return {
       accessToken,
@@ -130,89 +135,91 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     { refreshToken, ipAddress, userAgent }: RefreshTokenPairParams,
     options: TokenPairOptions = {},
   ): Promise<TokenPair> {
+    const { id: refreshTokenId } = parseToken(refreshToken);
+
     // get user id
-    let userId: string | null;
+    const userId = await this.call(
+      () =>
+        this.db.beginTx(async (ctx) => {
+          const result = await this.refreshTokensRepository.getById(
+            ctx,
+            refreshTokenId,
+          );
 
-    try {
-      userId = await this.db.beginTx(async (ctx) => {
-        const result = await this.refreshTokensRepository.get(
-          ctx,
-          refreshToken,
-        );
-
-        return result?.userId ?? null;
-      }, READ_ONLY_DB_TX);
-    } catch (err) {
-      throw new TokenProviderError("Refresh token query failed", {
-        cause: err,
-      });
-    }
+          return result?.userId ?? null;
+        }, READ_ONLY_DB_TX),
+      "refreshTokenPair: refresh token retrieval failed",
+    );
 
     if (!userId) {
       throw new NotFoundError("Refresh token not found");
     }
 
-    const exp = Date.now() + this.config.accessTokenTtl;
-
     // get access token
-    let accessToken: IssuedToken;
-    try {
-      const value = await this.jwtSigner.sign({
-        sub: userId,
-        exp,
-      });
+    const accessTokenExp = Date.now() + this.config.accessTokenTtl;
+    const accessTokenValue = await this.call(
+      () =>
+        this.jwtSigner.sign({
+          sub: userId,
+          exp: accessTokenExp,
+        }),
+      "issueTokenPair: JWT signing failed",
+    );
 
-      accessToken = {
-        value,
-        expiresAt: new Date(exp),
-      };
-    } catch (err) {
-      throw new TokenProviderError("Access token signing failed", {
-        cause: err,
-      });
-    }
+    const accessToken = {
+      value: accessTokenValue,
+      expiresAt: new Date(accessTokenExp),
+    };
 
     // get refresh token
-    let newRefreshToken: IssuedToken;
+    const refreshTokenSecret = randomBytes(32).toString("base64url");
+    const refreshTokenHash = await this.call(
+      () => this.hasher.hash(refreshTokenSecret),
+      "issueTokenPair: secret hashing failed",
+    );
 
-    const ttl = options.rememberMe
+    const refreshTokenTtl = options.rememberMe
       ? this.config.refreshTokenTtlExtended
       : this.config.refreshTokenTtl;
-    const secret = randomBytes(32).toString("base64url");
-    const expiresAt = new Date(Date.now() + ttl);
+    const refreshTokenExpiresAt = new Date(Date.now() + refreshTokenTtl);
 
-    try {
-      const value = await this.db.beginTx(async (ctx) => {
-        const model: RefreshToken = {
-          id: uuidV7(),
-          userId,
-          expiresAt,
-          tokenHash: await this.hasher.hash(secret),
-          ipAddress,
-          userAgent,
-          revokedAt: null,
-          createdAt: new Date(),
-        };
+    const refreshTokenEntity: RefreshToken = {
+      id: uuidV7(),
+      userId,
+      expiresAt: refreshTokenExpiresAt,
+      tokenHash: refreshTokenHash,
+      ipAddress,
+      userAgent,
+      revokedAt: null,
+      createdAt: new Date(),
+    };
 
-        await this.refreshTokensRepository.save(ctx, model);
-        await this.refreshTokensRepository.revokeByToken(ctx, refreshToken);
-        return stringifyToken(model.id, secret);
-      });
+    await this.call(
+      () =>
+        this.db.beginTx(async (ctx) => {
+          await this.refreshTokensRepository.revokeById(ctx, refreshTokenId);
+          await this.refreshTokensRepository.save(ctx, refreshTokenEntity);
+        }),
+      "refreshTokenPair: Repository save and revocation failed",
+    );
 
-      newRefreshToken = {
-        value,
-        expiresAt,
-      };
-    } catch (err) {
-      throw new TokenProviderError("Refresh token generation failed", {
-        cause: err,
-      });
-    }
+    const refreshTokenValue = stringifyToken(
+      refreshTokenEntity.id,
+      refreshTokenSecret,
+    );
 
-    // sanity check
-    if (!newRefreshToken) {
-      throw new TokenProviderError("Refresh token missing");
-    }
+    const newRefreshToken = {
+      value: refreshTokenValue,
+      expiresAt: refreshTokenExpiresAt,
+    };
+
+    this.log.debug(
+      {
+        oldRefreshTokenId: refreshTokenId,
+        newRefreshTokenId: refreshTokenEntity.id,
+      },
+      "Token pair refreshed",
+    );
 
     return {
       accessToken,
@@ -221,44 +228,37 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
   }
 
   async revokeAllByUserId(userId: string): Promise<void> {
-    try {
-      await this.db.beginTx(async (ctx) => {
-        await this.refreshTokensRepository.revokeAllByUserId(ctx, userId);
-      });
-    } catch (err) {
-      throw new TokenProviderError("User tokens revocation failed", {
-        cause: err,
-      });
-    }
+    await this.call(
+      () =>
+        this.db.beginTx(async (ctx) => {
+          await this.refreshTokensRepository.revokeAllByUserId(ctx, userId);
+        }),
+      "revokeAllByUserId: repository revocation failed",
+    );
   }
 
   async revokeRefreshToken(refreshToken: string): Promise<void> {
-    try {
-      await this.db.beginTx(async (ctx) => {
-        await this.refreshTokensRepository.revokeByToken(ctx, refreshToken);
-      });
-    } catch (err) {
-      if (err instanceof NotFoundError) {
-        return;
-      }
-
-      throw new TokenProviderError("Token revocation failed", {
-        cause: err,
-      });
-    }
+    await this.call(
+      () =>
+        this.db.beginTx(async (ctx) => {
+          await this.refreshTokensRepository.revokeById(ctx, refreshToken);
+        }),
+      "revokeRefreshToken: repository revocation failed",
+    );
   }
 
-  async verifyAccessToken(token: string): Promise<AccessTokenPayload> {
-    try {
-      const payload = await this.jwtSigner.verify(token);
+  async verifyAccessToken(token: string): Promise<AccessTokenPayload | void> {
+    const payload = await this.call(
+      () => this.jwtSigner.verify(token),
+      "verifyAccessToken: JWT signer verification failed",
+    );
 
-      return {
-        userId: payload.sub,
-      };
-    } catch (err) {
-      throw new TokenProviderError("Invalid access token", {
-        cause: err,
-      });
+    if (payload.exp < Date.now()) {
+      return;
     }
+
+    return {
+      userId: payload.sub,
+    };
   }
 }

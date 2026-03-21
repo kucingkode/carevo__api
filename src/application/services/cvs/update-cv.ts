@@ -1,22 +1,37 @@
 import { UPDATE_CV_USE_CASE } from "@/constants";
+import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
   UpdateCvInput,
   UpdateCvUseCase,
 } from "@/domain/ports/in/cvs/update-cv";
-import type { TxContext } from "@/domain/ports/out/database/database";
+import type { CvsRepository } from "@/domain/ports/out/database/cvs-repository";
+import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import { BaseUseCase } from "@/shared/classes/base-use-case";
 
-export type UpdateCvServiceParams<TxCtx extends TxContext<any>> = {};
+export type UpdateCvServiceDeps<TxCtx extends TxContext<any>> = {
+  db: Database<TxCtx>;
+  cvsRepository: CvsRepository<TxCtx>;
+};
 
 export class UpdateCvService<TxCtx extends TxContext<any>>
   extends BaseUseCase
   implements UpdateCvUseCase
 {
-  constructor(params: UpdateCvServiceParams<TxCtx>) {
+  private readonly db: Database<TxCtx>;
+  private readonly cvsRepository: CvsRepository<TxCtx>;
+
+  constructor(deps: UpdateCvServiceDeps<TxCtx>) {
     super(UPDATE_CV_USE_CASE);
+
+    this.db = deps.db;
+    this.cvsRepository = deps.cvsRepository;
   }
 
-  updateCv(input: UpdateCvInput): Promise<void> {
-    throw new Error("not implemented");
+  async updateCv(input: UpdateCvInput): Promise<void> {
+    if (input.requestUserId !== input.userId) throw new UnauthorizedError();
+
+    await this.db.beginTx((ctx) =>
+      this.cvsRepository.partialUpdate(ctx, input.userId, input.partialCv),
+    );
   }
 }

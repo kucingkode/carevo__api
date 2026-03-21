@@ -81,6 +81,8 @@ const appConfigSchema = z.object({
 
   GOOGLE_OAUTH_CLIENT_ID: z.string(),
   GOOGLE_OAUTH_SECRET: z.string(),
+
+  STORAGE_DIR: z.string(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

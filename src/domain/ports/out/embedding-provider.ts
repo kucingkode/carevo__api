@@ -5,8 +5,7 @@ export type EmbedParams = {
 
 export type EmbedResult = {
   embeddings: number[][];
-  dimensions: number;
-  inputTokens: number;
+  totalTokens: number;
 };
 
 export type EmbeddingProvider = {

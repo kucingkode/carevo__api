@@ -1,6 +1,6 @@
 import { READ_ONLY_DB_TX, RESET_USER_PASSWORD_USE_CASE } from "@/constants";
-import { InternalError } from "@/domain/errors/common";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
+import { InfrastructureError } from "@/domain/errors/infrastructure-errors";
 import type {
   ResetUserPasswordInput,
   ResetUserPasswordUseCase,
@@ -83,7 +83,7 @@ export class ResetUserPasswordService<TxCtx extends TxContext<any>>
         "Data integrity violation: valid reset token exists but user not found",
       );
 
-      throw new InternalError();
+      throw new InfrastructureError("Data integrity violation");
     }
 
     if (!user.passwordHash) {
@@ -92,7 +92,7 @@ export class ResetUserPasswordService<TxCtx extends TxContext<any>>
         "Data integrity violation: password reset token exists for OAuth-only user",
       );
 
-      throw new InternalError();
+      throw new InfrastructureError("Data integrity violation");
     }
 
     // update password & use token

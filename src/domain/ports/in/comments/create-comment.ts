@@ -1,18 +1,18 @@
 import z from "zod";
 
 // request
-export const createCommentInput = z.object({
+export const createCommentInputSchema = z.object({
   requestUserId: z.uuidv7(),
-  userId: z.uuidv7(),
   postId: z.uuidv7(),
-  parrentId: z.uuidv7().optional(),
+  parentId: z.uuidv7().optional(),
   content: z.string().max(2000),
 });
 
-export type CreateCommentInput = z.infer<typeof createCommentInput>;
+export type CreateCommentInput = z.infer<typeof createCommentInputSchema>;
 
 // response
 export type CreateCommentOutput = {
+  commentId: string;
   createdAt: Date;
 };
 

@@ -14,7 +14,7 @@ export type GetCertificationsFeedInput = z.infer<
 
 // response
 export type GetCertificationsFeedOutput = {
-  bcertifications: Certification[];
+  certifications: Certification[];
 };
 
 // use case

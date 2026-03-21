@@ -5,6 +5,7 @@ export type LlmMessage = {
 
 export type LlmGenerateParams = {
   messages: LlmMessage[];
+  model: string;
   maxTokens?: number;
   temperature?: number;
 };

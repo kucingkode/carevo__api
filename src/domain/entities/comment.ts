@@ -10,7 +10,7 @@ export const commentPropsSchema = z.object({
   id: z.uuidv7(),
   userId: z.uuidv7(),
   postId: z.uuidv7(),
-  parentId: z.uuidv7().optional(),
+  parentId: z.uuidv7().nullable(),
   content: z.string().max(2000),
   createdAt: z.date(),
 });
@@ -42,7 +42,7 @@ export class Comment {
   private readonly _id: string;
   private readonly _userId: string;
   private readonly _postId: string;
-  private readonly _parentId?: string;
+  private readonly _parentId: string | null;
   private readonly _content: string;
   private readonly _createdAt: Date;
 
@@ -74,6 +74,26 @@ export class Comment {
 
   static rehydrate(data: CommentProps) {
     return new Comment(data);
+  }
+
+  // ===============================
+  // Getters
+  // ===============================
+
+  get id() {
+    return this._id;
+  }
+
+  get createdAt() {
+    return this._createdAt;
+  }
+
+  get postId() {
+    return this._postId;
+  }
+
+  get userId() {
+    return this._userId;
   }
 
   // ===============================

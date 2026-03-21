@@ -13,6 +13,7 @@ import { resetUserPasswordInputSchema } from "@/domain/ports/in/auth/reset-user-
 import { changeUserPasswordInputSchema } from "@/domain/ports/in/auth/change-user-password";
 import type { FastifyRequest } from "fastify";
 import { googleOauthInputSchema } from "@/domain/ports/in/auth/google-oauth";
+import { getBody } from "../utils";
 
 export function authRoutes(
   config: FastifyRestServerConfig,
@@ -48,7 +49,7 @@ export function authRoutes(
       async (req, reply) => {
         // register user
         const registerUserInput = registerUserInputSchema.parse({
-          ...(req.body || {}),
+          ...getBody(req),
           ipAddress: req.clientIp,
         });
         await deps.registerUserService.registerUser(registerUserInput);
@@ -83,7 +84,7 @@ export function authRoutes(
       },
       async (req, reply) => {
         const loginUserInput = loginUserInputSchema.parse({
-          ...(req.body || {}),
+          ...getBody(req),
           ipAddress: req.clientIp,
           userAgent: req.clientUa,
         });
@@ -151,7 +152,7 @@ export function authRoutes(
       },
       async (req, reply) => {
         const refreshUserTokenInput = refreshUserTokenInputSchema.parse({
-          ...(req.body || {}),
+          ...getBody(req),
           refreshToken: getRefreshToken(req),
           ipAddress: req.clientIp,
           userAgent: req.clientUa,
@@ -195,7 +196,7 @@ export function authRoutes(
       async (req, reply) => {
         const sendPasswordResetEmailInput =
           sendPasswordResetEmailInputSchema.parse({
-            ...(req.body || {}),
+            ...getBody(req),
             ipAddress: req.clientIp,
           });
 
@@ -223,7 +224,7 @@ export function authRoutes(
       },
       async (req, reply) => {
         const resetUserPasswordInput = resetUserPasswordInputSchema.parse({
-          ...(req.body || {}),
+          ...getBody(req),
           ipAddress: req.clientIp,
           userAgent: req.clientUa,
         });
@@ -254,7 +255,7 @@ export function authRoutes(
         console.log("jhwe", req.userId);
 
         const changeUserPasswordInput = changeUserPasswordInputSchema.parse({
-          ...(req.body || {}),
+          ...getBody(req),
           requestUserId: req.userId,
           ipAddress: req.clientIp,
           userAgent: req.clientUa,
@@ -284,7 +285,7 @@ export function authRoutes(
       },
       async (req, reply) => {
         const verifyUserEmailInput = verifyUserEmailInputSchema.parse({
-          ...(req.body || {}),
+          ...getBody(req),
           ipAddress: req.clientIp,
         });
 
@@ -311,7 +312,7 @@ export function authRoutes(
       async (req, reply) => {
         const sendVerificationEmailInput =
           sendVerificationEmailInputSchema.parse({
-            ...(req.body || {}),
+            ...getBody(req),
             ipAddress: req.clientIp,
           });
 

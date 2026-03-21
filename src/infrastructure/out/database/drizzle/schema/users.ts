@@ -6,6 +6,7 @@ import {
   timestamp,
   boolean,
   check,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -21,7 +22,13 @@ export const users = pgTable(
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
+    // checks
     check("username_length", sql`char_length(${t.username}) <= 30`),
     check("email_length", sql`char_length(${t.email}) <= 255`),
+
+    // indexes
+    uniqueIndex("uq_users_email").on(t.email),
+    uniqueIndex("uq_users_google_id").on(t.googleId),
+    uniqueIndex("uq_users_username").on(t.username),
   ],
 );

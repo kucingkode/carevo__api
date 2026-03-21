@@ -1,13 +1,20 @@
-export type PdfGenerateParams = {
-  html: string;
-  options?: {
-    format?: "A4" | "Letter";
-    margin?: {
-      top?: string;
-      bottom?: string;
-      left?: string;
-      right?: string;
-    };
+export type PdfGenerateOptions = {
+  format?: "A4" | "LETTER";
+  margin?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  watermark?: {
+    text: string;
+    angle?: number;
+    bold?: boolean;
+    color?: string;
+    font?: string;
+    fontSize?: number;
+    italics?: boolean;
+    opacity?: number;
   };
 };
 
@@ -17,5 +24,8 @@ export type PdfGenerateResult = {
 };
 
 export type PdfGenerator = {
-  generate(params: PdfGenerateParams): Promise<PdfGenerateResult>;
+  generate(
+    html: string,
+    options?: PdfGenerateOptions,
+  ): Promise<PdfGenerateResult>;
 };

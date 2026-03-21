@@ -1,22 +1,49 @@
-import { DELETE_POST_USE_CASE } from "@/constants";
+import { DELETE_POST_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
+import { NotFoundError } from "@/domain/errors/domain/not-found-error";
+import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
   DeletePostInput,
   DeletePostUseCase,
 } from "@/domain/ports/in/posts/delete-post";
-import type { TxContext } from "@/domain/ports/out/database/database";
+import type { Database, TxContext } from "@/domain/ports/out/database/database";
+import type { PostsRepository } from "@/domain/ports/out/database/posts-repository";
 import { BaseUseCase } from "@/shared/classes/base-use-case";
 
-export type DeletePostServiceParams<TxCtx extends TxContext<any>> = {};
+export type DeletePostServiceDeps<TxCtx extends TxContext> = {
+  db: Database<TxCtx>;
+  postsRepository: PostsRepository<TxCtx>;
+};
 
 export class DeletePostService<TxCtx extends TxContext<any>>
   extends BaseUseCase
   implements DeletePostUseCase
 {
-  constructor(params: DeletePostServiceParams<TxCtx>) {
+  private readonly db: Database<TxCtx>;
+  private readonly postsRepository: PostsRepository<TxCtx>;
+
+  constructor(deps: DeletePostServiceDeps<TxCtx>) {
     super(DELETE_POST_USE_CASE);
+
+    this.db = deps.db;
+    this.postsRepository = deps.postsRepository;
   }
 
-  deletePost(input: DeletePostInput): Promise<void> {
-    throw new Error("not implemented");
+  async deletePost(input: DeletePostInput): Promise<void> {
+    const post = await this.db.beginTx(
+      (ctx) => this.postsRepository.getById(ctx, input.postId),
+      READ_ONLY_DB_TX,
+    );
+
+    if (!post) throw new NotFoundError();
+    if (post.userId !== input.requestUserId) throw new UnauthorizedError();
+
+    await this.db.beginTx((ctx) =>
+      this.postsRepository.deleteById(ctx, post.id),
+    );
+
+    this.log.info(
+      { requestUserId: input.requestUserId, postId: input.postId },
+      "Post deleted",
+    );
   }
 }

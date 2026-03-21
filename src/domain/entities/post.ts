@@ -11,7 +11,6 @@ export const postPropsSchema = z.object({
   communityId: z.uuidv7(),
   userId: z.uuidv7(),
   content: z.string().max(2000),
-  totalLikes: z.int().min(0),
   createdAt: z.date(),
 });
 
@@ -21,6 +20,10 @@ export type CreatePostParams = {
   readonly communityId: string;
   readonly userId: string;
   readonly content: string;
+};
+
+export type PostDisplay = PostProps & {
+  totalLikes: number;
 };
 
 // ===============================
@@ -38,19 +41,17 @@ export class PostValidationError extends DomainError {
 // ===============================
 
 export class Post {
-  readonly _id: string;
-  readonly _communityId: string;
-  readonly _userId: string;
-  readonly _content: string;
-  readonly _totalLikes: number;
-  readonly _createdAt: Date;
+  private readonly _id: string;
+  private readonly _communityId: string;
+  private readonly _userId: string;
+  private readonly _content: string;
+  private readonly _createdAt: Date;
 
   private constructor(data: PostProps) {
     this._id = data.id;
     this._communityId = data.communityId;
     this._userId = data.userId;
     this._content = data.content;
-    this._totalLikes = data.totalLikes;
     this._createdAt = data.createdAt;
   }
 
@@ -77,6 +78,25 @@ export class Post {
   }
 
   // ===============================
+  // Getters
+  // ===============================
+  get id() {
+    return this._id;
+  }
+
+  get userId() {
+    return this._userId;
+  }
+
+  get communityId() {
+    return this._communityId;
+  }
+
+  get createdAt() {
+    return this._createdAt;
+  }
+
+  // ===============================
   // Persistence
   // ===============================
   toPersistence(): PostProps {
@@ -84,7 +104,6 @@ export class Post {
       id: this._id,
       content: this._content,
       communityId: this._communityId,
-      totalLikes: this._totalLikes,
       userId: this._userId,
       createdAt: this._createdAt,
     };

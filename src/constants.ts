@@ -1,7 +1,10 @@
+import { join } from "node:path";
 import type { TxConfig } from "./domain/ports/out/database/database";
 
 export const SERVICE_NAME = "api";
 export const SERVICE_VERSION = "0.1.0";
+
+export const CACHE_MAX_SIZE = 10_000;
 
 export const EMAIL_TOKEN_TTL = 24 * 60 * 60_000; // 24h
 export const ACCESS_TOKEN_TTL = 15 * 60_000; // 15m
@@ -10,6 +13,23 @@ export const REFRESH_TOKEN_SHORT_TTL = 60 * 60_000; // 1h
 
 export const READ_ONLY_DB_TX: TxConfig = {
   accessMode: "read only",
+};
+
+export const cacheNamespaces = {
+  POST_LIKES: "post_likes",
+};
+
+export const PDFMAKE_FONTS = {
+  Inter: {
+    normal: join(import.meta.dirname, "../fonts/Inter_28pt-Regular.ttf"),
+    medium: join(import.meta.dirname, "../fonts/Inter_28pt-Medium.ttf"),
+    bold: join(import.meta.dirname, "../fonts/Inter_28pt-Bold.ttf"),
+    italics: join(import.meta.dirname, "../fonts/Inter_28pt-Italic.ttf"),
+    bolditalics: join(
+      import.meta.dirname,
+      "../fonts/Inter_28pt-BoldItalic.ttf",
+    ),
+  },
 };
 
 // ===============================
@@ -96,6 +116,7 @@ export const DOWNLOAD_CV_USE_CASE = "download-cv";
 export const GET_CV_USE_CASE = "get-cv";
 export const SAVE_CV_USE_CASE = "save-cv";
 export const UPDATE_CV_USE_CASE = "update-cv";
+export const UPDATE_CV_EMBEDDING_USE_CASE = "update-cv-embedding";
 
 // files
 export const GET_FILE_USE_CASE = "get-file";
@@ -108,7 +129,8 @@ export const DELETE_POST_USE_CASE = "delete-post";
 export const GET_POSTS_FEED_USE_CASE = "get-posts-feed";
 export const LIKE_POST_USE_CASE = "like-post";
 
-// proftos
-export const GET_PROFTO_USE_CASE = "get-profto";
-export const LIST_PROFTOS_USE_CASE = "list-proftos";
-export const UPDATE_PROFTO_USE_CASE = "update-profto";
+// users
+export const GET_USER_COMMUNITIES_USE_CASE = "get-user-communities";
+export const GET_USER_PROFTO_USE_CASE = "get-user-profto";
+export const LIST_USERS_USE_CASE = "list-users";
+export const UPDATE_USER_PROFTO_USE_CASE = "update-user-profto";

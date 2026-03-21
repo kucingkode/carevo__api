@@ -26,6 +26,14 @@ export type CreateUserParams = {
   googleId: string | null;
 };
 
+export type UserSummary = {
+  id: string;
+  username: string;
+  name: string | null;
+  avatarFileId: string | null;
+  professionRole: string | null;
+};
+
 // ===============================
 // Errors
 // ===============================

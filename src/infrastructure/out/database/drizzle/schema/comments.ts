@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { check, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const comments = pgTable(
@@ -14,8 +21,15 @@ export const comments = pgTable(
       }),
     postId: uuid().notNull(),
     parentId: uuid(),
-    content: text(),
+    content: text().notNull(),
     createdAt: timestamp({ withTimezone: true }).notNull(),
   },
-  (t) => [check("content_length", sql`char_length(${t.content}) <= 2000`)],
+  (t) => [
+    // checks
+    check("content_length", sql`char_length(${t.content}) <= 2000`),
+
+    // indexes
+    index("idx_comments_user_id").on(t.userId),
+    index("idx_comments_post_id_parent_id").on(t.postId, t.parentId),
+  ],
 );

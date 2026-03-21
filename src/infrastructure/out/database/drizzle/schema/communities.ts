@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { check, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { files } from "./files";
 
 export const communities = pgTable(
@@ -14,6 +14,7 @@ export const communities = pgTable(
       }),
     name: text().notNull(),
     description: text().notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     check("name_length", sql`char_length(${t.name}) <= 255`),

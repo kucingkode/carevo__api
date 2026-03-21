@@ -1,0 +1,17 @@
+@baseUrl = http://localhost:3000
+
+### uploadFile
+POST {{baseUrl}}/api/v1/files/upload
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTljZjRmNC1mOTM2LTc3MTgtOWE2ZS1lYWM5YTAyZWIyNzciLCJpYXQiOjE3NzM4MTk1MDcsImV4cCI6MTc3MzgyMDQwNzgwOH0.bX-lsDUmNSq0_y7bzebeWgi4Lc65mTo8XNw7dGNsYLI
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### getFile
+GET {{baseUrl}}/api/v1/files/019cffe2-fbcb-714a-b4e5-237fdc155019
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMTljZjRmNC1mOTM2LTc3MTgtOWE2ZS1lYWM5YTAyZWIyNzciLCJpYXQiOjE3NzM4MTk1MDcsImV4cCI6MTc3MzgyMDQwNzgwOH0.bX-lsDUmNSq0_y7bzebeWgi4Lc65mTo8XNw7dGNsYLI

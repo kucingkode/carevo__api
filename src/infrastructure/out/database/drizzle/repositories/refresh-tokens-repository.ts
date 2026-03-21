@@ -8,107 +8,83 @@ import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import { refreshTokens } from "../schema";
 import { and, eq, isNull, lte } from "drizzle-orm";
-import { RefreshTokensRepositoryError } from "@/domain/errors/infrastructure/database-error";
-import { NotFoundError } from "@/domain/errors/common";
-import { parseToken } from "@/shared/utils/token-format";
+import { RefreshTokensRepositoryError } from "@/domain/errors/infrastructure-errors";
 
 export class DrizzleRefreshTokensRepository
   extends BaseAdapter
   implements RefreshTokensRepository<DrizzleTxContext>
 {
   constructor() {
-    super(REFRESH_TOKENS_REPOSITORY_PORT, OUTBOUND_DIRECTION);
+    super(
+      REFRESH_TOKENS_REPOSITORY_PORT,
+      OUTBOUND_DIRECTION,
+      RefreshTokensRepositoryError,
+    );
   }
 
-  async get(
+  async getById(
     ctx: DrizzleTxContext,
-    token: string,
-  ): Promise<RefreshToken | null> {
-    try {
-      const { id } = parseToken(token);
-      const result = await ctx.tx.query.refreshTokens.findFirst({
-        where: and(eq(refreshTokens.id, id), isNull(refreshTokens.revokedAt)),
-      });
+    tokenId: string,
+  ): Promise<RefreshToken | undefined> {
+    const result = await ctx.tx.query.refreshTokens.findFirst({
+      where: and(
+        eq(refreshTokens.id, tokenId),
+        isNull(refreshTokens.revokedAt),
+      ),
+    });
 
-      if (!result) {
-        return null;
-      }
-
-      return result;
-    } catch (err) {
-      throw new RefreshTokensRepositoryError("Database query failed", {
-        cause: err,
-      });
+    if (!result) {
+      return;
     }
+
+    return result;
   }
 
   async deleteExpired(ctx: DrizzleTxContext): Promise<void> {
-    try {
-      await ctx.tx
-        .delete(refreshTokens)
-        .where(lte(refreshTokens.expiresAt, new Date()));
+    const result = await ctx.tx
+      .delete(refreshTokens)
+      .where(lte(refreshTokens.expiresAt, new Date()))
+      .returning({ id: refreshTokens.id });
 
-      this.log.debug("Expired refresh tokens deleted");
-    } catch (err) {
-      throw new RefreshTokensRepositoryError("Database query failed", {
-        cause: err,
-      });
-    }
+    this.log.debug({ count: result.length }, "Expired refresh tokens deleted");
   }
 
   async revokeAllByUserId(
     ctx: DrizzleTxContext,
     userId: string,
   ): Promise<void> {
-    try {
-      await ctx.tx
-        .update(refreshTokens)
-        .set({
-          revokedAt: new Date(),
-        })
-        .where(eq(refreshTokens.userId, userId));
-
-      this.log.debug({ userId }, "User refresh tokens revoked");
-    } catch (err) {
-      throw new RefreshTokensRepositoryError("Database query failed", {
-        cause: err,
+    const result = await ctx.tx
+      .update(refreshTokens)
+      .set({
+        revokedAt: new Date(),
+      })
+      .where(eq(refreshTokens.userId, userId))
+      .returning({
+        id: refreshTokens.id,
       });
-    }
+
+    this.log.debug(
+      { userId, count: result.length },
+      "User refresh tokens revoked",
+    );
   }
 
-  async revokeByToken(ctx: DrizzleTxContext, token: string): Promise<void> {
-    try {
-      const { id } = parseToken(token);
-      const result = await ctx.tx
-        .update(refreshTokens)
-        .set({
-          revokedAt: new Date(),
-        })
-        .where(eq(refreshTokens.id, id))
-        .returning({
-          id: refreshTokens.id,
-        });
-
-      if (!result.length) {
-        throw new NotFoundError();
-      }
-
-      this.log.debug({ id }, "Refresh token revoked");
-    } catch (err) {
-      throw new RefreshTokensRepositoryError("Database query failed", {
-        cause: err,
+  async revokeById(ctx: DrizzleTxContext, id: string): Promise<void> {
+    const result = await ctx.tx
+      .update(refreshTokens)
+      .set({
+        revokedAt: new Date(),
+      })
+      .where(eq(refreshTokens.id, id))
+      .returning({
+        id: refreshTokens.id,
       });
-    }
+
+    this.log.debug({ id, count: result.length }, "Refresh token revoked");
   }
 
   async save(ctx: DrizzleTxContext, refreshToken: RefreshToken): Promise<void> {
-    try {
-      await ctx.tx.insert(refreshTokens).values(refreshToken);
-      this.log.debug("Refresh token inserted");
-    } catch (err) {
-      throw new RefreshTokensRepositoryError("Database query failed", {
-        cause: err,
-      });
-    }
+    await ctx.tx.insert(refreshTokens).values(refreshToken);
+    this.log.debug({ id: refreshToken.id }, "Refresh token inserted");
   }
 }

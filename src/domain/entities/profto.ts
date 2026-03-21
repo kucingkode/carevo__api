@@ -1,4 +1,7 @@
-import { professionRoleSchema } from "@/shared/schemas/zod/profession-role-schema";
+import {
+  professionRoleSchema,
+  type ProfessionRole,
+} from "@/shared/schemas/zod/profession-role-schema";
 import z from "zod";
 
 // ===============================
@@ -40,8 +43,7 @@ export const proftoLinkSchema = z.object({
 
 export type ProftoLink = z.infer<typeof proftoLinkSchema>;
 
-export const proftoPropsSchema = z.object({
-  userId: z.uuidv7(),
+export const proftoBaseSchema = z.object({
   avatarFileId: z.uuidv7().nullable(),
   name: z.string().max(255).nullable(),
   professionRole: professionRoleSchema.nullable(),
@@ -55,12 +57,93 @@ export const proftoPropsSchema = z.object({
   links: z.array(proftoLinkSchema),
 });
 
-export type ProftoProps = z.infer<typeof proftoPropsSchema>;
+export type ProftoBase = z.infer<typeof proftoBaseSchema>;
 
-export type ProftoSummary = {
+export type ProftoProps = ProftoBase & {
   userId: string;
-  username: string;
-  name: string;
-  avatarFileId: string;
-  professionRole: string;
+  updatedAt: Date;
 };
+
+// update schema
+export const proftoPartialUpdateSchema = proftoBaseSchema.partial();
+export type ProftoPartialUpdate = z.infer<typeof proftoPartialUpdateSchema>;
+
+export class Profto {
+  private readonly _userId: string;
+  private _avatarFileId: string | null;
+  private _cvFileId: string | null;
+  private _email: string | null;
+  private _lastEducation: string | null;
+  private _name: string | null;
+  private _professionRole: ProfessionRole | null;
+  private _summary: string | null;
+  private _certificates: ProftoCertificate[];
+  private _links: ProftoLink[];
+  private _projects: ProftoProject[];
+  private _experiences: ProftoExperience[];
+  private _updatedAt: Date;
+
+  private constructor(props: ProftoProps) {
+    this._userId = props.userId;
+    this._avatarFileId = props.avatarFileId;
+    this._cvFileId = props.cvFileId;
+    this._email = props.email;
+    this._lastEducation = props.lastEducation;
+    this._name = props.name;
+    this._professionRole = props.professionRole;
+    this._summary = props.summary;
+    this._certificates = props.certificates;
+    this._links = props.links;
+    this._projects = props.projects;
+    this._experiences = props.experiences;
+    this._updatedAt = props.updatedAt;
+  }
+
+  // ===============================
+  // Factory
+  // ===============================
+
+  static create(userId: string) {
+    return new Profto({
+      userId,
+      avatarFileId: null,
+      cvFileId: null,
+      email: null,
+      lastEducation: null,
+      name: null,
+      professionRole: null,
+      summary: null,
+      certificates: [],
+      links: [],
+      projects: [],
+      experiences: [],
+      updatedAt: new Date(),
+    });
+  }
+
+  static rehydrate(props: ProftoProps) {
+    return new Profto(props);
+  }
+
+  // ===============================
+  // Persistence
+  // ===============================
+
+  toPersistence(): ProftoProps {
+    return {
+      userId: this._userId,
+      avatarFileId: this._avatarFileId,
+      cvFileId: this._cvFileId,
+      email: this._email,
+      lastEducation: this._lastEducation,
+      name: this._name,
+      professionRole: this._professionRole,
+      summary: this._summary,
+      certificates: this._certificates,
+      links: this._links,
+      projects: this._projects,
+      experiences: this._experiences,
+      updatedAt: this._updatedAt,
+    };
+  }
+}

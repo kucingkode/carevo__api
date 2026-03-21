@@ -9,12 +9,12 @@ import { createAdapterLogger } from "@/shared/utils/create-adapter-logger";
 import { bootcampsRoutes } from "./routes/bootcamps-routes";
 import { certificationsRoutes } from "./routes/certifications-routes";
 import { communitiesRoutes } from "./routes/communities-routes";
-import { cvsRoutes } from "./routes/cvs-routes";
+import { aiRoutes } from "./routes/ai-routes";
 import { filesRoutes } from "./routes/files-routes";
 import { postsRoutes } from "./routes/posts-routes";
-import { proftosRoutes } from "./routes/proftos-routes";
 import type { FastifyRestServerDeps } from "./deps";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
+import { usersRoutes } from "./routes/users-routes";
+import type { AccessTokenPayload } from "@/domain/ports/out/token-provider";
 
 export async function createFastifyRestServer(
   config: FastifyRestServerConfig,
@@ -31,28 +31,34 @@ export async function createFastifyRestServer(
   // add hooks
 
   app.addHook("onRequest", async (req) => {
+    // IP Address
     req.clientIp =
       (req.headers["cf-connecting-ip"] as string) ?? req.ip ?? null;
 
+    // User Agent
     req.clientUa = req.headers["user-agent"] ?? null;
 
+    // JWT
+    req.userId = null;
     if (req.headers["authorization"]) {
+      // get payload
+      let accessTokenPayload: AccessTokenPayload | void;
       try {
-        console.log(
-          "iowwi",
-          req.headers["authorization"].replace("Bearer ", "")[0],
-        );
-        const accessTokenPayload = await deps.tokenProvider.verifyAccessToken(
+        accessTokenPayload = await deps.tokenProvider.verifyAccessToken(
           req.headers["authorization"].replace("Bearer ", ""),
         );
-
-        req.userId = accessTokenPayload.userId;
       } catch (err) {
         log.debug(
           { err, ipAddress: req.clientIp },
           "Access token verification failed",
         );
-        throw new UnauthorizedError("Invalid access token");
+
+        return;
+      }
+
+      // get user id
+      if (accessTokenPayload) {
+        req.userId = accessTokenPayload.userId;
       }
     }
   });
@@ -62,6 +68,10 @@ export async function createFastifyRestServer(
   });
 
   // register application routes
+
+  app.register(aiRoutes(config, deps) as any, {
+    prefix: "/api/v1/ai",
+  });
 
   app.register(authRoutes(config, deps) as any, {
     prefix: "/api/v1/auth",
@@ -79,10 +89,6 @@ export async function createFastifyRestServer(
     prefix: "/api/v1/communities",
   });
 
-  app.register(cvsRoutes(config, deps) as any, {
-    prefix: "/api/v1/cvs",
-  });
-
   app.register(filesRoutes(config, deps) as any, {
     prefix: "/api/v1/files",
   });
@@ -91,8 +97,8 @@ export async function createFastifyRestServer(
     prefix: "/api/v1/posts",
   });
 
-  app.register(proftosRoutes(config, deps) as any, {
-    prefix: "/api/v1/proftos",
+  app.register(usersRoutes(config, deps) as any, {
+    prefix: "/api/v1/users",
   });
 
   // error handler
@@ -109,7 +115,7 @@ export async function createFastifyRestServer(
       });
     }
 
-    if (err instanceof DomainError) {
+    if (err instanceof DomainError && err.code) {
       const statusCode = ERROR_HTTP_STATUS_CODES[err.code] ?? 500;
 
       return reply.status(statusCode).send({

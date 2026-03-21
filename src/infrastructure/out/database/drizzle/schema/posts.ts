@@ -1,4 +1,11 @@
-import { check, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { communities } from "./communities";
 import { sql } from "drizzle-orm";
@@ -22,5 +29,12 @@ export const posts = pgTable(
     content: text().notNull(),
     createdAt: timestamp({ withTimezone: true }).notNull(),
   },
-  (t) => [check("content_length", sql`char_length(${t.content}) <= 2000`)],
+  (t) => [
+    // checks
+    check("content_length", sql`char_length(${t.content}) <= 2000`),
+
+    // indexes
+    index("idx_user_id").on(t.userId),
+    index("idx_community_id").on(t.communityId),
+  ],
 );

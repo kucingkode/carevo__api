@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   check,
+  index,
   inet,
   pgTable,
   text,
@@ -26,5 +27,11 @@ export const refreshTokens = pgTable(
     revokedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull(),
   },
-  (t) => [check("user_agent_length", sql`char_length(${t.userAgent}) <= 512`)],
+  (t) => [
+    // checks
+    check("user_agent_length", sql`char_length(${t.userAgent}) <= 512`),
+
+    // indexes
+    index("idx_refresh_tokens_user_id").on(t.userId),
+  ],
 );

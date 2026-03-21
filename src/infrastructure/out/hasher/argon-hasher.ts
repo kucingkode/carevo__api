@@ -1,4 +1,7 @@
+import { HASHER_PORT, OUTBOUND_DIRECTION } from "@/constants";
+import { HasherError } from "@/domain/errors/infrastructure-errors";
 import type { Hasher } from "@/domain/ports/out/hasher";
+import { BaseAdapter } from "@/shared/classes/base-adapter";
 import { hash, verify } from "argon2";
 
 export type ArgonHasherParams = {
@@ -10,7 +13,7 @@ export type ArgonHasherParams = {
   parallelism: number;
 };
 
-export class ArgonHasher implements Hasher {
+export class ArgonHasher extends BaseAdapter implements Hasher {
   private readonly secret: Buffer<ArrayBufferLike>;
   private readonly hashConfig: {
     secret: Buffer<ArrayBufferLike>;
@@ -22,6 +25,8 @@ export class ArgonHasher implements Hasher {
   };
 
   constructor(params: ArgonHasherParams) {
+    super(HASHER_PORT, OUTBOUND_DIRECTION, HasherError);
+
     this.hashConfig = {
       secret: params.secret,
       salt: params.salt,
@@ -35,12 +40,19 @@ export class ArgonHasher implements Hasher {
   }
 
   hash(plain: string) {
-    return hash(plain, this.hashConfig);
+    return this.call(
+      () => hash(plain, this.hashConfig),
+      "hash: argon2 hash failed",
+    );
   }
 
   compare(plain: string, hashed: string): Promise<boolean> {
-    return verify(hashed, plain, {
-      secret: this.secret,
-    });
+    return this.call(
+      () =>
+        verify(hashed, plain, {
+          secret: this.secret,
+        }),
+      "compare: argon2 verify failed",
+    );
   }
 }

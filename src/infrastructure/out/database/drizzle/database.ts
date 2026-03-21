@@ -5,17 +5,16 @@ import type {
 } from "@/domain/ports/out/database/database";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import { drizzle, type NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
-import {
-  DrizzleError,
-  sql,
-  type ExtractTablesWithRelations,
-} from "drizzle-orm";
+import { sql, type ExtractTablesWithRelations } from "drizzle-orm";
 import type { ConnectionOptions } from "node:tls";
 import * as schema from "./schema";
-import { getLogger, type Logger } from "@/observability/logging";
 import { DATABASE_PORT, OUTBOUND_DIRECTION } from "@/constants";
-import { DatabaseError } from "@/domain/errors/infrastructure/database-error";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { DatabaseError } from "@/domain/errors/infrastructure-errors";
+import { BaseAdapter } from "@/shared/classes/base-adapter";
+import { pgMapper } from "./utils/db-error-mapper";
+import { PG_CONNECTION_FAILED_ERROR } from "./utils/db-error-codes";
+import { ServiceUnavailableError } from "@/domain/errors/domain/service-unavailable-error";
 
 export type DrizzleDatabaseParams = {
   host: string;
@@ -26,53 +25,45 @@ export type DrizzleDatabaseParams = {
   ssl: "disable" | "allow" | "prefer" | "require" | "verify-ca" | "verify-full";
 };
 
-export class DrizzleDatabase implements Database<DrizzleTxContext> {
+export class DrizzleDatabase
+  extends BaseAdapter
+  implements Database<DrizzleTxContext>
+{
   public readonly db: ReturnType<typeof this.createDrizzle>;
-  private readonly log: Logger;
 
   constructor(private readonly params: DrizzleDatabaseParams) {
-    this.log = getLogger().child({
-      component: DrizzleDatabase.name,
-      port: DATABASE_PORT,
-      direction: OUTBOUND_DIRECTION,
-    });
+    super(DATABASE_PORT, OUTBOUND_DIRECTION, DatabaseError);
 
     this.db = this.createDrizzle();
   }
 
   async ping(): Promise<void> {
-    try {
-      await this.db.execute(sql`SELECT 1`);
-    } catch (err) {
-      throw new DatabaseError("Database unreachable", { cause: err });
-    }
+    await this.call(
+      () => this.db.execute(sql`SELECT 1`),
+      "Database ping failed",
+    );
   }
 
   async beginTx<T>(
     fn: (ctx: DrizzleTxContext) => Promise<T>,
     config?: TxConfig,
   ): Promise<T> {
-    this.log.trace("Transaction started");
+    let result: T;
 
-    try {
-      let result: T;
-      await this.db.transaction(async (tx) => {
-        const txContext = new DrizzleTxContext(tx);
-        result = await fn(txContext);
-      }, config);
+    await this.call(
+      () =>
+        this.db.transaction(async (tx) => {
+          const txContext = new DrizzleTxContext(tx);
+          result = await fn(txContext);
+        }, config),
+      "beginTx: Transaction failed",
+      pgMapper({
+        [PG_CONNECTION_FAILED_ERROR]: () =>
+          new ServiceUnavailableError("Database unavailable"),
+      }),
+    );
 
-      this.log.trace("Transaction committed");
-      return result!;
-    } catch (err) {
-      if (err instanceof DrizzleError) {
-        this.log.trace("Transaction failed");
-        throw new DatabaseError("Transaction failed", {
-          cause: err,
-        });
-      }
-
-      throw err;
-    }
+    return result!;
   }
 
   async migrate() {
