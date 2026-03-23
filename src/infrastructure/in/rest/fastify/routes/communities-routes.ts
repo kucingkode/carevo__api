@@ -17,8 +17,6 @@ export function communitiesRoutes(
     // ===============================
 
     app.get("/", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const listCommunitiesInput = listBootcampsInputSchema.parse({
@@ -39,8 +37,6 @@ export function communitiesRoutes(
     // ===============================
 
     app.post("/:communityId/join", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const joinCommunityInput = joinCommunityInputSchema.parse({

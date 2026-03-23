@@ -16,8 +16,6 @@ export function certificationsRoutes(
     // ===============================
 
     app.get("/", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const listCertificationsInput = listCertificationsInputSchema.parse({
@@ -40,8 +38,6 @@ export function certificationsRoutes(
     // ===============================
 
     app.get("/feed", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const getCertificationsFeedInput = getCertificationsFeedInputSchema.parse(

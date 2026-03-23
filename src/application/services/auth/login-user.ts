@@ -74,7 +74,7 @@ export class LoginUserService<TxCtx extends TxContext<any>>
     }
 
     // issue token pair
-    const { accessToken, refreshToken } =
+    const { accessTokenIssued, refreshTokenIssued } =
       await this.tokenProvider.issueTokenPair(
         {
           userId: user.id,
@@ -82,19 +82,19 @@ export class LoginUserService<TxCtx extends TxContext<any>>
           userAgent: input.userAgent,
         },
         {
-          rememberMe: input.rememberMe,
+          longLived: input.rememberMe,
         },
       );
 
-    logCtx.refreshTokenId = parseToken(refreshToken.value).id;
+    logCtx.refreshTokenId = parseToken(refreshTokenIssued.value).id;
     this.log.info(logCtx, "User logged in");
 
     return {
       userId: user.id,
-      accessToken: accessToken.value,
-      accessTokenExpiredAt: accessToken.expiresAt,
-      refreshToken: refreshToken.value,
-      refreshTokenExpiredAt: refreshToken.expiresAt,
+      accessToken: accessTokenIssued.value,
+      accessTokenExpiresAt: accessTokenIssued.expiresAt,
+      refreshToken: refreshTokenIssued.value,
+      refreshTokenExpiresAt: refreshTokenIssued.expiresAt,
     };
   }
 }

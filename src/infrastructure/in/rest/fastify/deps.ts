@@ -35,6 +35,7 @@ import type { ListUsersUseCase } from "@/domain/ports/in/users/list-users";
 import type { UpdateUserProftoUseCase } from "@/domain/ports/in/users/update-user-profto";
 import type { TokenProvider } from "@/domain/ports/out/token-provider";
 import type { UpdateCvEmbeddingUseCase } from "@/domain/ports/in/cvs/update-cv-embedding";
+import type { GetUserUseCase } from "@/domain/ports/in/users/get-user";
 
 export type FastifyRestServerDeps = {
   tokenProvider: TokenProvider;
@@ -92,4 +93,5 @@ export type FastifyRestServerDeps = {
   getUserProftoService: GetUserProftoUseCase;
   listUsersService: ListUsersUseCase;
   updateUserProftoService: UpdateUserProftoUseCase;
+  getUserService: GetUserUseCase;
 };

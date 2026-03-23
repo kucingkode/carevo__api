@@ -21,8 +21,6 @@ export function postsRoutes(
     // ===============================
 
     app.post("/", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const createPostInput = createPostInputSchema.parse({
         ...getBody(req),
         requestUserId: req.userId,
@@ -42,8 +40,6 @@ export function postsRoutes(
     // ===============================
 
     app.get("/feed", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const getPostsFeedInput = getPostsFeedInputSchema.parse({
@@ -63,8 +59,6 @@ export function postsRoutes(
     // ===============================
 
     app.post("/:postId/likes", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const likePostInput = likePostInputSchema.parse({
@@ -82,8 +76,6 @@ export function postsRoutes(
     // ===============================
 
     app.delete("/:postId/likes", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const deletePostLikeInput = deletePostLikeInputSchema.parse({
@@ -101,8 +93,6 @@ export function postsRoutes(
     // ===============================
 
     app.get("/:postId/comments", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
       const q = getQuery(req);
 
@@ -126,8 +116,6 @@ export function postsRoutes(
     // ===============================
 
     app.post("/:postId/comments", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const createCommentInput = createCommentInputSchema.parse({
@@ -150,8 +138,6 @@ export function postsRoutes(
     // ===============================
 
     app.delete("/:postId/comments/:commentId", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const deleteCommentInput = deleteCommentInputSchema.parse({

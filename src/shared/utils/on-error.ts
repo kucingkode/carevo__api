@@ -1,4 +1,5 @@
 import { DomainError } from "@/domain/errors/domain/domain-error";
+import { InfrastructureError } from "@/domain/errors/infrastructure-errors";
 
 export async function onError<T>(
   fn: () => Promise<T> | T,
@@ -8,6 +9,7 @@ export async function onError<T>(
     return await fn();
   } catch (err) {
     if (err instanceof DomainError) throw err;
+    if (err instanceof InfrastructureError) throw err;
 
     const mapped = handler(err);
     if (mapped) throw mapped;

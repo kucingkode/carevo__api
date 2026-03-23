@@ -19,6 +19,12 @@ export function createApp(log: Logger, config: FastifyRestServerConfig) {
     trustProxy: true,
   });
 
+  // Skip legacy content parsing
+  app.addContentTypeParser(
+    "application/x-www-form-urlencoded",
+    (_request, _payload, done) => done(null, null),
+  );
+
   app.register(cors, {
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
@@ -44,23 +50,25 @@ export function createApp(log: Logger, config: FastifyRestServerConfig) {
     crossOriginOpenerPolicy: false,
   });
 
-  app.register(rateLimit, {
-    max: config.rateLimitMax,
-    timeWindow: config.rateLimitWindowMs,
-    cache: 10000,
-    keyGenerator: (req) => req.ip,
-    errorResponseBuilder: (_req, context) => ({
-      statusCode: 429,
-      error: "RATE_LIMITED",
-      message: `Too many attempts, try again in ${context.after}`,
-    }),
-  });
+  if (config.rateLimitEnabled) {
+    app.register(rateLimit, {
+      max: config.rateLimitMax,
+      timeWindow: config.rateLimitWindowMs,
+      cache: 10000,
+      keyGenerator: (req) => req.ip,
+      errorResponseBuilder: (_req, context) => ({
+        statusCode: 429,
+        error: "RATE_LIMITED",
+        message: `Too many attempts, try again in ${context.after}`,
+      }),
+    });
+  }
 
   app.register(underPressure, {
     maxEventLoopDelay: config.maxEventLoopDelay,
-    maxHeapUsedBytes: config.maxHeapBytes, // 900MB
-    maxRssBytes: config.maxRssBytes, // 1GB
-    maxEventLoopUtilization: config.maxElu, // 98% ELU
+    maxHeapUsedBytes: config.maxHeapBytes,
+    maxRssBytes: config.maxRssBytes,
+    maxEventLoopUtilization: config.maxElu,
     retryAfter: 50, // Retry-After header value in ms
     exposeStatusRoute: "/health",
     healthCheck: async () => {

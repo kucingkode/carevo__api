@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   inet,
@@ -21,10 +22,10 @@ export const refreshTokens = pgTable(
         onDelete: "cascade",
       }),
     tokenHash: text().notNull(),
+    longLived: boolean().notNull(),
     ipAddress: inet(),
     userAgent: text(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
-    revokedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull(),
   },
   (t) => [

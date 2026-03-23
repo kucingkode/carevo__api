@@ -16,8 +16,6 @@ export function aiRoutes(
     // ===============================
 
     app.post("/generate-cv", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const aiGenerateCvInput = aiGenerateCvInputSchema.parse({
         ...getBody(req),
         requestUserId: req.userId,

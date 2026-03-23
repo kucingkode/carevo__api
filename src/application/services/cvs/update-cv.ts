@@ -1,4 +1,5 @@
 import { UPDATE_CV_USE_CASE } from "@/constants";
+import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
   UpdateCvInput,
@@ -28,7 +29,7 @@ export class UpdateCvService<TxCtx extends TxContext<any>>
   }
 
   async updateCv(input: UpdateCvInput): Promise<void> {
-    if (input.requestUserId !== input.userId) throw new UnauthorizedError();
+    if (input.requestUserId !== input.userId) throw new ForbiddenError();
 
     await this.db.beginTx((ctx) =>
       this.cvsRepository.partialUpdate(ctx, input.userId, input.partialCv),

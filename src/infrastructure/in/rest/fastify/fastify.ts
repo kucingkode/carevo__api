@@ -14,7 +14,7 @@ import { filesRoutes } from "./routes/files-routes";
 import { postsRoutes } from "./routes/posts-routes";
 import type { FastifyRestServerDeps } from "./deps";
 import { usersRoutes } from "./routes/users-routes";
-import type { AccessTokenPayload } from "@/domain/ports/out/token-provider";
+import { createVerifyAccessToken } from "./hooks/verify-access-token";
 
 export async function createFastifyRestServer(
   config: FastifyRestServerConfig,
@@ -37,30 +37,6 @@ export async function createFastifyRestServer(
 
     // User Agent
     req.clientUa = req.headers["user-agent"] ?? null;
-
-    // JWT
-    req.userId = null;
-    if (req.headers["authorization"]) {
-      // get payload
-      let accessTokenPayload: AccessTokenPayload | void;
-      try {
-        accessTokenPayload = await deps.tokenProvider.verifyAccessToken(
-          req.headers["authorization"].replace("Bearer ", ""),
-        );
-      } catch (err) {
-        log.debug(
-          { err, ipAddress: req.clientIp },
-          "Access token verification failed",
-        );
-
-        return;
-      }
-
-      // get user id
-      if (accessTokenPayload) {
-        req.userId = accessTokenPayload.userId;
-      }
-    }
   });
 
   app.addHook("onSend", async (req, reply) => {
@@ -69,36 +45,40 @@ export async function createFastifyRestServer(
 
   // register application routes
 
-  app.register(aiRoutes(config, deps) as any, {
-    prefix: "/api/v1/ai",
-  });
-
   app.register(authRoutes(config, deps) as any, {
     prefix: "/api/v1/auth",
   });
 
-  app.register(bootcampsRoutes(config, deps) as any, {
-    prefix: "/api/v1/bootcamps",
-  });
+  app.register(async (privateRouter) => {
+    privateRouter.addHook("onRequest", createVerifyAccessToken(deps));
 
-  app.register(certificationsRoutes(config, deps) as any, {
-    prefix: "/api/v1/certifications",
-  });
+    privateRouter.register(aiRoutes(config, deps) as any, {
+      prefix: "/api/v1/ai",
+    });
 
-  app.register(communitiesRoutes(config, deps) as any, {
-    prefix: "/api/v1/communities",
-  });
+    privateRouter.register(bootcampsRoutes(config, deps) as any, {
+      prefix: "/api/v1/bootcamps",
+    });
 
-  app.register(filesRoutes(config, deps) as any, {
-    prefix: "/api/v1/files",
-  });
+    privateRouter.register(certificationsRoutes(config, deps) as any, {
+      prefix: "/api/v1/certifications",
+    });
 
-  app.register(postsRoutes(config, deps) as any, {
-    prefix: "/api/v1/posts",
-  });
+    privateRouter.register(communitiesRoutes(config, deps) as any, {
+      prefix: "/api/v1/communities",
+    });
 
-  app.register(usersRoutes(config, deps) as any, {
-    prefix: "/api/v1/users",
+    privateRouter.register(filesRoutes(config, deps) as any, {
+      prefix: "/api/v1/files",
+    });
+
+    privateRouter.register(postsRoutes(config, deps) as any, {
+      prefix: "/api/v1/posts",
+    });
+
+    privateRouter.register(usersRoutes(config, deps) as any, {
+      prefix: "/api/v1/users",
+    });
   });
 
   // error handler

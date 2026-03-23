@@ -16,9 +16,9 @@ export type LoginUserInput = z.infer<typeof loginUserInputSchema>;
 export type LoginUserOutput = {
   userId: string;
   accessToken: string;
-  accessTokenExpiredAt: Date;
+  accessTokenExpiresAt: Date;
   refreshToken: string;
-  refreshTokenExpiredAt: Date;
+  refreshTokenExpiresAt: Date;
 };
 
 // use case

@@ -6,6 +6,7 @@ export type FastifyRestServerConfig = {
   allowedOrigins: string[];
 
   // rate limit
+  rateLimitEnabled: boolean;
   rateLimitMax: number;
   rateLimitWindowMs: number;
 

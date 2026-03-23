@@ -7,7 +7,7 @@ import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import { Comment } from "@/domain/entities/comment";
 import { getPagination } from "@/shared/utils/pagination";
-import { and, count, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { comments } from "../schema";
 import { CommentsRepositoryError } from "@/domain/errors/infrastructure-errors";
 

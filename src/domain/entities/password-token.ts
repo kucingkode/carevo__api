@@ -1,4 +1,4 @@
-import { EMAIL_TOKEN_TTL } from "@/constants";
+import { EMAIL_TOKEN_TTL, PASSWORD_RESET_TOKEN_TTL } from "@/constants";
 
 export type PasswordTokenProps = {
   userId: string;
@@ -36,7 +36,7 @@ export class PasswordToken {
     return new PasswordToken({
       userId: params.userId,
       tokenHash: params.tokenHash,
-      expiresAt: new Date(Date.now() + EMAIL_TOKEN_TTL),
+      expiresAt: new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL),
       usedAt: null,
       createdAt: new Date(),
     });

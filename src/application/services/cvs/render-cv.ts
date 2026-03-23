@@ -1,4 +1,5 @@
 import { DOWNLOAD_CV_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
+import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import { InfrastructureError } from "@/domain/errors/infrastructure-errors";
 import type {
@@ -35,7 +36,7 @@ export class RenderCvService<TxCtx extends TxContext<any>>
 
   async renderCv(input: RenderCvInput): Promise<RenderCvOutput> {
     if (input.requestUserId !== input.userId && !input.preview)
-      throw new UnauthorizedError();
+      throw new ForbiddenError();
 
     const cv = await this.db.beginTx(
       (ctx) => this.cvsRepository.getByUserId(ctx, input.userId),

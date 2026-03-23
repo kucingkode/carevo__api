@@ -7,7 +7,12 @@ import { NodemailerEmailSender } from "@/infrastructure/out/email-sender/nodemai
 import { RegisterUserService } from "./services/auth/register-user";
 import { createFastifyRestServer } from "@/infrastructure/in/rest/fastify/fastify";
 import { randomBytes } from "node:crypto";
-import { CACHE_MAX_SIZE, SERVICE_NAME, SERVICE_VERSION } from "@/constants";
+import {
+  CACHE_MAX_SIZE,
+  REFRESH_TOKEN_CLEANUP_INTERVAL,
+  SERVICE_NAME,
+  SERVICE_VERSION,
+} from "@/constants";
 import { ChangeUserPasswordService } from "./services/auth/change-user-password";
 import { LoginUserService } from "./services/auth/login-user";
 import { LogoutUserService } from "./services/auth/logout-user";
@@ -62,6 +67,7 @@ import { UpdateUserProftoService } from "./services/users/update-user-profto";
 import { DrizzleUserCommunitiesRepository } from "@/infrastructure/out/database/drizzle/repositories/user-communities-repository";
 import { DrizzleUserLikesRepository } from "@/infrastructure/out/database/drizzle/repositories/user-likes-repository";
 import { UpdateCvEmbeddingService } from "./services/cvs/update-cv-embedding";
+import { GetUserService } from "./services/users/get-user";
 
 export async function bootstrap() {
   // ===============================
@@ -124,7 +130,6 @@ export async function bootstrap() {
     database: appConfig.DB_DATABASE,
     ssl: appConfig.DB_SSL,
   });
-  await db.ping();
 
   const bootcampsRepository = new DrizzleBootcampsRepository();
   const certificationsRepository = new DrizzleCertificationsRepository();
@@ -247,7 +252,7 @@ export async function bootstrap() {
 
   const sendPasswordResetEmailService = new SendPasswordResetEmailService(
     {
-      fromEmail: appConfig.SMTP_AUTH_EMAIL,
+      fromEmail: appConfig.SENDER_EMAIL,
       redirectBaseUrl: appConfig.UI_BASE_URL,
     },
     {
@@ -261,7 +266,7 @@ export async function bootstrap() {
 
   const sendVerificationEmailService = new SendVerificationEmailService(
     {
-      fromEmail: appConfig.SMTP_AUTH_EMAIL,
+      fromEmail: appConfig.SENDER_EMAIL,
       redirectBaseUrl: appConfig.UI_BASE_URL,
     },
     {
@@ -282,7 +287,7 @@ export async function bootstrap() {
 
   const googleOauthService = new GoogleOauthService(
     {
-      fromEmail: appConfig.SMTP_AUTH_EMAIL,
+      fromEmail: appConfig.SENDER_EMAIL,
     },
     {
       db,
@@ -452,6 +457,19 @@ export async function bootstrap() {
     usersRepository,
   });
 
+  const getUserService = new GetUserService({
+    db,
+    usersRepository,
+  });
+
+  // ===============================
+  // Tasks
+  // ===============================
+
+  setInterval(() => {
+    db.beginTx((ctx) => refreshTokensRepository.deleteExpired(ctx));
+  }, REFRESH_TOKEN_CLEANUP_INTERVAL);
+
   // ===============================
   // Inbound Ports
   // ===============================
@@ -464,6 +482,7 @@ export async function bootstrap() {
       allowedOrigins: appConfig.ALLOWED_ORIGINS.split(","),
 
       // rate limit
+      rateLimitEnabled: appConfig.RATE_LIMIT_ENABLED,
       rateLimitMax: appConfig.RATE_LIMIT_MAX,
       rateLimitWindowMs: appConfig.RATE_LIMIT_WINDOW_MS,
 
@@ -548,6 +567,7 @@ export async function bootstrap() {
       getUserProftoService,
       listUsersService,
       updateUserProftoService,
+      getUserService,
     },
   );
 

@@ -163,7 +163,7 @@ export class GoogleOauthService<TxCtx extends TxContext<any>>
     }
 
     // issue token pair
-    const { accessToken, refreshToken } =
+    const { accessTokenIssued, refreshTokenIssued } =
       await this.tokenProvider.issueTokenPair(
         {
           userId: user.id,
@@ -171,25 +171,29 @@ export class GoogleOauthService<TxCtx extends TxContext<any>>
           userAgent: input.userAgent,
         },
         {
-          rememberMe: true,
+          longLived: true,
         },
       );
 
-    logCtx.refreshTokenId = parseToken(refreshToken.value).id;
+    logCtx.refreshTokenId = parseToken(refreshTokenIssued.value).id;
     this.log.info(logCtx, "User logged in using Google oauth");
 
     return {
       userId: user.id,
-      accessToken: accessToken.value,
-      accessTokenExpiresAt: accessToken.expiresAt,
-      refreshToken: refreshToken.value,
-      refreshTokenExpiresAt: refreshToken.expiresAt,
+      accessToken: accessTokenIssued.value,
+      accessTokenExpiresAt: accessTokenIssued.expiresAt,
+      refreshToken: refreshTokenIssued.value,
+      refreshTokenExpiresAt: refreshTokenIssued.expiresAt,
     };
   }
 
   private nameToUsername(name: string) {
     const random = this.generateSecureRandomAlphanumeric(6);
-    return `${name.toLowerCase().replaceAll(" ", "-").slice(0, 23)}-${random}`;
+    return `${name
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .replaceAll(" ", "-")
+      .slice(0, 23)}-${random}`;
   }
 
   private generateSecureRandomAlphanumeric(length: number) {

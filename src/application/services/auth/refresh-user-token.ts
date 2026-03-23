@@ -1,6 +1,6 @@
 import { REFRESH_USER_TOKEN_USE_CASE } from "@/constants";
 import { NotFoundError } from "@/domain/errors/domain/not-found-error";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
+import { RefreshTokenInvalidError } from "@/domain/errors/domain/refresh-token-invalid-error";
 import type {
   RefreshUserTokenInput,
   RefreshUserTokenOutput,
@@ -31,30 +31,25 @@ export class RefreshUserTokenService
   ): Promise<RefreshUserTokenOutput> {
     const logCtx: any = {
       refreshTokenId: parseToken(input.refreshToken).id,
-      rememberMe: input.rememberMe,
     };
 
     try {
-      const { accessToken, refreshToken } =
-        await this.tokenProvider.refreshTokenPair(
-          {
-            refreshToken: input.refreshToken,
-            ipAddress: input.ipAddress,
-            userAgent: input.userAgent,
-          },
-          {
-            rememberMe: input.rememberMe,
-          },
-        );
+      const { accessTokenIssued, refreshTokenIssued, longLived } =
+        await this.tokenProvider.refreshTokenPair({
+          refreshTokenStr: input.refreshToken,
+          ipAddress: input.ipAddress,
+          userAgent: input.userAgent,
+        });
 
-      logCtx.newRefreshTokenId = parseToken(refreshToken.value).id;
+      logCtx.newRefreshTokenId = parseToken(refreshTokenIssued.value).id;
       this.log.info(logCtx, "User token refreshed");
 
       return {
-        accessToken: accessToken.value,
-        accessTokenExpiredAt: accessToken.expiresAt,
-        refreshToken: refreshToken.value,
-        refreshTokenExpiredAt: refreshToken.expiresAt,
+        accessToken: accessTokenIssued.value,
+        accessTokenExpiresAt: accessTokenIssued.expiresAt,
+        refreshToken: refreshTokenIssued.value,
+        refreshTokenExpiresAt: refreshTokenIssued.expiresAt,
+        rememberMe: longLived,
       };
     } catch (err) {
       if (err instanceof NotFoundError) {
@@ -67,7 +62,7 @@ export class RefreshUserTokenService
           "Refresh user token attempt failed: invalid refresh token",
         );
 
-        throw new UnauthorizedError();
+        throw new RefreshTokenInvalidError();
       }
 
       throw err;

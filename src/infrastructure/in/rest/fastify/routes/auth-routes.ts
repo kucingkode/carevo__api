@@ -6,7 +6,6 @@ import { loginUserInputSchema } from "@/domain/ports/in/auth/login-user";
 import type { FastifyRestServerConfig } from "../config";
 import type { FastifyRestServerDeps } from "../deps";
 import { logoutUserInputSchema } from "@/domain/ports/in/auth/logout-user";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import { refreshUserTokenInputSchema } from "@/domain/ports/in/auth/refresh-user-token";
 import { sendPasswordResetEmailInputSchema } from "@/domain/ports/in/auth/send-password-reset-email";
 import { resetUserPasswordInputSchema } from "@/domain/ports/in/auth/reset-user-password";
@@ -14,22 +13,27 @@ import { changeUserPasswordInputSchema } from "@/domain/ports/in/auth/change-use
 import type { FastifyRequest } from "fastify";
 import { googleOauthInputSchema } from "@/domain/ports/in/auth/google-oauth";
 import { getBody } from "../utils";
+import { createVerifyAccessToken } from "../hooks/verify-access-token";
+import { RefreshTokenInvalidError } from "@/domain/errors/domain/refresh-token-invalid-error";
+
+const getRefreshTokenMaxAge = (expiresAt: Date) =>
+  Math.floor((expiresAt.getTime() - Date.now()) / 1000);
+
+const getRefreshToken = (req: FastifyRequest) => {
+  const refreshTokenCookie = req.cookies["refresh_token"];
+  if (!refreshTokenCookie) throw new RefreshTokenInvalidError();
+
+  const refreshToken = req.unsignCookie(refreshTokenCookie);
+  if (!refreshToken.valid) throw new RefreshTokenInvalidError();
+
+  return refreshToken.value;
+};
 
 export function authRoutes(
   config: FastifyRestServerConfig,
   deps: FastifyRestServerDeps,
 ) {
-  const getRefreshToken = (req: FastifyRequest) => {
-    const refreshTokenCookie = req.cookies["refresh_token"];
-    if (!refreshTokenCookie)
-      throw new UnauthorizedError("Missing refresh token");
-
-    const refreshToken = req.unsignCookie(refreshTokenCookie);
-    if (!refreshToken.valid)
-      throw new UnauthorizedError("Invalid refresh token");
-
-    return refreshToken.value;
-  };
+  const verifyAccessToken = createVerifyAccessToken(deps);
 
   return async (app: FastifyApp) => {
     // ===============================
@@ -92,13 +96,14 @@ export function authRoutes(
         const loginUserOutput =
           await deps.loginUserService.loginUser(loginUserInput);
 
+        const refreshTokenMaxAge = getRefreshTokenMaxAge(
+          loginUserOutput.refreshTokenExpiresAt,
+        );
+
         reply.setCookie("refresh_token", loginUserOutput.refreshToken, {
           ...config.cookieOptions,
           httpOnly: true,
-          path: "/auth",
-          expires: loginUserInput.rememberMe
-            ? loginUserOutput.refreshTokenExpiredAt
-            : undefined,
+          maxAge: loginUserInput.rememberMe ? refreshTokenMaxAge : undefined,
           signed: true,
         });
 
@@ -122,6 +127,7 @@ export function authRoutes(
             timeWindow: "1 minute",
           },
         },
+        onRequest: [verifyAccessToken],
       },
       async (req, reply) => {
         const logoutUserInput = logoutUserInputSchema.parse({
@@ -152,7 +158,6 @@ export function authRoutes(
       },
       async (req, reply) => {
         const refreshUserTokenInput = refreshUserTokenInputSchema.parse({
-          ...getBody(req),
           refreshToken: getRefreshToken(req),
           ipAddress: req.clientIp,
           userAgent: req.clientUa,
@@ -163,12 +168,15 @@ export function authRoutes(
             refreshUserTokenInput,
           );
 
+        const refreshTokenMaxAge = getRefreshTokenMaxAge(
+          refreshUserTokenOutput.refreshTokenExpiresAt,
+        );
+
         reply.setCookie("refresh_token", refreshUserTokenOutput.refreshToken, {
           ...config.cookieOptions,
           httpOnly: true,
-          path: "/auth",
-          expires: refreshUserTokenInput.rememberMe
-            ? refreshUserTokenOutput.refreshTokenExpiredAt
+          maxAge: refreshUserTokenOutput.rememberMe
+            ? refreshTokenMaxAge
             : undefined,
           signed: true,
         });
@@ -250,10 +258,9 @@ export function authRoutes(
             timeWindow: "1 minute",
           },
         },
+        onRequest: [verifyAccessToken],
       },
       async (req, reply) => {
-        console.log("jhwe", req.userId);
-
         const changeUserPasswordInput = changeUserPasswordInputSchema.parse({
           ...getBody(req),
           requestUserId: req.userId,
@@ -345,11 +352,14 @@ export function authRoutes(
       const googleOauthOutput =
         await deps.googleOauthService.googleOauth(googleOauthInput);
 
+      const refreshTokenMaxAge = getRefreshTokenMaxAge(
+        googleOauthOutput.refreshTokenExpiresAt,
+      );
+
       reply.setCookie("refresh_token", googleOauthOutput.refreshToken, {
         ...config.cookieOptions,
         httpOnly: true,
-        path: "/auth",
-        expires: googleOauthOutput.refreshTokenExpiresAt,
+        maxAge: refreshTokenMaxAge,
         signed: true,
       });
 

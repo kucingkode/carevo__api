@@ -33,6 +33,10 @@ const appConfigSchema = z.object({
 
   RATE_LIMIT_MAX: z.coerce.number().int().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().default(60_000),
+  RATE_LIMIT_ENABLED: z
+    .enum(["true", "false"])
+    .transform((v) => v === "true")
+    .default(true),
 
   MAX_EVENT_LOOP_DELAY: z.coerce.number().int().default(1000),
   MAX_HEAP_USED_BYTES: z.coerce
@@ -48,8 +52,10 @@ const appConfigSchema = z.object({
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number().int(),
   SMTP_SECURE: z.enum(["true", "false"]).transform((v) => v === "true"),
-  SMTP_AUTH_EMAIL: z.string(),
-  SMTP_AUTH_PASSWORD: z.string(),
+  SMTP_AUTH_EMAIL: z.email().optional(),
+  SMTP_AUTH_PASSWORD: z.string().optional(),
+
+  SENDER_EMAIL: z.email(),
 
   UI_BASE_URL: z.url(),
   API_BASE_URL: z.url(),

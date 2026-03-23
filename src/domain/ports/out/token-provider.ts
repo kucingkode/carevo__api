@@ -4,8 +4,9 @@ export type IssuedToken = {
 };
 
 export type TokenPair = {
-  accessToken: IssuedToken;
-  refreshToken: IssuedToken;
+  accessTokenIssued: IssuedToken;
+  refreshTokenIssued: IssuedToken;
+  longLived: boolean;
 };
 
 export type IssueTokenPairParams = {
@@ -15,13 +16,13 @@ export type IssueTokenPairParams = {
 };
 
 export type RefreshTokenPairParams = {
-  refreshToken: string;
+  refreshTokenStr: string;
   ipAddress: string | null;
   userAgent: string | null;
 };
 
 export type TokenPairOptions = {
-  rememberMe?: boolean;
+  longLived?: boolean;
 };
 
 export type AccessTokenPayload = {
@@ -34,10 +35,7 @@ export type TokenProvider = {
     options?: TokenPairOptions,
   ): Promise<TokenPair>;
   verifyAccessToken(token: string): Promise<AccessTokenPayload | void>;
-  refreshTokenPair(
-    params: RefreshTokenPairParams,
-    options?: TokenPairOptions,
-  ): Promise<TokenPair>;
-  revokeRefreshToken(refreshToken: string): Promise<void>;
+  refreshTokenPair(params: RefreshTokenPairParams): Promise<TokenPair>;
+  revokeRefreshToken(refreshTokenStr: string): Promise<void>;
   revokeAllByUserId(userId: string): Promise<void>;
 };

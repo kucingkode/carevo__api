@@ -18,8 +18,6 @@ export function filesRoutes(
     // ===============================
 
     app.get("/:fileId", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const getFileInput = getFileInputSchema.parse({
@@ -51,8 +49,6 @@ export function filesRoutes(
         },
       },
       async (req, reply) => {
-        if (!req.userId) throw new UnauthorizedError();
-
         const data = await req.file();
         if (!data) {
           throw new DomainError("Missing file", "VALIDATION_ERROR");

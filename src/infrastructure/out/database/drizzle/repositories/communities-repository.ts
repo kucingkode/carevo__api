@@ -8,7 +8,7 @@ import type { DrizzleTxContext } from "../database";
 import { CommunitiesRepositoryError } from "@/domain/errors/infrastructure-errors";
 import type { Community } from "@/domain/entities/community";
 import { getPagination } from "@/shared/utils/pagination";
-import { and, eq, like, or } from "drizzle-orm";
+import { and, ilike } from "drizzle-orm";
 import { communities } from "../schema";
 
 export class DrizzleCommunitiesRepository
@@ -30,7 +30,7 @@ export class DrizzleCommunitiesRepository
     const { limit, offset } = getPagination(query.page, query.limit);
 
     const filter = and(
-      query.query ? like(communities.name, `%${query.query}%`) : undefined,
+      query.query ? ilike(communities.name, `%${query.query}%`) : undefined,
     );
 
     const result = await ctx.tx.query.communities.findMany({

@@ -7,9 +7,8 @@ export const SERVICE_VERSION = "0.1.0";
 export const CACHE_MAX_SIZE = 10_000;
 
 export const EMAIL_TOKEN_TTL = 24 * 60 * 60_000; // 24h
-export const ACCESS_TOKEN_TTL = 15 * 60_000; // 15m
-export const REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60_000; // 30d
-export const REFRESH_TOKEN_SHORT_TTL = 60 * 60_000; // 1h
+export const PASSWORD_RESET_TOKEN_TTL = 24 * 60 * 60_000; // 24h
+export const REFRESH_TOKEN_CLEANUP_INTERVAL = 24 * 60 * 60_000; // 24h
 
 export const READ_ONLY_DB_TX: TxConfig = {
   accessMode: "read only",
@@ -134,3 +133,4 @@ export const GET_USER_COMMUNITIES_USE_CASE = "get-user-communities";
 export const GET_USER_PROFTO_USE_CASE = "get-user-profto";
 export const LIST_USERS_USE_CASE = "list-users";
 export const UPDATE_USER_PROFTO_USE_CASE = "update-user-profto";
+export const GET_USER_USE_CASE = "get-user";

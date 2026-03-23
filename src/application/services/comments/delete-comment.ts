@@ -1,4 +1,5 @@
 import { CREATE_COMMENT_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
+import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
 import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
@@ -36,7 +37,7 @@ export class DeleteCommentService<TxCtx extends TxContext<any>>
 
     if (!comment) throw new NotFoundError();
     if (comment.postId !== input.postId) throw new NotFoundError();
-    if (comment.userId !== input.requestUserId) throw new UnauthorizedError();
+    if (comment.userId !== input.requestUserId) throw new ForbiddenError();
 
     await this.db.beginTx((ctx) =>
       this.commentsRepository.deleteById(ctx, input.commentId),

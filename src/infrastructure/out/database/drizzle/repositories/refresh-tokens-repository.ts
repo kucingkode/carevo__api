@@ -27,10 +27,7 @@ export class DrizzleRefreshTokensRepository
     tokenId: string,
   ): Promise<RefreshToken | undefined> {
     const result = await ctx.tx.query.refreshTokens.findFirst({
-      where: and(
-        eq(refreshTokens.id, tokenId),
-        isNull(refreshTokens.revokedAt),
-      ),
+      where: and(eq(refreshTokens.id, tokenId)),
     });
 
     if (!result) {
@@ -54,10 +51,7 @@ export class DrizzleRefreshTokensRepository
     userId: string,
   ): Promise<void> {
     const result = await ctx.tx
-      .update(refreshTokens)
-      .set({
-        revokedAt: new Date(),
-      })
+      .delete(refreshTokens)
       .where(eq(refreshTokens.userId, userId))
       .returning({
         id: refreshTokens.id,
@@ -71,10 +65,7 @@ export class DrizzleRefreshTokensRepository
 
   async revokeById(ctx: DrizzleTxContext, id: string): Promise<void> {
     const result = await ctx.tx
-      .update(refreshTokens)
-      .set({
-        revokedAt: new Date(),
-      })
+      .delete(refreshTokens)
       .where(eq(refreshTokens.id, id))
       .returning({
         id: refreshTokens.id,

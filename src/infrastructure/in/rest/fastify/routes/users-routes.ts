@@ -1,7 +1,6 @@
 import type { FastifyApp } from "../create-app";
 import type { FastifyRestServerConfig } from "../config";
 import type { FastifyRestServerDeps } from "../deps";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import { getBody, getParams, getQuery, qNumber } from "../utils";
 import { listUsersInputSchema } from "@/domain/ports/in/users/list-users";
 import { getUserCommunitiesInputSchema } from "@/domain/ports/in/users/get-user-communities";
@@ -11,6 +10,7 @@ import { getCvInputSchema } from "@/domain/ports/in/cvs/get-cv";
 import { updateCvInputSchema } from "@/domain/ports/in/cvs/update-cv";
 import { renderCvInputSchema } from "@/domain/ports/in/cvs/render-cv";
 import { Readable } from "node:stream";
+import { getUserInputSchema } from "@/domain/ports/in/users/get-user";
 
 export function usersRoutes(
   config: FastifyRestServerConfig,
@@ -18,12 +18,24 @@ export function usersRoutes(
 ) {
   return async (app: FastifyApp) => {
     // ===============================
+    // getUser
+    // ===============================
+
+    app.get("/me", async (req, reply) => {
+      const getUserInput = getUserInputSchema.parse({
+        requestUserId: req.userId,
+      });
+
+      const getUserOutput = await deps.getUserService.getUser(getUserInput);
+
+      return reply.status(200).send(getUserOutput);
+    });
+
+    // ===============================
     // listUsers
     // ===============================
 
     app.get("/", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const listUsersInput = listUsersInputSchema.parse({
@@ -43,8 +55,6 @@ export function usersRoutes(
     // ===============================
 
     app.get("/:userId/communities", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const getUserCommunitiesInput = getUserCommunitiesInputSchema.parse({
@@ -64,8 +74,6 @@ export function usersRoutes(
     // ===============================
 
     app.get("/u/:username/profto", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const getUserProftoInput = getUserProftoInputSchema.parse({
@@ -83,8 +91,6 @@ export function usersRoutes(
     // ===============================
 
     app.patch("/:userId/profto", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const updateUserProftoInput = updateUserProftoInputSchema.parse({
@@ -105,8 +111,6 @@ export function usersRoutes(
     // ===============================
 
     app.get("/:userId/cv", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const getCvInput = getCvInputSchema.parse({
@@ -124,8 +128,6 @@ export function usersRoutes(
     // ===============================
 
     app.patch("/:userId/cv", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const updateCvInput = updateCvInputSchema.parse({
@@ -144,8 +146,6 @@ export function usersRoutes(
     // ===============================
 
     app.get("/:userId/cv/download", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
       const q = getQuery(req);
 
@@ -168,8 +168,6 @@ export function usersRoutes(
     // ===============================
 
     app.post("/:userId/cv/save", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const p = getParams(req);
 
       const renderCvInput = renderCvInputSchema.parse({
@@ -183,11 +181,11 @@ export function usersRoutes(
       const uploadFileOutput = await deps.uploadFileService.uploadFile({
         stream: Readable.from(renderCvOutput.buffer),
         mimeType: "application/pdf",
-        requestUserId: req.userId,
+        requestUserId: renderCvInput.requestUserId,
       });
 
       await deps.updateUserProftoService.updateUserProfto({
-        requestUserId: req.userId,
+        requestUserId: renderCvInput.requestUserId,
         userId: p.userId,
         profto: {
           cvFileId: uploadFileOutput.fileId,
@@ -195,7 +193,7 @@ export function usersRoutes(
       });
 
       await deps.updateCvEmbeddingService.updateCvEmbedding({
-        userId: req.userId,
+        userId: renderCvInput.requestUserId,
       });
 
       return reply.status(200).send();

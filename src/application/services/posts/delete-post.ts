@@ -1,4 +1,5 @@
 import { DELETE_POST_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
+import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
 import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
@@ -35,7 +36,7 @@ export class DeletePostService<TxCtx extends TxContext<any>>
     );
 
     if (!post) throw new NotFoundError();
-    if (post.userId !== input.requestUserId) throw new UnauthorizedError();
+    if (post.userId !== input.requestUserId) throw new ForbiddenError();
 
     await this.db.beginTx((ctx) =>
       this.postsRepository.deleteById(ctx, post.id),

@@ -12,8 +12,8 @@ export type NodemailerEmailSenderConfig = {
   port: number;
   secure: boolean;
   auth: {
-    email: string;
-    password: string;
+    email?: string;
+    password?: string;
   };
 };
 

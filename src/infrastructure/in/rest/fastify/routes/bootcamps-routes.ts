@@ -16,8 +16,6 @@ export function bootcampsRoutes(
     // ===============================
 
     app.get("/", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const listBootcampsInput = listBootcampsInputSchema.parse({
@@ -38,8 +36,6 @@ export function bootcampsRoutes(
     // ===============================
 
     app.get("/feed", async (req, reply) => {
-      if (!req.userId) throw new UnauthorizedError();
-
       const q = getQuery(req);
 
       const getBootcampsFeedInput = getBootcampsFeedInputSchema.parse({

@@ -61,6 +61,8 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     { userId, ipAddress, userAgent }: IssueTokenPairParams,
     options: TokenPairOptions = {},
   ): Promise<TokenPair> {
+    const longLived = options.longLived ?? false;
+
     // get access token
     const accessTokenExp = Date.now() + this.config.accessTokenTtl;
 
@@ -73,7 +75,7 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
       "issueTokenPair: JWT signing failed",
     );
 
-    const accessToken = {
+    const accessTokenIssued = {
       value: accessTokenValue,
       expiresAt: new Date(accessTokenExp),
     };
@@ -85,7 +87,7 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
       "issueTokenPair: secret hashing failed",
     );
 
-    const refreshTokenTtl = options.rememberMe
+    const refreshTokenTtl = longLived
       ? this.config.refreshTokenTtlExtended
       : this.config.refreshTokenTtl;
 
@@ -96,9 +98,9 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
       userId,
       expiresAt: refreshTokenExpiresAt,
       tokenHash: refreshTokenHash,
+      longLived: longLived ?? false,
       ipAddress,
       userAgent,
-      revokedAt: null,
       createdAt: new Date(),
     };
 
@@ -115,7 +117,7 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
       refreshTokenSecret,
     );
 
-    const refreshToken = {
+    const refreshTokenIssued = {
       value: refreshTokenValue,
       expiresAt: refreshTokenExpiresAt,
     };
@@ -126,32 +128,30 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     );
 
     return {
-      accessToken,
-      refreshToken,
+      accessTokenIssued,
+      refreshTokenIssued,
+      longLived,
     };
   }
 
-  async refreshTokenPair(
-    { refreshToken, ipAddress, userAgent }: RefreshTokenPairParams,
-    options: TokenPairOptions = {},
-  ): Promise<TokenPair> {
-    const { id: refreshTokenId } = parseToken(refreshToken);
+  async refreshTokenPair({
+    refreshTokenStr,
+    ipAddress,
+    userAgent,
+  }: RefreshTokenPairParams): Promise<TokenPair> {
+    const { id: oldRefreshTokenId } = parseToken(refreshTokenStr);
 
     // get user id
-    const userId = await this.call(
+    const oldRefreshToken = await this.call(
       () =>
-        this.db.beginTx(async (ctx) => {
-          const result = await this.refreshTokensRepository.getById(
-            ctx,
-            refreshTokenId,
-          );
-
-          return result?.userId ?? null;
-        }, READ_ONLY_DB_TX),
+        this.db.beginTx(
+          (ctx) => this.refreshTokensRepository.getById(ctx, oldRefreshTokenId),
+          READ_ONLY_DB_TX,
+        ),
       "refreshTokenPair: refresh token retrieval failed",
     );
 
-    if (!userId) {
+    if (!oldRefreshToken) {
       throw new NotFoundError("Refresh token not found");
     }
 
@@ -160,70 +160,74 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     const accessTokenValue = await this.call(
       () =>
         this.jwtSigner.sign({
-          sub: userId,
+          sub: oldRefreshToken.userId,
           exp: accessTokenExp,
         }),
       "issueTokenPair: JWT signing failed",
     );
 
-    const accessToken = {
+    const accessTokenIssued = {
       value: accessTokenValue,
       expiresAt: new Date(accessTokenExp),
     };
 
     // get refresh token
-    const refreshTokenSecret = randomBytes(32).toString("base64url");
-    const refreshTokenHash = await this.call(
-      () => this.hasher.hash(refreshTokenSecret),
+    const newRefreshTokenSecret = randomBytes(32).toString("base64url");
+    const newRefreshTokenHash = await this.call(
+      () => this.hasher.hash(newRefreshTokenSecret),
       "issueTokenPair: secret hashing failed",
     );
 
-    const refreshTokenTtl = options.rememberMe
+    const newRefreshTokenTtl = oldRefreshToken.longLived
       ? this.config.refreshTokenTtlExtended
       : this.config.refreshTokenTtl;
-    const refreshTokenExpiresAt = new Date(Date.now() + refreshTokenTtl);
+    const newRefreshTokenExpiresAt = new Date(Date.now() + newRefreshTokenTtl);
 
-    const refreshTokenEntity: RefreshToken = {
+    const newRefreshTokenEntity: RefreshToken = {
       id: uuidV7(),
-      userId,
-      expiresAt: refreshTokenExpiresAt,
-      tokenHash: refreshTokenHash,
+      userId: oldRefreshToken.userId,
+      expiresAt: newRefreshTokenExpiresAt,
+      tokenHash: newRefreshTokenHash,
+      longLived: oldRefreshToken.longLived,
       ipAddress,
       userAgent,
-      revokedAt: null,
       createdAt: new Date(),
     };
 
     await this.call(
       () =>
         this.db.beginTx(async (ctx) => {
-          await this.refreshTokensRepository.revokeById(ctx, refreshTokenId);
-          await this.refreshTokensRepository.save(ctx, refreshTokenEntity);
+          await this.refreshTokensRepository.revokeById(
+            ctx,
+            oldRefreshToken.id,
+          );
+          await this.refreshTokensRepository.save(ctx, newRefreshTokenEntity);
         }),
       "refreshTokenPair: Repository save and revocation failed",
     );
 
     const refreshTokenValue = stringifyToken(
-      refreshTokenEntity.id,
-      refreshTokenSecret,
+      newRefreshTokenEntity.id,
+      newRefreshTokenSecret,
     );
 
-    const newRefreshToken = {
+    const refreshTokenIssued = {
       value: refreshTokenValue,
-      expiresAt: refreshTokenExpiresAt,
+      expiresAt: newRefreshTokenExpiresAt,
     };
 
     this.log.debug(
       {
-        oldRefreshTokenId: refreshTokenId,
-        newRefreshTokenId: refreshTokenEntity.id,
+        oldRefreshTokenId: oldRefreshToken.id,
+        newRefreshTokenId: newRefreshTokenEntity.id,
       },
       "Token pair refreshed",
     );
 
     return {
-      accessToken,
-      refreshToken: newRefreshToken,
+      accessTokenIssued,
+      refreshTokenIssued,
+      longLived: newRefreshTokenEntity.longLived,
     };
   }
 
@@ -237,19 +241,23 @@ export class DefaultTokenProvider<TxCtx extends TxContext>
     );
   }
 
-  async revokeRefreshToken(refreshToken: string): Promise<void> {
+  async revokeRefreshToken(refreshTokenStr: string): Promise<void> {
+    const { id } = parseToken(refreshTokenStr);
+
     await this.call(
       () =>
         this.db.beginTx(async (ctx) => {
-          await this.refreshTokensRepository.revokeById(ctx, refreshToken);
+          await this.refreshTokensRepository.revokeById(ctx, id);
         }),
       "revokeRefreshToken: repository revocation failed",
     );
   }
 
-  async verifyAccessToken(token: string): Promise<AccessTokenPayload | void> {
+  async verifyAccessToken(
+    accessTokenStr: string,
+  ): Promise<AccessTokenPayload | void> {
     const payload = await this.call(
-      () => this.jwtSigner.verify(token),
+      () => this.jwtSigner.verify(accessTokenStr),
       "verifyAccessToken: JWT signer verification failed",
     );
 

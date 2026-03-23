@@ -4,7 +4,7 @@ export type RefreshToken = {
   tokenHash: string;
   ipAddress: string | null;
   userAgent: string | null;
+  longLived: boolean;
   expiresAt: Date;
-  revokedAt: Date | null;
   createdAt: Date;
 };

@@ -6,7 +6,7 @@ import type {
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import type { Certification } from "@/domain/entities/certification";
-import { and, cosineDistance, desc, eq, like, sql } from "drizzle-orm";
+import { and, cosineDistance, desc, eq, ilike, sql } from "drizzle-orm";
 import { certifications } from "../schema";
 import { getPagination } from "@/shared/utils/pagination";
 import { CertificationsRepositoryError } from "@/domain/errors/infrastructure-errors";
@@ -31,7 +31,7 @@ export class DrizzleCertificationsRepository
 
     const filter = and(
       // query
-      query.query ? like(certifications.name, `%${query.query}%`) : undefined,
+      query.query ? ilike(certifications.name, `%${query.query}%`) : undefined,
 
       // professionRole
       query.professionRole

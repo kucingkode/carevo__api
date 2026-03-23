@@ -1,5 +1,5 @@
 import { UPDATE_USER_PROFTO_USE_CASE } from "@/constants";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
+import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
 import type {
   UpdateUserProftoInput,
   UpdateUserProftoUseCase,
@@ -28,7 +28,7 @@ export class UpdateUserProftoService<TxCtx extends TxContext<any>>
   }
 
   async updateUserProfto(input: UpdateUserProftoInput): Promise<void> {
-    if (input.requestUserId !== input.userId) throw new UnauthorizedError();
+    if (input.requestUserId !== input.userId) throw new ForbiddenError();
 
     await this.db.beginTx((ctx) =>
       this.usersRepository.partialUpdateProfto(ctx, input.userId, input.profto),

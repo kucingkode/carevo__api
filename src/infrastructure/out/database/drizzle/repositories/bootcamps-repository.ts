@@ -6,7 +6,7 @@ import type {
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import type { Bootcamp } from "@/domain/entities/bootcamp";
-import { and, cosineDistance, desc, eq, like, sql } from "drizzle-orm";
+import { and, cosineDistance, desc, eq, ilike, sql } from "drizzle-orm";
 import { bootcamps } from "../schema";
 import { getPagination } from "@/shared/utils/pagination";
 import { BootcampsRepositoryError } from "@/domain/errors/infrastructure-errors";
@@ -31,7 +31,7 @@ export class DrizzleBootcampsRepository
 
     const filter = and(
       // query
-      query.query ? like(bootcamps.name, `%${query.query}%`) : undefined,
+      query.query ? ilike(bootcamps.name, `%${query.query}%`) : undefined,
 
       // professionRole
       query.professionRole

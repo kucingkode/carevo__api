@@ -6,7 +6,7 @@ import type {
   ListUsersQuery,
   UsersRepository,
 } from "@/domain/ports/out/database/users-repository";
-import { desc, eq, like, or } from "drizzle-orm";
+import { desc, eq, ilike, or } from "drizzle-orm";
 import { BaseAdapter } from "@/shared/classes/base-adapter";
 import { cvs, proftos, users } from "../schema";
 import { UsersRepositoryError } from "@/domain/errors/infrastructure-errors";
@@ -109,8 +109,8 @@ export class DrizzleUsersRepository
 
     const filter = query.query
       ? or(
-          like(users.username, `%${query.query}%`),
-          like(proftos.name, `%${query.query}%`),
+          ilike(users.username, `%${query.query}%`),
+          ilike(proftos.name, `%${query.query}%`),
         )
       : undefined;
 
@@ -137,7 +137,7 @@ export class DrizzleUsersRepository
     username: string,
   ): Promise<ProftoProps | undefined> {
     const result = await ctx.tx.query.proftos.findFirst({
-      where: eq(users.username, username),
+      where: ilike(users.username, username),
       with: {
         user: {
           columns: {
