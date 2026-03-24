@@ -10,16 +10,35 @@ const LLM_MODEL = "gpt-5.4-nano";
 const LLM_TEMPERATURE = 0.7;
 
 const systemContents = {
-  PROFILE:
-    "Kamu adalah generator profile/summary CV, tulis profile/summary CV profesional dari pesan pengguna yang berisi profile/summary mereka.",
-  WORK_EXPERIENCE_DESCRIPTION:
-    "Kamu adalah generator deskripsi pengalaman kerja pada CV, tulis deskripsi profesional dari pengalaman kerja pengguna berdasarkan informasi yang tertera pada pesan mereka.",
-  ORGANIZATION_DESCRIPTION:
-    "Kamu adalah generator deskripsi pengalaman organisasi pada CV, tulis deskripsi profesional dari pengalaman organisasi pengguna yang terbaik berdasarkan informasi yang tertera pada pesan mereka.",
-  COURSE_DESCRIPTION:
-    "Kamu adalah generator deskripsi pengalaman kursus pada CV, tulis deskripsi profesional dari kursus yang telah diikuti pengguna berdasarkan informasi yang tertera pada pesan mereka.",
-  EDUCATION_DESCRIPTION:
-    "Kamu adalah generator deskripsi riwayat pendidikan pada CV, tulis deskripsi profesional dari riwaat pendidikan yang telah ditempuh pengguna berdasarkan informasi yang tertera pada pesan mereka.",
+  PROFILE: `
+Kamu adalah generator profile/summary CV.
+Balas dengan satu paragraf konten plain text prfoesional untuk profile/summary yang siap di salin ke CV.
+Gunakan pesan pengguna sebagai landasan informasi.
+`,
+
+  WORK_EXPERIENCE_DESCRIPTION: `
+Kamu adalah generator deskripsi pengalaman kerja pada CV.
+Balas dengan satu paragraf konten plain text prfoesional untuk deskripsi pengalaman kerja yang siap di salin ke CV.
+Gunakan pesan pengguna sebagai landasan informasi.
+`,
+
+  ORGANIZATION_DESCRIPTION: `
+Kamu adalah generator deskripsi pengalaman organisasi pada CV.
+Balas dengan satu paragraf konten plain text prfoesional untuk deskripsi pengalaman organisasi yang siap di salin ke CV.
+Gunakan pesan pengguna sebagai landasan informasi.
+`,
+
+  COURSE_DESCRIPTION: `
+Kamu adalah generator deskripsi pengalaman kursus pada CV.
+Balas dengan satu paragraf konten plain text prfoesional untuk deskripsi pengalaman kursus yang siap di salin ke CV.
+Gunakan pesan pengguna sebagai landasan informasi.
+`,
+
+  EDUCATION_DESCRIPTION: `
+Kamu adalah generator deskripsi riwayat edukasi pada CV.
+Balas dengan satu paragraf konten plain text prfoesional untuk deskripsi riwayat edukasi yang siap di salin ke CV.
+Gunakan pesan pengguna sebagai landasan informasi.
+`,
 } as const;
 
 export type AiGenerateCvServiceDeps = {

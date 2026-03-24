@@ -24,8 +24,13 @@ export function aiRoutes(
       const aiGenerateCvOutput =
         deps.aiGenerateCvService.aiGenerateCv(aiGenerateCvInput);
 
-      const stream = Readable.from(aiGenerateCvOutput);
-      reply.send(stream);
+      let result = "";
+
+      for await (const chunk of aiGenerateCvOutput) {
+        result += chunk;
+      }
+
+      return reply.send(result);
     });
   };
 }
