@@ -15,7 +15,7 @@ export const certifications = pgTable(
     id: uuid().primaryKey(),
     name: text().notNull(),
     professionRole: text().notNull(),
-    thumbnailUrl: uuid().notNull(),
+    thumbnailUrl: text().notNull(),
     redirectUrl: text().notNull(),
     publisher: text().notNull(),
     embedding: vector({ dimensions: 1536 }).notNull(),

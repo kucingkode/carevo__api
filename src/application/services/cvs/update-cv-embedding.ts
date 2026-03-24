@@ -9,7 +9,7 @@ import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import type { EmbeddingProvider } from "@/domain/ports/out/embedding-provider";
 import { BaseUseCase } from "@/shared/classes/base-use-case";
 
-const EMBEDDING_MODEL = "";
+const EMBEDDING_MODEL = "text-embedding-3-small";
 
 export type UpdateCvEmbeddingDeps<TxCtx extends TxContext> = {
   db: Database<TxCtx>;

@@ -42,6 +42,7 @@ export function createApp(log: Logger, config: FastifyRestServerConfig) {
       "authorization",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   });
 
   app.register(helmet, {

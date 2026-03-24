@@ -28,7 +28,20 @@ export const cvSkillSchema = z.object({
 export type CvSkill = z.infer<typeof cvSkillSchema>;
 
 export const cvEducationSchema = z.object({
-  educationLevel: z.string().max(255),
+  educationLevel: z.enum([
+    "SD",
+    "SMP",
+    "MTS",
+    "SMA",
+    "MA",
+    "SMK",
+    "Profesi",
+    "D3",
+    "D4",
+    "S1",
+    "S2",
+    "S3",
+  ]),
   institution: z.string().max(255),
   city: z.string().max(255).optional(),
   studyProgram: z.string().max(255).optional(),

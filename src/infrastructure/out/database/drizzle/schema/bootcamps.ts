@@ -16,7 +16,7 @@ export const bootcamps = pgTable(
     id: uuid().primaryKey(),
     name: text().notNull(),
     professionRole: text().notNull(),
-    thumbnailUrl: uuid().notNull(),
+    thumbnailUrl: text().notNull(),
     redirectUrl: text().notNull(),
     publisher: text().notNull(),
     startDate: date().notNull(),
