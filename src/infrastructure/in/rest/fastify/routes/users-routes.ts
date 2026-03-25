@@ -1,7 +1,7 @@
 import type { FastifyApp } from "../create-app";
 import type { FastifyRestServerConfig } from "../config";
 import type { FastifyRestServerDeps } from "../deps";
-import { getBody, getParams, getQuery, qNumber } from "../utils";
+import { getBody, getParams, getQuery, qBoolean, qNumber } from "../utils";
 import { listUsersInputSchema } from "@/domain/ports/in/users/list-users";
 import { getUserCommunitiesInputSchema } from "@/domain/ports/in/users/get-user-communities";
 import { getUserProftoInputSchema } from "@/domain/ports/in/users/get-user-profto";
@@ -152,7 +152,7 @@ export function usersRoutes(
       const renderCvInput = renderCvInputSchema.parse({
         requestUserId: req.userId,
         userId: p.userId,
-        preview: q.preview,
+        preview: qBoolean(q.preview),
       });
 
       const renderCvOutput = await deps.renderCvService.renderCv(renderCvInput);
