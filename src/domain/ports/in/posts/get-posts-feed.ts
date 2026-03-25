@@ -1,9 +1,10 @@
-import type { Post, PostDisplay } from "@/domain/entities/post";
+import type { PostDisplay } from "@/domain/entities/post";
 import z from "zod";
 
 // request
 export const getPostsFeedInputSchema = z.object({
   requestUserId: z.uuidv7(),
+  sharedPostId: z.uuidv7(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });

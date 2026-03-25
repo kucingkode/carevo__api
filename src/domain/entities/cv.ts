@@ -1,3 +1,4 @@
+import { sanitizeHtmlObject } from "@/shared/utils/sanitize-html";
 import z from "zod";
 
 // ===============================
@@ -8,12 +9,14 @@ export const cvPersonalInformationSchema = z.object({
   firstName: z.string().max(255).optional(),
   lastName: z.string().max(255).optional(),
   profile: z.string().max(255).optional(),
-  websiteUrl: z.url().max(500).optional(),
+  websiteUrl: z
+    .url({ protocol: /^https?$/ })
+    .max(500)
+    .optional(),
   address: z.string().max(255).optional(),
   phone: z
     .string()
-    .max(255)
-    .regex(/^\+[1-9]\d{1,14}$/)
+    .regex(/^\+[1-9]\d{1,15}$/)
     .optional(),
   email: z.email().max(255).optional(),
 });
@@ -105,7 +108,7 @@ export const cvBaseSchema = z.object({
   educations: z.array(cvEducationSchema),
   workExperiences: z.array(cvWorkExperienceSchema),
   courses: z.array(cvCourseSchema),
-  organziations: z.array(cvOrganizationSchema),
+  organizations: z.array(cvOrganizationSchema),
   certificates: z.array(cvCertificateSchema),
 });
 
@@ -151,7 +154,7 @@ export class Cv {
 
   public readonly skills: CvSkill[];
   public readonly courses: CvCourse[];
-  public readonly organziations: CvOrganization[];
+  public readonly organizations: CvOrganization[];
   public readonly updatedAt: Date;
 
   private constructor(props: CvProps) {
@@ -161,7 +164,7 @@ export class Cv {
     this.educations = props.educations;
     this.workExperiences = props.workExperiences;
     this.courses = props.courses;
-    this.organziations = props.organziations;
+    this.organizations = props.organizations;
     this.certificates = props.certificates;
     this.updatedAt = props.updatedAt;
   }
@@ -176,7 +179,7 @@ export class Cv {
       certificates: [],
       courses: [],
       educations: [],
-      organziations: [],
+      organizations: [],
       personalInformation: {},
       skills: [],
       workExperiences: [],
@@ -198,7 +201,7 @@ export class Cv {
       this.educations.length ? this.renderEducations() : "",
       this.workExperiences.length ? this.renderWorkExperiences() : "",
       this.certificates.length ? this.renderCertificates() : "",
-      this.organziations.length ? this.renderOrganizations() : "",
+      this.organizations.length ? this.renderOrganizations() : "",
       this.courses.length ? this.renderCourses() : "",
       this.skills.length ? this.renderSkills() : "",
       "</div>",
@@ -247,7 +250,7 @@ export class Cv {
 
   private renderPersonalInformation() {
     const { address, email, firstName, lastName, phone, profile, websiteUrl } =
-      this.personalInformation;
+      sanitizeHtmlObject(this.personalInformation);
 
     const links = [];
     if (phone)
@@ -277,6 +280,8 @@ export class Cv {
 
   private renderEducations() {
     const items = this.educations.map((v) => {
+      v = sanitizeHtmlObject(v);
+
       return [
         `<table border=0 data-pdfmake='{"widths": ["*", "auto"], "heights": 1, "layout": "noBorders"}'>`,
         `<tr>`,
@@ -304,6 +309,8 @@ export class Cv {
 
   private renderWorkExperiences() {
     const items = this.workExperiences.map((v) => {
+      v = sanitizeHtmlObject(v);
+
       return [
         `<table border=0 data-pdfmake='{"widths": ["*", "auto"], "heights": 1, "layout": "noBorders"}'>`,
         `<tr>`,
@@ -331,6 +338,8 @@ export class Cv {
 
   private renderCertificates() {
     const items = this.certificates.map((v) => {
+      v = sanitizeHtmlObject(v);
+
       const publishDate = v.publishDate?.split("-").map((v) => +v);
 
       return [
@@ -356,7 +365,9 @@ export class Cv {
   }
 
   private renderOrganizations() {
-    const items = this.organziations.map((v) => {
+    const items = this.organizations.map((v) => {
+      v = sanitizeHtmlObject(v);
+
       return [
         `<table border=0 data-pdfmake='{"widths": ["*", "auto"], "heights": 1, "layout": "noBorders"}'>`,
         `<tr>`,
@@ -384,6 +395,8 @@ export class Cv {
 
   private renderCourses() {
     const items = this.courses.map((v) => {
+      v = sanitizeHtmlObject(v);
+
       return [
         v.url ? `<a style="color: black; margin-top: 0;" href="${v.url}">` : "",
         `<table border=0 data-pdfmake='{"widths": ["*", "auto"], "heights": 1, "layout": "noBorders"}'>`,
@@ -413,6 +426,8 @@ export class Cv {
 
   private renderSkills() {
     const items = this.skills.map((v) => {
+      v = sanitizeHtmlObject(v);
+
       return `${v.name} <span style="font-style: italic;">(${v.score}/5)</span>`;
     });
 
@@ -434,7 +449,7 @@ export class Cv {
       certificates: this.certificates,
       courses: this.courses,
       educations: this.educations,
-      organziations: this.organziations,
+      organizations: this.organizations,
       skills: this.skills,
       workExperiences: this.workExperiences,
       updatedAt: this.updatedAt,

@@ -136,33 +136,31 @@ export class DrizzleUsersRepository
     ctx: DrizzleTxContext,
     username: string,
   ): Promise<ProftoProps | undefined> {
-    const result = await ctx.tx.query.proftos.findFirst({
-      where: ilike(users.username, username),
+    const result = await ctx.tx.query.users.findFirst({
+      where: eq(users.username, username),
       with: {
-        user: {
-          columns: {
-            username: true,
-          },
-        },
+        profto: true,
       },
     });
 
-    if (!result) return;
+    if (!result || !result.profto) return;
+
+    const profto = result.profto;
 
     return {
-      userId: result.userId,
-      avatarFileId: result.avatarFileId,
-      cvFileId: result.cvFileId,
-      email: result.email,
-      lastEducation: result.lastEducation,
-      name: result.name,
-      summary: result.summary,
-      professionRole: result.professionRole as any,
-      certificates: result.certificates as any,
-      experiences: result.experiences as any,
-      links: result.links as any,
-      projects: result.projects as any,
-      updatedAt: result.updatedAt,
+      userId: profto.userId,
+      avatarFileId: profto.avatarFileId,
+      cvFileId: profto.cvFileId,
+      email: profto.email,
+      lastEducation: profto.lastEducation,
+      name: profto.name,
+      summary: profto.summary,
+      professionRole: profto.professionRole as any,
+      certificates: profto.certificates as any,
+      experiences: profto.experiences as any,
+      links: profto.links as any,
+      projects: profto.projects as any,
+      updatedAt: profto.updatedAt,
     };
   }
 

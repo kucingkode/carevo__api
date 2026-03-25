@@ -51,11 +51,26 @@ export class GetPostsFeedService<TxCtx extends TxContext<any>>
         input.requestUserId,
       );
 
-      const posts = await this.postsRepository.list(ctx, {
+      const posts = [];
+
+      if (input.sharedPostId) {
+        const sharedPost = await this.postsRepository.getById(
+          ctx,
+          input.sharedPostId,
+        );
+
+        if (sharedPost) {
+          posts.push(sharedPost);
+        }
+      }
+
+      const feedPosts = await this.postsRepository.list(ctx, {
         communityIds,
         page: input.page,
         limit: input.limit,
       });
+
+      posts.push(...feedPosts);
 
       const displays: Promise<PostDisplay>[] = posts.map(async (p) => ({
         ...p.toPersistence(),

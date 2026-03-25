@@ -1,6 +1,5 @@
 import { DOWNLOAD_CV_USE_CASE, READ_ONLY_DB_TX } from "@/constants";
 import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import { InfrastructureError } from "@/domain/errors/infrastructure-errors";
 import type {
   RenderCvInput,

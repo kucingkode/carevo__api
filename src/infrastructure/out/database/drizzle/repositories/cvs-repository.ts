@@ -6,7 +6,6 @@ import { Cv, type CvPartialUpdate } from "@/domain/entities/cv";
 import { CvsRepositoryError } from "@/domain/errors/infrastructure-errors";
 import { eq } from "drizzle-orm";
 import { cvEmbeddings, cvs } from "../schema";
-import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 
 export class DrizzleCvsRepository
   extends BaseAdapter
@@ -32,7 +31,7 @@ export class DrizzleCvsRepository
       certificates: result.certifications as any,
       courses: result.courses as any,
       educations: result.educations as any,
-      organziations: result.organizations as any,
+      organizations: result.organizations as any,
       skills: result.skills as any,
       workExperiences: result.workExperiences as any,
       updatedAt: result.updatedAt,

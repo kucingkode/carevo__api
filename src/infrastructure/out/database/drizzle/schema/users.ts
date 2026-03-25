@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -8,6 +8,7 @@ import {
   check,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { proftos } from "./proftos";
 
 export const users = pgTable(
   "users",
@@ -32,3 +33,7 @@ export const users = pgTable(
     uniqueIndex("uq_users_username").on(t.username),
   ],
 );
+
+export const usersRelations = relations(users, ({ one }) => ({
+  profto: one(proftos),
+}));

@@ -1,6 +1,5 @@
 import { UPDATE_CV_USE_CASE } from "@/constants";
 import { ForbiddenError } from "@/domain/errors/domain/forbidden-error";
-import { UnauthorizedError } from "@/domain/errors/domain/unauthorized-error";
 import type {
   UpdateCvInput,
   UpdateCvUseCase,
