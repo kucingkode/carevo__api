@@ -8,7 +8,6 @@ import type {
   GoogleOauthUseCase,
   GoogleOauthOutput,
 } from "@/domain/ports/in/auth/google-oauth";
-import type { CvsRepository } from "@/domain/ports/out/database/cvs-repository";
 import type { Database, TxContext } from "@/domain/ports/out/database/database";
 import type { UsersRepository } from "@/domain/ports/out/database/users-repository";
 import type { EmailSender } from "@/domain/ports/out/email-sender";

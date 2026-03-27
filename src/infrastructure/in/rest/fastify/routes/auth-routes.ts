@@ -364,7 +364,7 @@ export function authRoutes(
       });
 
       return reply.redirect(
-        `${config.uiBaseUrl}/auth/login#${googleOauthOutput.accessToken}?tokenType=access_token`,
+        `${config.uiBaseUrl}/login#${googleOauthOutput.accessToken}?tokenType=access_token`,
       );
     });
   };
