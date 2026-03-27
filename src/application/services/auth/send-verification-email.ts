@@ -97,7 +97,7 @@ export class SendVerificationEmailService<TxCtx extends TxContext<any>>
         from: `Carevo <${this.config.fromEmail}>`,
         to: input.email,
         subject: "Verifikasi Email Anda",
-        text: `Verifikasi email Anda dengan tautan berikut.\n${this.config.redirectBaseUrl}/auth/login#${token}`,
+        text: `Verifikasi email Anda dengan tautan berikut.\n${this.config.redirectBaseUrl}/login#${token}`,
       });
     });
 

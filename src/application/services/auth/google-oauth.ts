@@ -191,8 +191,8 @@ export class GoogleOauthService<TxCtx extends TxContext<any>>
     const random = this.generateSecureRandomAlphanumeric(6);
     return `${name
       .toLowerCase()
-      .replace(/[^a-zA-Z0-9]/g, "")
       .replaceAll(" ", "-")
+      .replace(/[^a-zA-Z0-9_-]/g, "")
       .slice(0, 23)}-${random}`;
   }
 

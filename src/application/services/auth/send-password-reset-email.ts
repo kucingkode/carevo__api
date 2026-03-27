@@ -106,7 +106,7 @@ export class SendPasswordResetEmailService<TxCtx extends TxContext<any>>
         from: `Carevo <${this.config.fromEmail}>`,
         to: input.email,
         subject: "Reset Password Anda",
-        text: `Reset password Anda dengan tautan berikut.\n${this.config.redirectBaseUrl}/auth/reset-password#${token}`,
+        text: `Reset password Anda dengan tautan berikut.\n${this.config.redirectBaseUrl}/reset-password#${token}`,
       });
     });
 

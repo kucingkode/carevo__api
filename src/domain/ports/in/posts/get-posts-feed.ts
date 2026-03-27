@@ -4,7 +4,7 @@ import z from "zod";
 // request
 export const getPostsFeedInputSchema = z.object({
   requestUserId: z.uuidv7(),
-  sharedPostId: z.uuidv7(),
+  sharedPostId: z.uuidv7().optional(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });
