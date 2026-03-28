@@ -105,6 +105,7 @@ export function authRoutes(
           httpOnly: true,
           maxAge: loginUserInput.rememberMe ? refreshTokenMaxAge : undefined,
           signed: true,
+          path: "/",
         });
 
         return reply.status(200).send({
@@ -179,6 +180,7 @@ export function authRoutes(
             ? refreshTokenMaxAge
             : undefined,
           signed: true,
+          path: "/",
         });
 
         return reply.status(200).send({
@@ -360,6 +362,7 @@ export function authRoutes(
         ...config.cookieOptions,
         httpOnly: true,
         maxAge: refreshTokenMaxAge,
+        path: "/",
         signed: true,
       });
 
