@@ -4,7 +4,7 @@ import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import type { File } from "@/domain/entities/file";
 import { files } from "../schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 import { FilesRepositoryError } from "@/domain/errors/infrastructure-errors";
 
@@ -29,9 +29,23 @@ export class DrizzleFilesRepository
     return result;
   }
 
-  async deleteById(ctx: DrizzleTxContext, fileId: string): Promise<void> {
-    await ctx.tx.delete(files).where(eq(files.id, fileId));
-    this.log.debug({ id: fileId }, "File deleted");
+  async delete(
+    ctx: DrizzleTxContext,
+    ownerId: string,
+    fileId: string,
+  ): Promise<string | undefined> {
+    const result = await ctx.tx
+      .delete(files)
+      .where(and(eq(files.id, fileId), eq(files.ownerId, ownerId)))
+      .returning({
+        key: files.key,
+      });
+
+    this.log.debug({ id: fileId, count: result.length }, "File deleted");
+
+    if (!result.length) return;
+
+    return result[0].key;
   }
 
   async insert(ctx: DrizzleTxContext, file: File): Promise<void> {

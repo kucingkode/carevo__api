@@ -8,7 +8,7 @@ import z from "zod";
 export const cvPersonalInformationSchema = z.object({
   firstName: z.string().max(255).optional(),
   lastName: z.string().max(255).optional(),
-  profile: z.string().max(255).optional(),
+  profile: z.string().max(2000).optional(),
   websiteUrl: z
     .url({ protocol: /^https?$/ })
     .max(500)

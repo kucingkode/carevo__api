@@ -5,7 +5,9 @@ import z from "zod";
 export const updateUserProftoInputSchema = z.object({
   requestUserId: z.uuidv7(),
   userId: z.uuidv7(),
-  profto: proftoPartialUpdateSchema,
+  profto: proftoPartialUpdateSchema.omit({
+    cvFileId: true,
+  }),
 });
 
 export type UpdateUserProftoInput = z.infer<typeof updateUserProftoInputSchema>;

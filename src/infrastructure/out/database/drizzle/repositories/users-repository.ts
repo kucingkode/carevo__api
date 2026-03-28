@@ -164,6 +164,33 @@ export class DrizzleUsersRepository
     };
   }
 
+  async getProftoByUserId(
+    ctx: DrizzleTxContext,
+    userId: string,
+  ): Promise<ProftoProps | undefined> {
+    const result = await ctx.tx.query.proftos.findFirst({
+      where: eq(proftos.userId, userId),
+    });
+
+    if (!result) return;
+
+    return {
+      userId: result.userId,
+      avatarFileId: result.avatarFileId,
+      cvFileId: result.cvFileId,
+      email: result.email,
+      lastEducation: result.lastEducation,
+      name: result.name,
+      summary: result.summary,
+      professionRole: result.professionRole as any,
+      certificates: result.certificates as any,
+      experiences: result.experiences as any,
+      links: result.links as any,
+      projects: result.projects as any,
+      updatedAt: result.updatedAt,
+    };
+  }
+
   async partialUpdateProfto(
     ctx: DrizzleTxContext,
     userId: string,

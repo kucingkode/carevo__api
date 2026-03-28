@@ -44,6 +44,11 @@ export type UsersRepository<TxCtx extends TxContext<any>> = {
     username: string,
   ): Promise<ProftoProps | undefined>;
 
+  getProftoByUserId(
+    ctx: TxCtx,
+    userId: string,
+  ): Promise<ProftoProps | undefined>;
+
   partialUpdateProfto(
     ctx: TxCtx,
     userId: string,
