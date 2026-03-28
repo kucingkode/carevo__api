@@ -3,6 +3,7 @@ import z from "zod";
 
 // request
 export const listBootcampsInputSchema = z.object({
+  requestUserId: z.uuidv7(),
   query: z.string().max(255).optional(),
   professionRole: z.string().max(255).optional(),
   page: z.int().min(1).optional(),

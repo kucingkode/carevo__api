@@ -19,6 +19,7 @@ export function bootcampsRoutes(
       const q = getQuery(req);
 
       const listBootcampsInput = listBootcampsInputSchema.parse({
+        requestUserId: req.userId,
         query: q.query,
         professionRole: q.professionRole,
         page: qNumber(q.page),

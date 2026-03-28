@@ -308,6 +308,7 @@ export async function bootstrap() {
   const listBootcampsService = new ListBootcampsService({
     db,
     bootcampsRepository,
+    cvsRepository,
   });
 
   // certifications
@@ -321,6 +322,7 @@ export async function bootstrap() {
   const listCertificationsService = new ListCertificationsService({
     db,
     certificationsRepository,
+    cvsRepository,
   });
 
   // comments
@@ -455,6 +457,8 @@ export async function bootstrap() {
   const updateUserProftoService = new UpdateUserProftoService({
     db,
     usersRepository,
+    filesRepository,
+    fileStorage,
   });
 
   const getUserService = new GetUserService({
