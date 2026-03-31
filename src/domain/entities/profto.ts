@@ -11,7 +11,7 @@ import z from "zod";
 export const proftoCertificateSchema = z.object({
   imageFileId: z.uuidv7(),
   name: z.string().max(255),
-  publishDate: z.date(),
+  publishDate: z.iso.date(),
   publisher: z.string().max(255),
 });
 

@@ -457,8 +457,6 @@ export async function bootstrap() {
   const updateUserProftoService = new UpdateUserProftoService({
     db,
     usersRepository,
-    filesRepository,
-    fileStorage,
   });
 
   const getUserService = new GetUserService({

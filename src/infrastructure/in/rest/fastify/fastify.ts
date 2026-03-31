@@ -15,6 +15,7 @@ import { postsRoutes } from "./routes/posts-routes";
 import type { FastifyRestServerDeps } from "./deps";
 import { usersRoutes } from "./routes/users-routes";
 import { createVerifyAccessToken } from "./hooks/verify-access-token";
+import type { FastifyError } from "fastify";
 
 export async function createFastifyRestServer(
   config: FastifyRestServerConfig,
@@ -92,6 +93,13 @@ export async function createFastifyRestServer(
           field: e.path.join("."),
           message: e.message,
         })),
+      });
+    }
+
+    if ((err as FastifyError).statusCode) {
+      const { statusCode, message } = err as FastifyError;
+      return reply.status(statusCode ?? 500).send({
+        message,
       });
     }
 
