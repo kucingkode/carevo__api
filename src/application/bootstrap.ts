@@ -399,11 +399,16 @@ export async function bootstrap() {
     },
   );
 
-  const uploadFileService = new UploadFileService({
-    db,
-    filesRepository,
-    fileStorage,
-  });
+  const uploadFileService = new UploadFileService(
+    {
+      userStorageBytes: appConfig.USER_STORAGE_BYTES,
+    },
+    {
+      db,
+      filesRepository,
+      fileStorage,
+    },
+  );
 
   // posts
 

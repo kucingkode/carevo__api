@@ -40,6 +40,6 @@ export class LocalFileStorage extends BaseAdapter implements FileStorage {
 
   async delete(key: string): Promise<void> {
     const path = join(this.config.storageDir, key);
-    await this.call(() => rm(path), "delete: rm failed");
+    await this.call(() => rm(path, { force: true }), "delete: rm failed");
   }
 }

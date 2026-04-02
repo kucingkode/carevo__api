@@ -1,4 +1,4 @@
-import { UPLOAD_FILE_USE_CASE } from "@/constants";
+import { READ_ONLY_DB_TX, UPLOAD_FILE_USE_CASE } from "@/constants";
 import type { File } from "@/domain/entities/file";
 import type {
   UploadFileInput,
@@ -10,6 +10,11 @@ import { BaseUseCase } from "@/shared/classes/base-use-case";
 import { v7 as uuidV7 } from "uuid";
 import type { FileStorage } from "@/domain/ports/out/file-storage";
 import type { FilesRepository } from "@/domain/ports/out/database/files-repository";
+import { InsufficientStorageError } from "@/domain/errors/domain/insufficient-storage-error";
+
+export type UploadFileServiceConfig = {
+  userStorageBytes: number;
+};
 
 export type UploadFileServiceDeps<TxCtx extends TxContext<any>> = {
   db: Database<TxCtx>;
@@ -25,7 +30,10 @@ export class UploadFileService<TxCtx extends TxContext<any>>
   private readonly fileStorage: FileStorage;
   private readonly filesRepository: FilesRepository<TxCtx>;
 
-  constructor(deps: UploadFileServiceDeps<TxCtx>) {
+  constructor(
+    private readonly config: UploadFileServiceConfig,
+    deps: UploadFileServiceDeps<TxCtx>,
+  ) {
     super(UPLOAD_FILE_USE_CASE);
 
     this.db = deps.db;
@@ -34,6 +42,18 @@ export class UploadFileService<TxCtx extends TxContext<any>>
   }
 
   async uploadFile(input: UploadFileInput): Promise<UploadFileOutput> {
+    // check if storage available
+    const usedStorageBytes = await this.db.beginTx(
+      (ctx) =>
+        this.filesRepository.getUserTotalSizeBytes(ctx, input.requestUserId),
+      READ_ONLY_DB_TX,
+    );
+
+    if (usedStorageBytes >= this.config.userStorageBytes) {
+      throw new InsufficientStorageError();
+    }
+
+    // upload file
     const id = uuidV7();
 
     const a = id.slice(0, 2);

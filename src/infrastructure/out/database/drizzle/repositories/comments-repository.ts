@@ -7,7 +7,7 @@ import { BaseAdapter } from "@/shared/classes/base-adapter";
 import type { DrizzleTxContext } from "../database";
 import { Comment } from "@/domain/entities/comment";
 import { getPagination } from "@/shared/utils/pagination";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { comments } from "../schema";
 import { CommentsRepositoryError } from "@/domain/errors/infrastructure-errors";
 
@@ -43,7 +43,9 @@ export class DrizzleCommentsRepository
 
     const filter = and(
       eq(comments.postId, query.postId),
-      query.parentId ? eq(comments.parentId, query.parentId) : undefined,
+      query.parentId
+        ? eq(comments.parentId, query.parentId)
+        : isNull(comments.parentId),
     );
 
     const result = await ctx.tx.query.comments.findMany({

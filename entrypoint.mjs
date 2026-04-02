@@ -8,16 +8,17 @@ switch (mode) {
     import("./dist/index.mjs");
     break;
 
-  // case "migrate":
-  //   console.log("[ENTRYPOINT] Running migrations...");
-  //   import("./dist/migrate.mjs");
-  //   break;
+  case "cleanup-files":
+    console.log("[ENTRYPOINT] Running migrations...");
+    import("./dist/cleanup-files.mjs");
+    break;
 
   default:
     console.log(
       [
         "Usage:", //
         "  entrypoint.sh run",
+        "  entrypoint.sh cleanup-files",
       ].join("\n"),
     );
     process.exit(1);

@@ -29,6 +29,14 @@ export class DrizzleFilesRepository
     return result;
   }
 
+  async listByUserId(ctx: DrizzleTxContext, userId: string): Promise<File[]> {
+    const result = await ctx.tx.query.files.findMany({
+      where: eq(files.ownerId, userId),
+    });
+
+    return result;
+  }
+
   async delete(
     ctx: DrizzleTxContext,
     ownerId: string,

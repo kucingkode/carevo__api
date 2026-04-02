@@ -89,6 +89,8 @@ const appConfigSchema = z.object({
   GOOGLE_OAUTH_SECRET: z.string(),
 
   STORAGE_DIR: z.string(),
+
+  USER_STORAGE_BYTES: z.coerce.number().default(1024 * 1024 * 1024), // 1gb
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

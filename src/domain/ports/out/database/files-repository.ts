@@ -4,6 +4,8 @@ import type { TxContext } from "./database";
 export type FilesRepository<TxCtx extends TxContext> = {
   getById(ctx: TxCtx, fileId: string): Promise<File | undefined>;
 
+  listByUserId(ctx: TxCtx, userId: string): Promise<File[]>;
+
   insert(ctx: TxCtx, file: File): Promise<void>;
 
   /**

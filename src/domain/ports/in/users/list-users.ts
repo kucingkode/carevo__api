@@ -3,7 +3,7 @@ import z from "zod";
 
 // request
 export const listUsersInputSchema = z.object({
-  query: z.string().max(255),
+  query: z.string().max(255).optional(),
   page: z.int().min(1).optional(),
   limit: z.int().min(1).optional(),
 });
