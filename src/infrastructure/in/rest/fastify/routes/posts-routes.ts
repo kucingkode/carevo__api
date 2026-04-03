@@ -128,7 +128,7 @@ export function postsRoutes(
         await deps.createCommentService.createComment(createCommentInput);
 
       return reply.status(201).send({
-        postId: createCommentOutput.commentId,
+        commentId: createCommentOutput.commentId,
         createdAt: createCommentOutput.createdAt,
       });
     });

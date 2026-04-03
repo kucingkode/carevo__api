@@ -10,7 +10,11 @@ import { PostsRepositoryError } from "@/domain/errors/infrastructure-errors";
 import { eq, inArray } from "drizzle-orm";
 import { posts } from "../schema";
 import { pgMapper } from "../utils/db-error-mapper";
-import { PG_UNIQUE_VIOLATION_ERROR } from "../utils/db-error-codes";
+import {
+  PG_FK_VIOLATION_ERROR,
+  PG_UNIQUE_VIOLATION_ERROR,
+} from "../utils/db-error-codes";
+import { NotFoundError } from "@/domain/errors/domain/not-found-error";
 
 export class DrizzlePostsRepository
   extends BaseAdapter
@@ -49,6 +53,9 @@ export class DrizzlePostsRepository
     await this.call(
       () => ctx.tx.insert(posts).values(data),
       "insert: database query failed",
+      pgMapper({
+        [PG_FK_VIOLATION_ERROR]: () => new NotFoundError(),
+      }),
     );
 
     this.log.debug({ postId: data.id, userId: data.userId }, "Post inserted");

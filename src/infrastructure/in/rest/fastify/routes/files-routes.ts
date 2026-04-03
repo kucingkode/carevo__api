@@ -56,7 +56,7 @@ export function filesRoutes(
 
         const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
         if (!allowedTypes.includes(data.mimetype)) {
-          throw new DomainError("Invalid file type", "VALIDATION_ERROR");
+          throw new DomainError("Invalid file type", "UNSUPPORTED_MEDIA_TYPE");
         }
 
         const uploadFileInput = uploadFileInputSchema.parse({

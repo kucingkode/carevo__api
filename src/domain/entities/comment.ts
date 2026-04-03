@@ -61,6 +61,7 @@ export class Comment {
   static create(params: CreateCommentParams) {
     const result = commentPropsSchema.safeParse({
       ...params,
+      parentId: params.parentId ?? null,
       id: uuidV7(),
       createdAt: new Date(),
     });
