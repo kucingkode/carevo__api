@@ -366,9 +366,7 @@ export function authRoutes(
         signed: true,
       });
 
-      return reply.redirect(
-        `${config.uiBaseUrl}/login#${googleOauthOutput.accessToken}?tokenType=access_token`,
-      );
+      return reply.redirect(`${config.uiBaseUrl}/login`);
     });
   };
 }

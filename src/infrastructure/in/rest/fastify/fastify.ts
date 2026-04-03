@@ -104,6 +104,10 @@ export async function createFastifyRestServer(
     }
 
     if (err instanceof DomainError && err.code) {
+      if (err.code === "REFRESH_TOKEN_INVALID") {
+        reply.clearCookie("refresh_token");
+      }
+
       const statusCode = ERROR_HTTP_STATUS_CODES[err.code] ?? 500;
 
       return reply.status(statusCode).send({
