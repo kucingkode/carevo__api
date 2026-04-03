@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ["tests/e2e/asah/*.test.ts"],
+    include: ["tests/e2e/**/*.test.ts"],
     environment: "node",
     globalSetup: "./tests/e2e/global-setup.ts",
     setupFiles: ["./tests/e2e/setup.ts"],
